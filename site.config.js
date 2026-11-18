@@ -16,8 +16,8 @@ window.SITE_CONFIG = {
   publisherLocation: "Arizona, USA",
 
   // Domain & contact — TODO before going live: replace with a real domain/inbox you control.
-  domain: "saga-reader.example",
-  contactEmail: "privacy@saga-reader.example",
+  domain: "saga.proxima-3d.com",
+  contactEmail: "ex3dprint@mail.com",
 
   // Look
   accentColor: "#2c7a6b", // buttons, links, highlights
@@ -28,8 +28,8 @@ window.SITE_CONFIG = {
   // "/api/waitlist" is served by server.js in this repo (stores to data/waitlist.jsonl).
   // If you host the static files elsewhere, point this at your own endpoint and update
   // waitlistStorage below so the privacy policy stays true.
-  waitlistEndpoint: "/api/waitlist",
-  waitlistStorage: "a file on the server that runs this site, operated by Proxima LLC",
+  waitlistEndpoint: "https://formspree.io/f/xgakypyr",
+  waitlistStorage: "Formspree (formspree.io), a form service that stores sign-ups and emails them to Proxima LLC",
 
   // Privacy policy
   policyEffectiveDate: "18 November 2026",
