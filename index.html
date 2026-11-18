@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="description" content="An offline-first reader for DRM-free EPUB, PDF and TXT books. Your notes stay yours and export anytime. Published by Proxima LLC." />
+  <meta name="referrer" content="no-referrer" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231f2a30'/%3E%3Cpath d='M20 44c0-14 9-24 24-26-1 15-10 25-24 26z' fill='%232c7a6b'/%3E%3Cpath d='M20 44l14-14' stroke='%23eceee9' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E" />
+  <title>SAGA Reader by Proxima</title>
+  <link rel="stylesheet" href="site/site.css" />
+  <script src="site.config.js"></script>
+  <script src="site/site.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="top">
+    <div class="wrap">
+      <a class="brand" href="./">
+        <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="var(--ink)"/><path d="M20 44c0-14 9-24 24-26-1 15-10 25-24 26z" fill="var(--accent)"/><path d="M20 44l14-14" stroke="var(--paper)" stroke-width="2.5" stroke-linecap="round"/></svg>
+        <span><span data-site="productName">SAGA Reader by Proxima</span><small>Published by <span data-site="publisher">Proxima LLC</span></small></span>
+      </a>
+      <a class="btn ghost" href="saga-reader.html" data-site-href="readerUrl">Open the reader</a>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="wrap">
+      <section class="hero">
+        <h1>Read the books you own. Keep the notes you make.</h1>
+        <p class="lead"><span data-site="appName">SAGA Reader</span> is an offline-first reader for EPUB, PDF and TXT files. No account needed. It works in your browser today, with Android next.</p>
+        <div class="actions">
+          <a class="btn" href="saga-reader.html" data-site-href="readerUrl">Open the reader</a>
+          <a class="btn ghost" href="#waitlist">Join the waitlist</a>
+        </div>
+      </section>
+
+      <section aria-labelledby="what">
+        <h2 id="what">What it does</h2>
+        <div class="grid">
+          <div class="card">
+            <h3>Works offline</h3>
+            <p>Open EPUB, PDF and TXT files from your device. Your library is stored on the device, not on our servers.</p>
+          </div>
+          <div class="card">
+            <h3>DRM-free, honestly</h3>
+            <p>It opens books you own as files. If a file is DRM-protected, it tells you so and stops. It never removes or works around DRM.</p>
+          </div>
+          <div class="card">
+            <h3>Notes you keep</h3>
+            <p>Highlight and take notes as you read. Export your notes, or your whole library, whenever you like.</p>
+          </div>
+          <div class="card">
+            <h3>Free, no store</h3>
+            <p>The apps are free in version 1. There is no book store inside the app and nothing to buy.</p>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="leaf">
+        <h2 id="leaf"><span data-site="deviceName">SAGA Leaf</span>, later</h2>
+        <p>We are also designing a small e-paper reading device. It isn't ready, and we won't give a date until it is. Join the waitlist if you'd like to hear when there is real news.</p>
+      </section>
+
+      <section id="waitlist" aria-labelledby="wl">
+        <div class="signup">
+          <h2 id="wl">Join the waitlist</h2>
+          <p>We'll email you about the Android app and <span data-site="deviceName">SAGA Leaf</span>. Your email is the only thing we collect, and you can ask us to delete it at any time.</p>
+          <form id="waitlist-form" action="/api/waitlist" method="post" novalidate>
+            <label class="vh" for="email">Email address</label>
+            <input id="email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required maxlength="254" />
+            <div class="hp" aria-hidden="true"><label for="website">Leave this empty</label><input id="website" name="website" type="text" tabindex="-1" autocomplete="off" /></div>
+            <button class="btn" type="submit">Notify me</button>
+          </form>
+          <p id="waitlist-msg" class="msg" role="status" aria-live="polite"></p>
+          <p class="note">No account, no tracking pixels. See the <a href="privacy.html">privacy policy</a>.</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <nav aria-label="Footer">
+        <a href="privacy.html">Privacy policy</a>
+        <a href="saga-reader.html" data-site-href="readerUrl">Open the reader</a>
+        <a href="mailto:privacy@saga-reader.example" data-site-href="contactEmail">Contact</a>
+      </nav>
+      <span>© <span id="year">2026</span> <span data-site="publisher">Proxima LLC</span>, <span data-site="publisherLocation">Arizona, USA</span></span>
+    </div>
+  </footer>
+</body>
+</html>

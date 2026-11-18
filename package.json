@@ -1,0 +1,9 @@
+{
+  "name": "saga-reader-site",
+  "private": true,
+  "description": "Waitlist landing page and privacy policy for SAGA Reader by Proxima (Proxima LLC).",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": { "node": ">=18" }
+}
