@@ -12,7 +12,7 @@
 // It activates at once (skipWaiting + clients.claim) and drops older caches.
 // The page itself is fetched network-first, so an online visit always gets the
 // current deploy even if an old worker is still in charge.
-const VERSION = '5130711cac02'
+const VERSION = 'dfb6a55e09c5'
 const CACHE = 'saga-shell-' + VERSION
 const PAGE = 'saga-reader.html'
 const SHELL = [PAGE, "saga-reader.webmanifest", "icons/icon-192.png", "icons/icon-512.png", "icons/icon-maskable-192.png", "icons/icon-maskable-512.png", "icons/apple-touch-icon.png"]

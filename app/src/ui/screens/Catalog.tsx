@@ -7,6 +7,8 @@ import { PlatformImg } from '../components'
 import { importBytes } from '../../core/library'
 import { Icon } from '../icons'
 import { tintOf, fmtBytes } from '../../core/util'
+import { UrlImport } from './Import'
+import { cachedSE, fetchSENewReleases, cachedSEBook, getStandardEbook, seCatalogId, seSegmentsOf, unslug, SE_ORIGIN, type SEBook } from '../../app/standardebooks'
 import { TOPICS, listUrl, fetchPage, cachedPopular, cachePopular, cachedBook, fetchBook, getBook, DownloadBlocked, authorsOf, personName, coverOf, shortTitle, catalogIdOf, gutenbergPage, type GBook } from '../../app/gutendex'
 
 export interface CatalogItem { id: string; title: string; author: string; description: string; language: string; subjects: string[]; price: number; license: string; words: number; hasCover: boolean; fileSize: number; publishedAt: number; series?: string }
@@ -30,19 +32,107 @@ export function Catalog() {
   const [q, setQ] = useState('')
   const [debounced, setDebounced] = useState('')
   const [topic, setTopic] = useState('')
+  const [source, setSource] = useState<'pg' | 'se'>(() => (localStorage.getItem('saga.discover.source') === 'se' ? 'se' : 'pg'))
+  useEffect(() => { try { localStorage.setItem('saga.discover.source', source) } catch { /* private mode */ } }, [source])
   useEffect(() => { const t = setTimeout(() => setDebounced(q), 450); return () => clearTimeout(t) }, [q])
   return (
     <>
       <h1 className="page-title">Discover</h1>
-      <p className="page-sub">Free public-domain books from Project Gutenberg. Each one is a DRM-free file you keep, the same as anything you import.</p>
-      <label className="search-input" style={{ display: 'block', maxWidth: 520, marginBottom: 14 }}><span className="sr-only">Search free books</span><Icon.search /><input className="input" type="search" value={q} onChange={e => setQ(e.target.value)} placeholder="Search titles and authors" /></label>
-      <div className="row wrap" style={{ gap: 6, marginBottom: 22 }} role="group" aria-label="Topics">
-        <button className="chip" aria-pressed={!topic} onClick={() => setTopic('')}>Popular</button>
-        {TOPICS.map(t => <button key={t} className="chip" aria-pressed={topic === t} onClick={() => setTopic(topic === t ? '' : t)}>{t}</button>)}
+      <p className="page-sub">Free public-domain books from Project Gutenberg and Standard Ebooks. Each one is a DRM-free file you keep, the same as anything you import.</p>
+      <div className="row wrap" style={{ gap: 6, marginBottom: 18 }} role="group" aria-label="Source">
+        <button className="chip" aria-pressed={source === 'pg'} onClick={() => setSource('pg')}>Project Gutenberg</button>
+        <button className="chip" aria-pressed={source === 'se'} onClick={() => setSource('se')}>Standard Ebooks</button>
       </div>
-      {FEATURES.authorPortal && <AuthorCatalogSection q={debounced} />}
-      <GutenbergList search={debounced} topic={topic} />
-      <p className="small muted" style={{ marginTop: 30 }}>Free public-domain books from <a href="https://www.gutenberg.org" target="_blank" rel="noreferrer">Project Gutenberg</a>. {PRIVACY_NOTE}</p>
+      {source === 'pg' ? <>
+        <label className="search-input" style={{ display: 'block', maxWidth: 520, marginBottom: 14 }}><span className="sr-only">Search free books</span><Icon.search /><input className="input" type="search" value={q} onChange={e => setQ(e.target.value)} placeholder="Search titles and authors" /></label>
+        <div className="row wrap" style={{ gap: 6, marginBottom: 22 }} role="group" aria-label="Topics">
+          <button className="chip" aria-pressed={!topic} onClick={() => setTopic('')}>Popular</button>
+          {TOPICS.map(t => <button key={t} className="chip" aria-pressed={topic === t} onClick={() => setTopic(topic === t ? '' : t)}>{t}</button>)}
+        </div>
+        {FEATURES.authorPortal && <AuthorCatalogSection q={debounced} />}
+        <GutenbergList search={debounced} topic={topic} />
+      </> : <StandardEbooksList />}
+      <section aria-labelledby="paste-h" style={{ marginTop: 34 }}>
+        <h2 className="section-title" id="paste-h">Have a link?</h2>
+        <UrlImport />
+      </section>
+      <p className="small muted" style={{ marginTop: 30 }}>Free public-domain books from <a href="https://www.gutenberg.org" target="_blank" rel="noreferrer">Project Gutenberg</a> and <a href={SE_ORIGIN} target="_blank" rel="noreferrer">Standard Ebooks</a>. {PRIVACY_NOTE}</p>
+    </>
+  )
+}
+
+// ---------- Standard Ebooks (public new-releases feed; downloads fetched directly, CORS allowed)
+function SECover({ b, width }: { b: SEBook; width?: number | string }) {
+  const [broken, setBroken] = useState(false)
+  if (b.cover && !broken) return <div className="cover" style={{ width }}><img src={b.cover} alt="" loading="lazy" onError={() => setBroken(true)} /></div>
+  const h = tintOf(b.title + b.author)
+  return <div className="cover gen" style={{ width, '--gen-bg': `hsl(${h} 28% 34%)`, '--gen-ink': `hsl(${h} 30% 94%)` } as React.CSSProperties}><span className="t">{b.title}</span><span className="rule" /><span className="a">{b.author}</span></div>
+}
+
+function StandardEbooksList() {
+  const online = useOnline()
+  const cached = cachedSE()
+  const [books, setBooks] = useState<SEBook[] | null>(cached?.books ?? null)
+  const [state, setState] = useState<'loading' | 'ready' | 'offline' | 'error'>('loading')
+  useEffect(() => {
+    let live = true
+    if (!online) { setState('offline'); return }
+    setState('loading')
+    fetchSENewReleases().then(b => { if (live) { setBooks(b); setState('ready') } }).catch(() => { if (live) setState(navigator.onLine ? 'error' : 'offline') })
+    return () => { live = false }
+  }, [online])
+  return (
+    <section aria-labelledby="se-h" aria-busy={state === 'loading'}>
+      <h2 className="section-title" id="se-h">New from Standard Ebooks</h2>
+      <p className="small muted" style={{ marginTop: -6 }}>Carefully produced editions of public-domain books. Standard Ebooks’ full catalogue feed needs a membership, so this lists their public new-releases feed; for any other title, open it on <a href={`${SE_ORIGIN}/ebooks`} target="_blank" rel="noreferrer">standardebooks.org</a> and paste its link below.</p>
+      {state === 'offline' && <div className="banner warn" role="status">Discover needs an internet connection; your library still works offline.{cached ? ` Showing the list from ${new Date(cached.at).toLocaleDateString()}.` : ''}</div>}
+      {state === 'error' && <div className="banner warn" role="status">Standard Ebooks’ feed couldn’t be loaded in this browser. Browse <a href={`${SE_ORIGIN}/ebooks`} target="_blank" rel="noreferrer">standardebooks.org</a> and paste a book’s link below; the download itself works directly.</div>}
+      {state === 'loading' && !books?.length && <p className="muted">Loading books…</p>}
+      {!!books?.length && <div className="shelf">{books.map(b => <a key={b.pageUrl} className="book-tile" href={href(`catalog/${seCatalogId(b.segments)}`)}><SECover b={b} /><div className="meta"><h3>{b.title}</h3><p>{b.author}</p></div></a>)}</div>}
+    </section>
+  )
+}
+
+function SEItemView({ id }: { id: string }) {
+  const segments = seSegmentsOf(id)
+  const b: SEBook = cachedSEBook(segments) ?? { segments, title: unslug(segments[1] ?? ''), author: unslug(segments[0] ?? ''), pageUrl: `${SE_ORIGIN}/ebooks/${segments.join('/')}`, epubUrl: `${SE_ORIGIN}/ebooks/${segments.join('/')}/downloads/${segments.join('_')}.epub?source=download` }
+  const [owned, setOwned] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [blocked, setBlocked] = useState<string | null>(null)
+  useEffect(() => { store.db.books.where('catalogId').equals(id).first().then(x => setOwned(x && !x.deleted ? x.id : null)) }, [id, busy])
+  async function get() {
+    if (!navigator.onLine) { toast('Getting a book needs an internet connection.'); return }
+    setBusy(true); setBlocked(null)
+    try {
+      const r = await getStandardEbook(b, b.title)
+      toast(`“${r.title}” is in your library`, { label: 'Read now', run: () => go(`read/${r.bookId}`) })
+      setOwned(r.bookId)
+    } catch (e) {
+      if (e instanceof DownloadBlocked) setBlocked(e.url)
+      else toast((e as Error).message, undefined, 7000)
+    } finally { setBusy(false) }
+  }
+  return (
+    <>
+      <a href={href('catalog')} className="btn quiet small" style={{ marginLeft: -10, marginBottom: 18 }}><Icon.back />Discover</a>
+      <div className="detail">
+        <SECover b={b} width="100%" />
+        <div>
+          <h1>{b.title}</h1>
+          <p className="by">{b.author}</p>
+          <div className="row wrap">
+            {owned ? <a className="btn primary" href={href(`read/${owned}`)}>Read</a> : <button className="btn primary" disabled={busy} onClick={get}><Icon.download />{busy ? 'Getting book…' : 'Get book'}</button>}
+            {owned && <span className="pill ok"><Icon.check width={14} />In your library</span>}
+          </div>
+          {blocked && <div className="banner" style={{ marginTop: 16, maxWidth: 620 }} role="status"><span>Your browser didn’t let SAGA Reader download this file directly. <a href={blocked} target="_blank" rel="noreferrer">Download it from Standard Ebooks</a>, then add it with <b>Add books</b> in your Library or drop it onto this window.</span></div>}
+          {b.summary && <p className="desc" style={{ marginTop: 22 }}>{b.summary}</p>}
+          <dl className="facts" style={{ marginTop: 22 }}>
+            <dt>Rights</dt><dd>Public domain in the USA; Standard Ebooks releases its own work on the edition under CC0. If you live elsewhere, check your country’s copyright rules.</dd>
+            <dt>Source</dt><dd><a href={b.pageUrl} target="_blank" rel="noreferrer">This book on Standard Ebooks</a>. The EPUB is downloaded straight from standardebooks.org.</dd>
+          </dl>
+          <p className="small muted">{PRIVACY_NOTE}</p>
+        </div>
+      </div>
     </>
   )
 }
@@ -166,6 +256,7 @@ function AuthorCatalogSection({ q }: { q: string }) {
 
 export function CatalogItemView({ id }: { id: string }) {
   if (/^pg-\d+$/.test(id)) return <GutenbergItemView id={Number(id.slice(3))} />
+  if (/^se~[a-z0-9-]+(~[a-z0-9-]+)+$/.test(id)) return <SEItemView id={id} />
   if (FEATURES.authorPortal) return <PlatformItemView id={id} />
   return <div className="empty"><h2>Not in Discover</h2><a className="btn" href={href('catalog')}>Discover</a></div>
 }

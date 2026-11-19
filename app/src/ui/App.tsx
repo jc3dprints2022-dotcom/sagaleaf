@@ -2,7 +2,7 @@ import { useEffect, useState, lazy, Suspense } from 'react'
 import { useRoute, store, useLive, href } from '../app/state'
 import { Icon, Wordmark } from './icons'
 import { SyncStatusLine, Toasts, InstallHintBar } from './components'
-import { importWithFeedback } from '../app/data'
+import { importDropped } from '../app/importers'
 import { Home } from './screens/Home'
 import { Library } from './screens/Library'
 import { BookDetails } from './screens/BookDetails'
@@ -12,6 +12,7 @@ import { Collections, CollectionDetail } from './screens/Collections'
 import { Devices, DeviceDetail } from './screens/Devices'
 import { Settings } from './screens/Settings'
 import { Catalog, CatalogItemView } from './screens/Catalog'
+import { ImportScreen } from './screens/Import'
 const Reader = lazy(() => import('./reader/Reader'))
 import { FEATURES } from '../app/features'
 const Author = FEATURES.authorPortal ? lazy(() => import('./screens/Author')) : null
@@ -44,7 +45,7 @@ export function App() {
     const enter = (e: DragEvent) => { if (e.dataTransfer?.types.includes('Files')) { depth++; setDragging(true); e.preventDefault() } }
     const leave = () => { depth = Math.max(0, depth - 1); if (!depth) setDragging(false) }
     const over = (e: DragEvent) => { if (e.dataTransfer?.types.includes('Files')) e.preventDefault() }
-    const drop = (e: DragEvent) => { e.preventDefault(); depth = 0; setDragging(false); const f = [...(e.dataTransfer?.files ?? [])]; if (f.length) importWithFeedback(f) }
+    const drop = (e: DragEvent) => { e.preventDefault(); depth = 0; setDragging(false); const f = [...(e.dataTransfer?.files ?? [])]; if (f.length) importDropped(f) }
     window.addEventListener('dragenter', enter); window.addEventListener('dragleave', leave); window.addEventListener('dragover', over); window.addEventListener('drop', drop)
     return () => { window.removeEventListener('dragenter', enter); window.removeEventListener('dragleave', leave); window.removeEventListener('dragover', over); window.removeEventListener('drop', drop) }
   }, [])
@@ -65,6 +66,7 @@ export function App() {
       case 'devices': return <Devices />
       case 'device': return <DeviceDetail id={route.params.id} />
       case 'settings': return <Settings />
+      case 'import': return <ImportScreen />
       case 'catalog': return <Catalog />
       case 'catalog-item': return <CatalogItemView id={route.params.id} />
       case 'author': case 'author-sub': if (Author) return <Author id={route.params.id} />; break
@@ -72,7 +74,7 @@ export function App() {
     }
     return <div className="empty"><h2>Page not found</h2><p>That address doesn’t lead anywhere in SAGA Reader.</p><a className="btn" href="#/">Go home</a></div>
   })()
-  const active = (n: string) => route.name === n || (n === 'library' && route.name === 'book') || (n === 'collections' && route.name === 'collection') || (n === 'devices' && route.name === 'device') || (n === 'catalog' && route.name === 'catalog-item') || (n === 'author' && route.name === 'author-sub')
+  const active = (n: string) => route.name === n || (n === 'library' && (route.name === 'book' || route.name === 'import')) || (n === 'collections' && route.name === 'collection') || (n === 'devices' && route.name === 'device') || (n === 'catalog' && route.name === 'catalog-item') || (n === 'author' && route.name === 'author-sub')
 
   return (
     <div className="shell">
