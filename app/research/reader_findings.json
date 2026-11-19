@@ -1,0 +1,2216 @@
+[
+ {
+  "id": "R-001",
+  "category": "Preservation & portability",
+  "type": "complaint",
+  "problem": "Amazon removed the web 'Download & Transfer via USB' option on 26 Feb 2025, so buyers can no longer pull a local backup copy of purchased books from the website. It hit a minority of owners directly, but it made the 'you own a license, not a book' issue visible to everyone.",
+  "competitors": [
+   "Amazon Kindle"
+  ],
+  "sources": [
+   {
+    "title": "Cloudwards: Amazon removes USB download & transfer",
+    "url": "https://www.cloudwards.net/news/amazon-removes-usb-download-transfer-kindle-books"
+   },
+   {
+    "title": "AlternativeTo news: removal by Feb 2025",
+    "url": "https://alternativeto.net/news/2025/2/amazon-will-remove-the-option-to-download-transfer-kindle-e-books-via-usb-by-february-2025"
+   },
+   {
+    "title": "Libreture: Amazon removing your ability to download and keep ebooks",
+    "url": "https://libreture.com/blog/amazon-removing-your-ability-download-keep-ebooks/"
+   },
+   {
+    "title": "Rossmann Group wiki entry",
+    "url": "https://wiki.rossmanngroup.com/wiki/Amazon_Kindle_removes_download_feature_of_purchased_books"
+   }
+  ],
+  "evidence_strength": "strong",
+  "evidence_kind": "press/review",
+  "persistence": "recent",
+  "severity": "high",
+  "workarounds": "Send to a Kindle over Wi-Fi, then copy KFX files off by USB; buy from DRM-free stores instead.",
+  "saga_solution": "Every imported file stays a plain file the user can see in the OS file manager; a one-tap 'Export library' writes originals + annotations + metadata to a folder or zip, with no account needed.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-002",
+  "category": "Preservation & portability",
+  "type": "request",
+  "problem": "Amazon now lets KDP authors who sell DRM-free let buyers download EPUB/PDF copies (announced Dec 2025, from Jan 2026). Readers welcomed it, but it only covers the titles where the author opted out of DRM, so most of a typical Kindle library is unaffected.",
+  "competitors": [
+   "Amazon Kindle"
+  ],
+  "sources": [
+   {
+    "title": "The eBook Reader: DRM-free Kindle ebooks downloadable as EPUB/PDF",
+    "url": "https://blog.the-ebook-reader.com/2025/12/11/drm-free-kindle-ebooks-will-be-downloadable-in-epub-and-pdf-formats-soon/"
+   },
+   {
+    "title": "TechCrunch: Amazon changes how DRM applies to KDP ebooks",
+    "url": "https://techcrunch.com/2025/12/10/amazon-changes-how-copyright-protection-is-applied-to-kindle-directs-self-published-ebooks"
+   },
+   {
+    "title": "The Bookseller: download of some e-books from 2026",
+    "url": "https://www.thebookseller.com/news/amazon-to-enable-download-of-some-e-books-across-range-of-devices-from-2026"
+   }
+  ],
+  "evidence_strength": "strong",
+  "evidence_kind": "press/review",
+  "persistence": "recent",
+  "severity": "medium",
+  "workarounds": "Check each title's DRM status; download eligible EPUBs manually.",
+  "saga_solution": "Make SAGA the obvious destination for these newly downloadable DRM-free EPUB/PDFs: share-sheet import from Amazon's download page, dedupe against existing copies, keep the original file untouched.",
+  "complexity": "S"
+ },
+ {
+  "id": "R-003",
+  "category": "Privacy & ownership",
+  "type": "complaint",
+  "problem": "Independent traffic analysis found the Kindle app reports very fine-grained reading behaviour (page timestamps, character positions, taps, settings changes) and queues it while offline for later upload. Most readers never look, but privacy-minded users cite it as a reason to leave.",
+  "competitors": [
+   "Amazon Kindle"
+  ],
+  "sources": [
+   {
+    "title": "Nullsweep: Kindle collects a surprisingly large amount of data",
+    "url": "https://nullsweep.com/kindle-collects-a-surprisingly-large-amount-of-data/"
+   },
+   {
+    "title": "Reclaim The Net: On Kindle, Amazon tracks your every tap",
+    "url": "https://reclaimthenet.org/kindle-amazon-tracks-each-tap"
+   },
+   {
+    "title": "Input: Amazon tracks every tap on your Kindle",
+    "url": "https://www.inputmag.com/tech/amazon-tracks-every-tap-on-your-kindle"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "press/review",
+  "persistence": "multi-year",
+  "severity": "medium",
+  "workarounds": "Keep the device in airplane mode; use KOReader or an offline reader.",
+  "saga_solution": "No reading telemetry by default; reading stats computed and stored on-device; any opt-in crash reporting excludes book titles and positions; publish a plain-language data inventory.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-004",
+  "category": "Privacy & ownership",
+  "type": "complaint",
+  "problem": "Mozilla's Privacy Not Included rated Onyx Boox 'very creepy': no device-specific privacy policy found, unconfirmed security update practice, and no reply to inquiries. Boox users get great hardware flexibility but little transparency.",
+  "competitors": [
+   "Boox"
+  ],
+  "sources": [
+   {
+    "title": "Mozilla Privacy Not Included: Onyx Boox",
+    "url": "https://foundation.mozilla.org/privacynotincluded/onyx-boox/"
+   },
+   {
+    "title": "MobileRead thread on Boox data/privacy",
+    "url": "https://www.mobileread.com/forums/showthread.php?p=4222351"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "press/review",
+  "persistence": "multi-year",
+  "severity": "medium",
+  "workarounds": "Block vendor apps with a firewall; use third-party reader apps on Boox.",
+  "saga_solution": "SAGA Leaf firmware ships with a published privacy policy, no cloud dependency, and open update notes; the app works with the Leaf over local transfer only unless the user opts into sync.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-005",
+  "category": "Privacy & ownership",
+  "type": "love",
+  "problem": "Kobo is repeatedly praised because buyers can still download their purchased books and sideload freely, which reviewers frame as more ownership than Kindle allows.",
+  "competitors": [
+   "Kobo",
+   "Amazon Kindle"
+  ],
+  "sources": [
+   {
+    "title": "Laptop Mag: I switched from Kindle to Kobo for a week",
+    "url": "https://www.laptopmag.com/news/amazon-kindle-vs-kobo-clara-bw"
+   },
+   {
+    "title": "Johnny Jet: why I switched from Kindle Oasis to Kobo Libra Colour",
+    "url": "https://johnnyjet.com/why-i-switched-from-a-kindle-oasis-to-a-kobo-libra-colour/"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "press/review",
+  "persistence": "recent",
+  "severity": "medium",
+  "workarounds": "n/a",
+  "saga_solution": "Match Kobo's openness and go further: no store lock-in at all, any DRM-free file is a first-class book.",
+  "complexity": "S"
+ },
+ {
+  "id": "R-006",
+  "category": "Device connectivity",
+  "type": "complaint",
+  "problem": "Kindle devices no longer show covers for books sideloaded over USB or Wi-Fi on some models (titles appear as text tiles), which reviewers call a deliberate or neglected degradation of non-Amazon content.",
+  "competitors": [
+   "Amazon Kindle"
+  ],
+  "sources": [
+   {
+    "title": "Tom's Guide: Kindle Colorsoft shortcoming with sideloaded covers",
+    "url": "https://www.tomsguide.com/computing/e-readers/amazons-kindle-colorsoft-finally-convinced-me-to-get-an-e-reader-but-this-one-shortcoming-is-really-getting-under-my-skin"
+   },
+   {
+    "title": "Book Riot: How to fix missing covers on sideloaded Kindle ebooks",
+    "url": "https://bookriot.com/how-to-fix-missing-sideloaded-ebook-covers-on-kindle/"
+   },
+   {
+    "title": "The eBook Reader: personal documents show covers on lockscreen but not library",
+    "url": "https://blog.the-ebook-reader.com/2022/05/16/kindle-personal-documents-show-covers-on-lockscreen-but-not-library/"
+   }
+  ],
+  "evidence_strength": "strong",
+  "evidence_kind": "press/review",
+  "persistence": "multi-year",
+  "severity": "low",
+  "workarounds": "Calibre 'fix covers' on device; send via Send-to-Kindle instead of USB.",
+  "saga_solution": "Treat sideloaded books identically to any other: extract the EPUB cover, let the user replace it, and push the same thumbnail to SAGA Leaf.",
+  "complexity": "S"
+ },
+ {
+  "id": "R-007",
+  "category": "Device connectivity",
+  "type": "complaint",
+  "problem": "The Xteink X4 does not mount as a USB drive, so books go on via microSD or a browser upload to the device's local IP. Owners find this fiddly compared with drag-and-drop.",
+  "competitors": [
+   "Xteink X4"
+  ],
+  "sources": [
+   {
+    "title": "PocketInk: Xteink X4 pre-purchase reality check",
+    "url": "https://pocketink.io/blog/xteink-x4-pre-purchase-reality-check"
+   },
+   {
+    "title": "Digital Trends: Xteink X4 review",
+    "url": "https://www.digitaltrends.com/phones/xteink-x4-review/"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "press/review",
+  "persistence": "recent",
+  "severity": "medium",
+  "workarounds": "microSD card reader; CrossPoint firmware Wi-Fi upload or Calibre wireless.",
+  "saga_solution": "SAGA Leaf: pair once with the phone app (BLE handshake, Wi-Fi/BLE bulk transfer) and push books from the SAGA library with one tap; also expose USB mass storage as a fallback.",
+  "complexity": "L"
+ },
+ {
+  "id": "R-008",
+  "category": "Device connectivity",
+  "type": "love",
+  "problem": "Kobo's built-in Instapaper integration (replacing Pocket after Mozilla shut Pocket in July 2025) was received as Kobo 'saving' a favourite feature: read-later articles appear on the e-reader.",
+  "competitors": [
+   "Kobo"
+  ],
+  "sources": [
+   {
+    "title": "Kobo Help: Pocket has shut down",
+    "url": "https://help.kobo.com/hc/en-us/articles/360017763753"
+   },
+   {
+    "title": "Android Authority: Kobo Instapaper integration rolls out",
+    "url": "https://www.androidauthority.com/kobo-instapaper-integration-roll-out-3592013/"
+   },
+   {
+    "title": "Boing Boing: Kobo just saved one of its e-readers' best features",
+    "url": "https://boingboing.net/2025/09/03/kobo-just-saved-one-of-its-e-readers-best-features.html"
+   }
+  ],
+  "evidence_strength": "strong",
+  "evidence_kind": "official",
+  "persistence": "recent",
+  "severity": "medium",
+  "workarounds": "n/a",
+  "saga_solution": "Let SAGA import web articles (share-sheet, Instapaper/Wallabag/Readwise via OPML or API) and push them to SAGA Leaf as clean reflowable text.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-009",
+  "category": "Integrations",
+  "type": "complaint",
+  "problem": "Pocket's shutdown deleted users' saved items after the export window closed (Oct 2025), a reminder that read-later and reading data held by a third party can vanish.",
+  "competitors": [
+   "Kobo",
+   "Pocket"
+  ],
+  "sources": [
+   {
+    "title": "Kobo Help: Pocket has shut down",
+    "url": "https://help.kobo.com/hc/en-us/articles/360017763753"
+   },
+   {
+    "title": "Good e-Reader: Will you buy a Kobo now that Pocket is discontinued?",
+    "url": "https://goodereader.com/blog/kobo-ereader-news/will-you-buy-a-new-kobo-e-reader-now-that-pocket-is-being-discontinued"
+   }
+  ],
+  "evidence_strength": "strong",
+  "evidence_kind": "official",
+  "persistence": "recent",
+  "severity": "medium",
+  "workarounds": "Export to HTML/CSV before the deadline; move to Instapaper.",
+  "saga_solution": "All saved articles and highlights live locally in an open format (EPUB/Markdown + JSON); if SAGA's cloud ever ends, nothing is lost.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-010",
+  "category": "Sync",
+  "type": "unmet-need",
+  "problem": "Kobo does not sync reading position or annotations for sideloaded books across devices and apps, and Kindle only syncs personal documents sent via Send-to-Kindle, not USB sideloads. Readers with DRM-free libraries lose the 'pick up anywhere' experience that store buyers get.",
+  "competitors": [
+   "Kobo",
+   "Amazon Kindle"
+  ],
+  "sources": [
+   {
+    "title": "The eBook Reader: Nook can sync sideloaded ebooks now (compares Kindle/Kobo)",
+    "url": "https://blog.the-ebook-reader.com/2024/06/20/nook-ereaders-and-apps-can-sync-sideloaded-ebooks-now/"
+   },
+   {
+    "title": "The eBook Reader: sync issues with Kobo finally fixed (purchased only)",
+    "url": "https://blog.the-ebook-reader.com/2026/09/11/sync-issues-with-kobo-ereaders-and-apps-finally-fixed/"
+   },
+   {
+    "title": "MobileRead: Kobo sideloaded sync thread",
+    "url": "https://www.mobileread.com/forums/showthread.php?p=4362085"
+   }
+  ],
+  "evidence_strength": "strong",
+  "evidence_kind": "press/review",
+  "persistence": "multi-year",
+  "severity": "high",
+  "workarounds": "KOReader progress sync server; Calibre-Web/Kobo sync hacks; Send-to-Kindle.",
+  "saga_solution": "Position + highlight sync keyed by content hash (not filename), working identically for every imported file across phone, desktop, web and SAGA Leaf; end-to-end encrypted.",
+  "complexity": "L"
+ },
+ {
+  "id": "R-011",
+  "category": "Sync",
+  "type": "complaint",
+  "problem": "Kobo's own bookmark/progress sync between e-readers and apps was unreliable long enough that Kobo rebuilt the system in 2026; users must manually run 'Repair account' or re-sign-in on each device to get the fix.",
+  "competitors": [
+   "Kobo"
+  ],
+  "sources": [
+   {
+    "title": "The eBook Reader: sync issues with Kobo ereaders and apps finally fixed",
+    "url": "https://blog.the-ebook-reader.com/2026/09/11/sync-issues-with-kobo-ereaders-and-apps-finally-fixed/"
+   },
+   {
+    "title": "Notebookcheck: Kobo finally fixes longstanding issues",
+    "url": "https://www.notebookcheck.net/Kobo-finally-fixes-longstanding-issues-on-its-e-readers.1398521.0.html"
+   }
+  ],
+  "evidence_strength": "strong",
+  "evidence_kind": "press/review",
+  "persistence": "multi-year",
+  "severity": "high",
+  "workarounds": "Manually note page; repair account per device.",
+  "saga_solution": "Show sync state explicitly (last synced, from which device) and offer 'jump to furthest position' with conflict choice rather than silently overwriting.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-012",
+  "category": "Sync",
+  "type": "love",
+  "problem": "Whispersync (position, highlights, notes moving seamlessly across Kindle devices and apps) is one of the features that keeps people on Kindle even when they dislike Amazon.",
+  "competitors": [
+   "Amazon Kindle"
+  ],
+  "sources": [
+   {
+    "title": "Android Authority: the Kindle feature stopping me switching",
+    "url": "https://www.androidauthority.com/kindle-feature-stopping-me-switching-3591123"
+   },
+   {
+    "title": "SlashGear: 3 things Kindle owners say they love most",
+    "url": "https://www.slashgear.com/2299893/things-kindle-owners-say-love-most/"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "press/review",
+  "persistence": "multi-year",
+  "severity": "high",
+  "workarounds": "n/a",
+  "saga_solution": "Parity is mandatory: sync must 'just work' with zero configuration for users who opt in, including the Leaf.",
+  "complexity": "L"
+ },
+ {
+  "id": "R-013",
+  "category": "Sync",
+  "type": "request",
+  "problem": "Open-source readers rely on partial sync: KOReader's official sync server handles progress only, and matching can break if filenames or file contents differ; annotation sync needs third-party plugins (Readest server, Syncthing, AnnotationSync).",
+  "competitors": [
+   "KOReader",
+   "Readest"
+  ],
+  "sources": [
+   {
+    "title": "Readest wiki: Sync with KOReader devices",
+    "url": "https://github.com/readest/readest/wiki/Sync-with-Koreader-devices"
+   },
+   {
+    "title": "AnnotationSync.koplugin release",
+    "url": "https://newreleases.io/project/github/dani84bs/AnnotationSync.koplugin/release/v0.2.1"
+   },
+   {
+    "title": "koreader-syncthing plugin",
+    "url": "https://github.com/jasonchoimtt/koreader-syncthing"
+   }
+  ],
+  "evidence_strength": "strong",
+  "evidence_kind": "github-issue",
+  "persistence": "multi-year",
+  "severity": "medium",
+  "workarounds": "Syncthing folder sync of sidecar files; Readest plugin; manual export.",
+  "saga_solution": "Interoperate: speak the KOReader progress-sync protocol so existing KOReader devices can sync with SAGA, and offer annotation sync natively.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-014",
+  "category": "Sync",
+  "type": "request",
+  "problem": "Desktop-only readers such as Foliate have no built-in cross-device progress sync, so users write tutorials for syncing config folders between computers.",
+  "competitors": [
+   "Foliate"
+  ],
+  "sources": [
+   {
+    "title": "EndeavourOS forum: how to sync reading progress in Foliate",
+    "url": "https://forum.endeavouros.com/t/tutorial-how-to-sync-reading-progress-in-foliate-ebook-reader/45695"
+   },
+   {
+    "title": "Foliate (Wikipedia)",
+    "url": "https://en.wikipedia.org/wiki/Foliate_(software)"
+   }
+  ],
+  "evidence_strength": "weak",
+  "evidence_kind": "user-reports",
+  "persistence": "multi-year",
+  "severity": "medium",
+  "workarounds": "Sync ~/.local/share/foliate with Nextcloud/Syncthing.",
+  "saga_solution": "Ship a Linux/desktop client with the same sync engine instead of leaving desktop as an afterthought.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-015",
+  "category": "Reading interface & typography",
+  "type": "complaint",
+  "problem": "Apple's iOS 16 Books redesign hid controls behind a menu, replaced the page-curl with a card-slide animation, and added accidental double-tap bookmarks; enough users objected that Apple restored the curl option in iOS 16.4.",
+  "competitors": [
+   "Apple Books"
+  ],
+  "sources": [
+   {
+    "title": "Michael Tsai: Apple Books in iOS 16",
+    "url": "https://mjtsai.com/blog/2022/10/07/apple-books-in-ios-16"
+   },
+   {
+    "title": "MacRumors forum: I truly despise the iOS 16 Apple Books update",
+    "url": "https://forums.macrumors.com/threads/i-truly-despise-the-ios-16-apple-books-update.2372905"
+   },
+   {
+    "title": "TidBITS talk: How Apple's Books app changed in iOS 16",
+    "url": "https://talk.tidbits.com/t/how-apple-s-books-app-has-changed-in-ios-16/20125"
+   }
+  ],
+  "evidence_strength": "strong",
+  "evidence_kind": "press/review",
+  "persistence": "multi-year",
+  "severity": "medium",
+  "workarounds": "Wait for 16.4 toggle; switch apps.",
+  "saga_solution": "Never force a UI redesign on readers: keep page-turn style, chrome visibility and tap zones as user settings that survive updates.",
+  "complexity": "S"
+ },
+ {
+  "id": "R-016",
+  "category": "Reading interface & typography",
+  "type": "love",
+  "problem": "Kobo readers praise the typography control (more built-in fonts, weight/sharpness sliders, easy custom font loading), which is a common reason given for switching from Kindle.",
+  "competitors": [
+   "Kobo",
+   "Amazon Kindle"
+  ],
+  "sources": [
+   {
+    "title": "Laptop Mag: Kindle vs Kobo hands-on",
+    "url": "https://www.laptopmag.com/news/amazon-kindle-vs-kobo-clara-bw"
+   },
+   {
+    "title": "Avocado Diaries: Why I'm switching from Kindle to Kobo",
+    "url": "https://www.avocadodiaries.com/2022/04/kobo-review.html"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "press/review",
+  "persistence": "multi-year",
+  "severity": "medium",
+  "workarounds": "n/a",
+  "saga_solution": "Ship good defaults plus weight/sharpness, margins, line spacing, hyphenation and drag-in custom fonts on every platform, including the Leaf.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-017",
+  "category": "Reading interface & typography",
+  "type": "complaint",
+  "problem": "Publisher/author CSS often makes ebooks look bad on Kindle (forced fonts, odd spacing), and readers cannot always override it.",
+  "competitors": [
+   "Amazon Kindle"
+  ],
+  "sources": [
+   {
+    "title": "BookFunnel blog: why do ebooks look ugly on Kindle",
+    "url": "https://blog.bookfunnel.com/2022/why-do-ebooks-look-ugly-on-kindle"
+   }
+  ],
+  "evidence_strength": "weak",
+  "evidence_kind": "press/review",
+  "persistence": "multi-year",
+  "severity": "medium",
+  "workarounds": "Edit the EPUB in Calibre/Sigil; use publisher font toggle.",
+  "saga_solution": "Provide a 'publisher styles: full / partial / off' switch per book, as KOReader does with style tweaks.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-018",
+  "category": "Reading interface & typography",
+  "type": "complaint",
+  "problem": "Stock Xteink X4 software forces justified text, offers no margin control, limited fonts and broken bold/italic, and sometimes defaults to Chinese; reviewers say the open CrossPoint firmware is what makes it pleasant.",
+  "competitors": [
+   "Xteink X4"
+  ],
+  "sources": [
+   {
+    "title": "Aftermath: Xteink X4 cheap hackable e-reader / CrossPoint review",
+    "url": "https://aftermath.site/xteink-x4-cheap-hackable-ereader-crosspoint-review/"
+   },
+   {
+    "title": "Digital Trends: Xteink X4 review",
+    "url": "https://www.digitaltrends.com/phones/xteink-x4-review/"
+   }
+  ],
+  "evidence_strength": "strong",
+  "evidence_kind": "press/review",
+  "persistence": "recent",
+  "severity": "high",
+  "workarounds": "Flash CrossPoint firmware (~20 min).",
+  "saga_solution": "SAGA Leaf must ship with good typography out of the box (margin, alignment, line height, bold/italic, a crisp small-screen font) rather than relying on community firmware.",
+  "complexity": "L"
+ },
+ {
+  "id": "R-019",
+  "category": "Small screens",
+  "type": "love",
+  "problem": "Reviewers love the card-sized, ~77 g, magnetic phone-back form of the Xteink X4: always with you, cheap (~$69) and comfortable for long sessions with ~2 weeks of battery.",
+  "competitors": [
+   "Xteink X4"
+  ],
+  "sources": [
+   {
+    "title": "Digital Trends: Xteink X4 review",
+    "url": "https://www.digitaltrends.com/phones/xteink-x4-review/"
+   },
+   {
+    "title": "Aftermath: Xteink X4 review",
+    "url": "https://aftermath.site/xteink-x4-cheap-hackable-ereader-crosspoint-review/"
+   },
+   {
+    "title": "Boing Boing: Xteink X4 MagSafes to your wallet",
+    "url": "https://boingboing.net/2026/02/23/xteinks-x4-a-69-e-ink-reader-that-magsafes-to-your-wallet.html"
+   }
+  ],
+  "evidence_strength": "strong",
+  "evidence_kind": "press/review",
+  "persistence": "recent",
+  "severity": "medium",
+  "workarounds": "n/a",
+  "saga_solution": "Validates SAGA Leaf's concept; keep it light, cheap, magnetic and long-lasting.",
+  "complexity": "L"
+ },
+ {
+  "id": "R-020",
+  "category": "Small screens",
+  "type": "complaint",
+  "problem": "On a 4.3-inch 220 ppi screen only a few paragraphs fit per page and text is softer than 300 ppi readers; the original X4 also lacks a front light and touch, so reading in bed needs a clip-on lamp.",
+  "competitors": [
+   "Xteink X4"
+  ],
+  "sources": [
+   {
+    "title": "Digital Trends: Xteink X4 review",
+    "url": "https://www.digitaltrends.com/phones/xteink-x4-review/"
+   },
+   {
+    "title": "PocketInk: Xteink X4 reality check",
+    "url": "https://pocketink.io/blog/xteink-x4-pre-purchase-reality-check"
+   },
+   {
+    "title": "Digital Trends: Xteink X4 Pro review (adds front light)",
+    "url": "https://www.digitaltrends.com/phones/xteink-x4-pro-review/"
+   }
+  ],
+  "evidence_strength": "strong",
+  "evidence_kind": "press/review",
+  "persistence": "recent",
+  "severity": "high",
+  "workarounds": "Clip-on light; smallest font; buy X4 Pro.",
+  "saga_solution": "Leaf: include a front light, a font tuned for small sizes, tight-but-readable default margins, and an optional 'compact' layout that hides headers/footers.",
+  "complexity": "L"
+ },
+ {
+  "id": "R-021",
+  "category": "Small screens",
+  "type": "complaint",
+  "problem": "Large camera bumps on newer phones stop magnetic phone-back readers sitting flush, so they rock or overhang.",
+  "competitors": [
+   "Xteink X4"
+  ],
+  "sources": [
+   {
+    "title": "Digital Trends: Xteink X4 review",
+    "url": "https://www.digitaltrends.com/phones/xteink-x4-review/"
+   },
+   {
+    "title": "Aftermath: Xteink X4 review",
+    "url": "https://aftermath.site/xteink-x4-cheap-hackable-ereader-crosspoint-review/"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "press/review",
+  "persistence": "recent",
+  "severity": "low",
+  "workarounds": "Use on a case or wallet; adhesive ring offset.",
+  "saga_solution": "Design the Leaf's magnet ring and back geometry around current camera-bump layouts; offer a slim wallet/case variant.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-022",
+  "category": "Performance & battery",
+  "type": "complaint",
+  "problem": "KOReader on PocketBook was faster for PDFs but crashed occasionally on first load of large PDFs, and loading screens interrupt the flow.",
+  "competitors": [
+   "KOReader",
+   "PocketBook"
+  ],
+  "sources": [
+   {
+    "title": "TechTactician: PocketBook Verse Pro with KOReader after 4 months",
+    "url": "https://techtactician.com/pocketbook-verse-pro-with-koreader-my-experience/"
+   }
+  ],
+  "evidence_strength": "weak",
+  "evidence_kind": "user-reports",
+  "persistence": "recent",
+  "severity": "medium",
+  "workarounds": "Pre-open big PDFs on a charger; use stock reader for EPUB.",
+  "saga_solution": "Index/render big PDFs in the background with progress, cache rendered pages, and recover gracefully from render failures without losing position.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-023",
+  "category": "Performance & battery",
+  "type": "complaint",
+  "problem": "Readwise Reader's mobile app is described as somewhat laggy with large libraries; reviewers say desktop/web is the stronger experience.",
+  "competitors": [
+   "Readwise Reader"
+  ],
+  "sources": [
+   {
+    "title": "Asian Efficiency: Readwise Reader review",
+    "url": "https://www.asianefficiency.com/productivity/readwise-reader-review/"
+   }
+  ],
+  "evidence_strength": "weak",
+  "evidence_kind": "press/review",
+  "persistence": "recent",
+  "severity": "medium",
+  "workarounds": "Archive old items; use desktop.",
+  "saga_solution": "Local database with incremental indexing so library size does not affect scroll performance on phone or Leaf.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-024",
+  "category": "Academic & technical reading",
+  "type": "unmet-need",
+  "problem": "MobileRead users still say no e-ink reader matches a tablet for PDFs; large Boox devices or column-splitting/reflow are the compromises. Small-screen e-readers handle academic PDFs poorly.",
+  "competitors": [
+   "Kobo",
+   "Amazon Kindle",
+   "Boox"
+  ],
+  "sources": [
+   {
+    "title": "MobileRead: Best e-reader for PDFs in 2025",
+    "url": "https://www.mobileread.com/forums/showthread.php?p=4523506"
+   },
+   {
+    "title": "The eBook Reader: PDF showdown ranking readers",
+    "url": "https://blog.the-ebook-reader.com/2013/04/30/pdf-showdown-ranking-the-best-and-worst-ebook-readers-for-pdf-reading/"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "user-reports",
+  "persistence": "multi-year",
+  "severity": "high",
+  "workarounds": "KOReader reflow (k2pdfopt); large tablets; crop margins.",
+  "saga_solution": "PDF mode with auto-crop margins, column detection, text reflow for text-layer PDFs; route PDFs to phone/desktop and send only reflowed text to the Leaf.",
+  "complexity": "XL"
+ },
+ {
+  "id": "R-025",
+  "category": "Academic & technical reading",
+  "type": "love",
+  "problem": "KOReader is loved for PDF handling far beyond stock firmware (reflow, cropping, contrast and font thickening).",
+  "competitors": [
+   "KOReader"
+  ],
+  "sources": [
+   {
+    "title": "LWN: KOReader article and comments",
+    "url": "https://lwn.net/Articles/891494"
+   },
+   {
+    "title": "TechTactician: PocketBook with KOReader",
+    "url": "https://techtactician.com/pocketbook-verse-pro-with-koreader-my-experience/"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "press/review",
+  "persistence": "multi-year",
+  "severity": "medium",
+  "workarounds": "n/a",
+  "saga_solution": "Benchmark SAGA's PDF tools against KOReader's crop/reflow on the same test PDFs before launch.",
+  "complexity": "L"
+ },
+ {
+  "id": "R-026",
+  "category": "Personalization",
+  "type": "love",
+  "problem": "KOReader's deep customization (programmable gestures, style tweaks, frontlight shortcuts) is the main reason power users install it.",
+  "competitors": [
+   "KOReader"
+  ],
+  "sources": [
+   {
+    "title": "LWN: KOReader",
+    "url": "https://lwn.net/Articles/891494"
+   },
+   {
+    "title": "ZSA Loves: KOReader",
+    "url": "https://blog.zsa.io/zsa-loves-koreader"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "press/review",
+  "persistence": "multi-year",
+  "severity": "medium",
+  "workarounds": "n/a",
+  "saga_solution": "Offer gesture/tap-zone mapping and saved reading profiles, but behind an 'Advanced' layer.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-027",
+  "category": "Personalization",
+  "type": "complaint",
+  "problem": "KOReader's settings are described as labyrinthine; one user needed hundreds of adjustments to get comfortable. Power comes at the cost of approachability.",
+  "competitors": [
+   "KOReader"
+  ],
+  "sources": [
+   {
+    "title": "LWN: KOReader comments",
+    "url": "https://lwn.net/Articles/891494"
+   },
+   {
+    "title": "Tildes: KOReader discussion",
+    "url": "https://tildes.net/~books/1w02/koreader_custom_reader_software_for_eink_devices"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "user-reports",
+  "persistence": "multi-year",
+  "severity": "medium",
+  "workarounds": "Copy someone else's settings file; follow guides.",
+  "saga_solution": "Progressive disclosure: 5 essential settings on the reading screen, full control in Advanced; ship presets ('Classic', 'Large print', 'Dyslexia-friendly', 'Compact Leaf').",
+  "complexity": "M"
+ },
+ {
+  "id": "R-028",
+  "category": "Pricing & subscriptions",
+  "type": "complaint",
+  "problem": "Kindle e-readers show lockscreen ads ('Special Offers') unless the buyer pays extra to remove them; reviewers note Kobo shows none, and lockscreens have even promoted low-quality AI-generated books.",
+  "competitors": [
+   "Amazon Kindle",
+   "Kobo"
+  ],
+  "sources": [
+   {
+    "title": "BGR: How to turn off ads on your Kindle",
+    "url": "https://bgr.com/2147837/how-to-remove-ads-amazon-kindle/"
+   },
+   {
+    "title": "Laptop Mag: Kindle vs Kobo",
+    "url": "https://www.laptopmag.com/news/amazon-kindle-vs-kobo-clara-bw"
+   },
+   {
+    "title": "Yahoo: Kindle lock screens showing ads for AI-generated books",
+    "url": "https://uk.news.yahoo.com/amazon-kindle-lock-screens-showing-140836783.html"
+   }
+  ],
+  "evidence_strength": "strong",
+  "evidence_kind": "press/review",
+  "persistence": "multi-year",
+  "severity": "medium",
+  "workarounds": "Pay to remove ads; ask support to remove.",
+  "saga_solution": "No ads or store promotions anywhere in the reading UI or Leaf sleep screen; sleep screen shows the current book cover or user image.",
+  "complexity": "S"
+ },
+ {
+  "id": "R-029",
+  "category": "Pricing & subscriptions",
+  "type": "complaint",
+  "problem": "Readwise Reader costs around $10/month (more billed monthly), which reviewers call steep for a reading app when free options exist, and its value takes weeks to appear.",
+  "competitors": [
+   "Readwise Reader"
+  ],
+  "sources": [
+   {
+    "title": "Asian Efficiency: Readwise Reader review",
+    "url": "https://www.asianefficiency.com/productivity/readwise-reader-review/"
+   },
+   {
+    "title": "Activepieces: Readwise pricing 2026 guide",
+    "url": "https://www.activepieces.com/blog/readwise-pricing-plans-and-costs-2026-guide"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "press/review",
+  "persistence": "recent",
+  "severity": "medium",
+  "workarounds": "Annual billing; Lite tier; free alternatives.",
+  "saga_solution": "Core reading, import, local stats and export free forever; charge only for optional hosted sync/storage and the Leaf hardware.",
+  "complexity": "S"
+ },
+ {
+  "id": "R-030",
+  "category": "Pricing & subscriptions",
+  "type": "complaint",
+  "problem": "BookFusion users note that uploading large libraries requires a paid subscription, adding cost for people already leaving Kindle/Audible.",
+  "competitors": [
+   "BookFusion"
+  ],
+  "sources": [
+   {
+    "title": "Tildes: BookFusion discussion",
+    "url": "https://tildes.net/~books/1mh2/bookfusion_upload_organize_read_share_and_sync_your_ebooks"
+   }
+  ],
+  "evidence_strength": "weak",
+  "evidence_kind": "user-reports",
+  "persistence": "recent",
+  "severity": "medium",
+  "workarounds": "Keep library local; upload selectively.",
+  "saga_solution": "Local library has no size limit; paid sync tiers priced on storage with a generous free tier for metadata/annotation sync (small) separate from file sync (large).",
+  "complexity": "S"
+ },
+ {
+  "id": "R-031",
+  "category": "Integrations",
+  "type": "love",
+  "problem": "Readwise Reader is valued for pushing highlights automatically into Notion/Obsidian, importing Kindle highlights, and resurfacing highlights via spaced repetition.",
+  "competitors": [
+   "Readwise Reader"
+  ],
+  "sources": [
+   {
+    "title": "Asian Efficiency: Readwise Reader review",
+    "url": "https://www.asianefficiency.com/productivity/readwise-reader-review/"
+   },
+   {
+    "title": "Readwise Reader update Dec 2025",
+    "url": "https://readwise.io/reader/update-dec2025"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "press/review",
+  "persistence": "recent",
+  "severity": "medium",
+  "workarounds": "n/a",
+  "saga_solution": "Export highlights as Markdown/JSON automatically to a chosen folder (works with Obsidian vaults) and offer a Readwise export target.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-032",
+  "category": "Integrations",
+  "type": "love",
+  "problem": "BookFusion's Calibre plugin and cross-device library are liked by users with DRM-free collections, who say those files stop being second-class citizens.",
+  "competitors": [
+   "BookFusion",
+   "Calibre"
+  ],
+  "sources": [
+   {
+    "title": "Tildes: BookFusion discussion",
+    "url": "https://tildes.net/~books/1mh2/bookfusion_upload_organize_read_share_and_sync_your_ebooks"
+   },
+   {
+    "title": "BookFusion docs: Calibre plugin",
+    "url": "https://docs.bookfusion.com/docs/tags/integration"
+   },
+   {
+    "title": "BookFusion feature board: sync Calibre highlights",
+    "url": "https://bookfusion.featureos.app/p/sync-calibre-highlights"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "user-reports",
+  "persistence": "recent",
+  "severity": "medium",
+  "workarounds": "n/a",
+  "saga_solution": "Calibre import that preserves metadata, tags, series and custom columns; optional Calibre content-server/OPDS connection.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-033",
+  "category": "Discovery & purchasing",
+  "type": "love",
+  "problem": "Kindle's store size, frequent deals and Kindle Unlimited are among the main reasons people stay, along with cheap, reliable hardware and Prime delivery.",
+  "competitors": [
+   "Amazon Kindle"
+  ],
+  "sources": [
+   {
+    "title": "SlashGear: 3 things Kindle owners love most",
+    "url": "https://www.slashgear.com/2299893/things-kindle-owners-say-love-most/"
+   },
+   {
+    "title": "Laptop Mag: Kindle vs Kobo (Kindle still wins on accessories/delivery)",
+    "url": "https://www.laptopmag.com/news/amazon-kindle-vs-kobo-clara-bw"
+   },
+   {
+    "title": "The eBook Reader: Kindle + Kobo is the best combination",
+    "url": "https://blog.the-ebook-reader.com/2025/01/08/kindle-kobo-is-the-best-combination-why-take-sides"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "press/review",
+  "persistence": "multi-year",
+  "severity": "high",
+  "workarounds": "n/a",
+  "saga_solution": "Don't compete with the store; make SAGA the best home for books bought elsewhere (DRM-free stores, Humble/StoryBundle, Gutenberg, Standard Ebooks) with built-in OPDS catalog browsing.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-034",
+  "category": "Discovery & purchasing",
+  "type": "complaint",
+  "problem": "Goodreads (Amazon-owned) is criticised as stagnant: dated design, buggy apps, few new features; many users moved to StoryGraph partly to avoid Amazon.",
+  "competitors": [
+   "Goodreads",
+   "StoryGraph"
+  ],
+  "sources": [
+   {
+    "title": "MakeUseOf: 6 reasons to stop using Goodreads",
+    "url": "https://www.makeuseof.com/6-reasons-why-you-should-stop-using-goodreads/"
+   },
+   {
+    "title": "HuffPost: people leaving Goodreads for StoryGraph",
+    "url": "https://huffingtonpost.co.uk/entry/storygraph-amazon-goodreads-jeff-bezos_l_673e2013e4b0f17b35e0a123"
+   }
+  ],
+  "evidence_strength": "strong",
+  "evidence_kind": "press/review",
+  "persistence": "multi-year",
+  "severity": "low",
+  "workarounds": "StoryGraph, Hardcover, BookWyrm.",
+  "saga_solution": "Optional export of finished books/ratings to StoryGraph/Goodreads CSV formats; never require a social account.",
+  "complexity": "S"
+ },
+ {
+  "id": "R-035",
+  "category": "Integrations",
+  "type": "love",
+  "problem": "Kobo's built-in OverDrive lets readers borrow library ebooks directly on the device, a major reason readers outside the US (where Kindle Libby delivery is unavailable) pick Kobo.",
+  "competitors": [
+   "Kobo",
+   "Libby"
+  ],
+  "sources": [
+   {
+    "title": "SlashGear: Is Libby compatible with Kobo?",
+    "url": "https://www.slashgear.com/1819179/libby-kobo-compatibility-explained/"
+   },
+   {
+    "title": "Libby Help: reading Libby ebooks on a Kobo",
+    "url": "https://help.libbyapp.com/6251.htm"
+   },
+   {
+    "title": "NBC Select: Kobo Libra Colour review",
+    "url": "https://www.nbcnews.com/select/shopping/kobo-libra-colour-review-rcna171899"
+   }
+  ],
+  "evidence_strength": "strong",
+  "evidence_kind": "official",
+  "persistence": "multi-year",
+  "severity": "high",
+  "workarounds": "ADE + .acsm for older Kobos.",
+  "saga_solution": "Library lending requires DRM licensing SAGA won't have at launch; instead deep-link to Libby and support Adobe/LCP-free library EPUBs where offered (e.g., public domain). Be honest in marketing that SAGA is for DRM-free books.",
+  "complexity": "XL"
+ },
+ {
+  "id": "R-036",
+  "category": "Discovery & purchasing",
+  "type": "complaint",
+  "problem": "Libby users in the US report some new releases cannot be sent to Kindle immediately (or ever) because of publisher/Amazon authorization, forcing reading in the Libby app.",
+  "competitors": [
+   "Libby",
+   "Amazon Kindle"
+  ],
+  "sources": [
+   {
+    "title": "Boing Boing: new Libby ebooks not available on Kindle, wait a day",
+    "url": "https://boingboing.net/2025/07/30/newly-released-ebooks-via-libby-not-available-on-kindle-wait-a-day.html"
+   }
+  ],
+  "evidence_strength": "weak",
+  "evidence_kind": "user-reports",
+  "persistence": "recent",
+  "severity": "medium",
+  "workarounds": "Read in Libby app; wait 1-2 days.",
+  "saga_solution": "n/a for DRM content; note as a reason Libby users may still need Libby alongside SAGA.",
+  "complexity": "S"
+ },
+ {
+  "id": "R-037",
+  "category": "Audio & TTS",
+  "type": "complaint",
+  "problem": "Kindle e-reader TTS is only available through VoiceView, an accessibility screen reader buried in settings, needing Bluetooth audio, ~18 gestures, and English only; Fire tablets have a much easier TTS.",
+  "competitors": [
+   "Amazon Kindle"
+  ],
+  "sources": [
+   {
+    "title": "The eBook Reader: why is TTS so difficult on Kindles",
+    "url": "https://blog.the-ebook-reader.com/2024/01/22/why-is-text-to-speech-so-difficult-to-use-on-kindles/"
+   },
+   {
+    "title": "TeleRead: I'm blind - Kindle TTS has been a nightmare",
+    "url": "https://teleread.org/2016/08/28/im-blind-kindle-text-to-speech-has-been-a-nightmare-to-master-heres-how-to-fix-this/"
+   }
+  ],
+  "evidence_strength": "strong",
+  "evidence_kind": "press/review",
+  "persistence": "multi-year",
+  "severity": "high",
+  "workarounds": "Use Kindle app on phone with system TTS; Fire tablet.",
+  "saga_solution": "First-class 'Listen' button in reading UI using OS voices (and optional on-device neural voices), sentence highlighting, sleep timer, continues with screen off.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-038",
+  "category": "Audio & TTS",
+  "type": "complaint",
+  "problem": "Kobo e-readers lack general text-to-speech for ebooks (commenters note it), while PocketBook's official TTS is a reason some prefer PocketBook.",
+  "competitors": [
+   "Kobo",
+   "PocketBook"
+  ],
+  "sources": [
+   {
+    "title": "The eBook Reader: Kindle TTS article (comment on Kobo)",
+    "url": "https://blog.the-ebook-reader.com/2024/01/22/why-is-text-to-speech-so-difficult-to-use-on-kindles/"
+   },
+   {
+    "title": "TechTactician: PocketBook official TTS",
+    "url": "https://techtactician.com/pocketbook-verse-pro-with-koreader-my-experience/"
+   }
+  ],
+  "evidence_strength": "weak",
+  "evidence_kind": "user-reports",
+  "persistence": "multi-year",
+  "severity": "medium",
+  "workarounds": "Use phone app; PocketBook device.",
+  "saga_solution": "TTS in the phone app that can follow along on the Leaf (page turns in sync).",
+  "complexity": "L"
+ },
+ {
+  "id": "R-039",
+  "category": "Audio & TTS",
+  "type": "love",
+  "problem": "BookFusion's listening controls (skip by sentence) and EPUB 3 Media Overlay read-along support are singled out as better than Kindle's.",
+  "competitors": [
+   "BookFusion"
+  ],
+  "sources": [
+   {
+    "title": "Tildes: BookFusion discussion",
+    "url": "https://tildes.net/~books/1mh2/bookfusion_upload_organize_read_share_and_sync_your_ebooks"
+   }
+  ],
+  "evidence_strength": "weak",
+  "evidence_kind": "user-reports",
+  "persistence": "recent",
+  "severity": "medium",
+  "workarounds": "n/a",
+  "saga_solution": "Support EPUB 3 Media Overlays (pre-recorded narration synced to text) and sentence-level skip in TTS.",
+  "complexity": "L"
+ },
+ {
+  "id": "R-040",
+  "category": "Accessibility",
+  "type": "complaint",
+  "problem": "The US National Federation of the Blind has long documented gaps in Amazon device accessibility; blind users describe Kindle e-reader accessibility as hard to learn.",
+  "competitors": [
+   "Amazon Kindle"
+  ],
+  "sources": [
+   {
+    "title": "NFB: The state of Amazon device accessibility",
+    "url": "https://nfb.org/node/7525"
+   },
+   {
+    "title": "TeleRead: Kindle TTS a nightmare for blind user",
+    "url": "https://teleread.org/2016/08/28/im-blind-kindle-text-to-speech-has-been-a-nightmare-to-master-heres-how-to-fix-this/"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "press/review",
+  "persistence": "multi-year",
+  "severity": "high",
+  "workarounds": "Use phone apps with VoiceOver/TalkBack.",
+  "saga_solution": "Build with platform accessibility APIs from day one: VoiceOver/TalkBack labels, logical focus order, reading-content exposure to screen readers, test with blind users before launch.",
+  "complexity": "L"
+ },
+ {
+  "id": "R-041",
+  "category": "Accessibility",
+  "type": "love",
+  "problem": "Thorium Reader is recognised by the DAISY Consortium for accessibility work (screen-reader support, EPUB 3 accessibility, read-aloud), showing what a reader built for accessibility looks like.",
+  "competitors": [
+   "Thorium"
+  ],
+  "sources": [
+   {
+    "title": "DAISY: Thorium 1.8.0 accessibility improvements",
+    "url": "https://daisy.org/news-events/news/thorium-1-8-0-new-improvements-for-accessibility/"
+   },
+   {
+    "title": "Thorium docs: accessibility",
+    "url": "https://thorium.edrlab.org/docs/300_accessibility/"
+   }
+  ],
+  "evidence_strength": "strong",
+  "evidence_kind": "official",
+  "persistence": "multi-year",
+  "severity": "medium",
+  "workarounds": "n/a",
+  "saga_solution": "Use Thorium/Readium accessibility behaviour as SAGA's accessibility test baseline.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-042",
+  "category": "Accessibility",
+  "type": "unmet-need",
+  "problem": "Dyslexia-friendly fonts are frequently requested, but literacy research suggests spacing and layout matter more than special typefaces; readers need control of letter, word and line spacing, not just one font.",
+  "competitors": [
+   "Amazon Kindle",
+   "Kobo"
+  ],
+  "sources": [
+   {
+    "title": "Shanahan on Literacy: special fonts for dyslexia",
+    "url": "https://www.shanahanonliteracy.com/blog/what-about-special-fonts-for-kids-with-dyslexia-or-other-reading-problems"
+   },
+   {
+    "title": "Popular Science: ebook readers make reading easier for people with dyslexia",
+    "url": "https://www.popsci.com/technology/article/2013-09/ebook-readers-make-reading-easier-dyslexics"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "press/review",
+  "persistence": "multi-year",
+  "severity": "medium",
+  "workarounds": "Sideload OpenDyslexic; short line length.",
+  "saga_solution": "Bundle OpenDyslexic/Atkinson Hyperlegible plus letter/word/line spacing, short-line mode and optional line focus ruler; avoid overclaiming that a font 'fixes' dyslexia.",
+  "complexity": "S"
+ },
+ {
+  "id": "R-043",
+  "category": "Import & formats",
+  "type": "complaint",
+  "problem": "Amazon dropped MOBI from Send-to-Kindle and converts EPUBs on its side; some files fail conversion or lose formatting, and users depend on Amazon's pipeline to read their own files.",
+  "competitors": [
+   "Amazon Kindle"
+  ],
+  "sources": [
+   {
+    "title": "The eBook Reader: Amazon dropping MOBI on Send-to-Kindle",
+    "url": "https://blog.the-ebook-reader.com/2022/05/03/amazon-dropping-mobi-support-on-send-to-kindle-apps/"
+   },
+   {
+    "title": "MobileRead: Send-to-Kindle EPUB thread",
+    "url": "https://www.mobileread.com/forums/showthread.php?p=4221638"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "user-reports",
+  "persistence": "multi-year",
+  "severity": "medium",
+  "workarounds": "Convert with Calibre first; fix EPUB errors.",
+  "saga_solution": "Read EPUB natively without server conversion; validate on import and repair common EPUB errors locally with a report.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-044",
+  "category": "Import & formats",
+  "type": "complaint",
+  "problem": "Google Play Books uploads sometimes fail with EPUB processing errors, and users hit opaque failures with files that open fine elsewhere.",
+  "competitors": [
+   "Google Play Books"
+  ],
+  "sources": [
+   {
+    "title": "OSTechNix: fix EPUB processing error in Google Play Books",
+    "url": "https://ostechnix.com/fix-epub-processing-error-google-play-books/"
+   },
+   {
+    "title": "Adobe Community: Google Play Books upload error",
+    "url": "https://community.adobe.com/t5/indesign-discussions/google-playbook-upload-error/m-p/13194932"
+   }
+  ],
+  "evidence_strength": "weak",
+  "evidence_kind": "user-reports",
+  "persistence": "multi-year",
+  "severity": "medium",
+  "workarounds": "Re-export via Calibre; repair EPUB.",
+  "saga_solution": "Local import never depends on a server; when a file is malformed, open it anyway in a tolerant mode and explain what's wrong.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-045",
+  "category": "Import & formats",
+  "type": "love",
+  "problem": "The Xteink X4 community (CrossPoint) supports Calibre wireless send and browser upload, which reviewers say turns a limited gadget into a joy.",
+  "competitors": [
+   "Xteink X4",
+   "Calibre"
+  ],
+  "sources": [
+   {
+    "title": "Aftermath: Xteink X4 / CrossPoint review",
+    "url": "https://aftermath.site/xteink-x4-cheap-hackable-ereader-crosspoint-review/"
+   }
+  ],
+  "evidence_strength": "weak",
+  "evidence_kind": "press/review",
+  "persistence": "recent",
+  "severity": "medium",
+  "workarounds": "n/a",
+  "saga_solution": "Leaf supports Calibre wireless device protocol and OPDS pull in addition to the SAGA app.",
+  "complexity": "L"
+ },
+ {
+  "id": "R-046",
+  "category": "Library organization",
+  "type": "love",
+  "problem": "Calibre remains the power tool for managing ebook libraries (metadata, conversion, device management) despite a long-criticised interface.",
+  "competitors": [
+   "Calibre"
+  ],
+  "sources": [
+   {
+    "title": "LWN: Calibrating Calibre 1.0",
+    "url": "https://lwn.net/Articles/564865"
+   },
+   {
+    "title": "OMG! Ubuntu: Calibre 4.0 released",
+    "url": "https://www.omgubuntu.co.uk/2019/10/calibre-4-0-released-features"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "press/review",
+  "persistence": "multi-year",
+  "severity": "medium",
+  "workarounds": "n/a",
+  "saga_solution": "Import Calibre libraries losslessly; don't try to replace Calibre for power users — interoperate.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-047",
+  "category": "Library organization",
+  "type": "complaint",
+  "problem": "Calibre's interface is widely called dated and cluttered; newcomers find it intimidating even though it is powerful.",
+  "competitors": [
+   "Calibre"
+  ],
+  "sources": [
+   {
+    "title": "Slashdot: Calibre 1.0 released (comments)",
+    "url": "https://news.slashdot.org/story/13/08/25/029205/calibre-version-10-released-after-7-years-of-development"
+   },
+   {
+    "title": "OMG! Ubuntu: making Calibre look nicer",
+    "url": "https://www.omgubuntu.co.uk/2011/05/making-calibre-look-nicer"
+   },
+   {
+    "title": "MobileRead: Calibre UI discussion",
+    "url": "https://www.mobileread.com/forums/showthread.php?p=1916118"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "user-reports",
+  "persistence": "multi-year",
+  "severity": "low",
+  "workarounds": "Themes; Calibre-Web front end.",
+  "saga_solution": "Simple library: shelves, tags, series, auto-metadata from the file, smart collections; bulk edit for power users.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-048",
+  "category": "Annotations",
+  "type": "complaint",
+  "problem": "Kindle limits how much of a publisher's book you can export as highlights (clipping limit), truncating notes, and highlights on personal documents need workarounds to export.",
+  "competitors": [
+   "Amazon Kindle"
+  ],
+  "sources": [
+   {
+    "title": "Readwise docs: Kindle highlights import / truncation",
+    "url": "https://docs.readwise.io/highlights/docs/importing-highlights/kindle"
+   },
+   {
+    "title": "Instructables: export Kindle highlights incl. personal documents",
+    "url": "https://www.instructables.com/How-to-Export-Kindle-Highlights-Personal-Documents"
+   },
+   {
+    "title": "Hongkiat: export Kindle notes and highlights",
+    "url": "https://www.hongkiat.com/blog/export-kindle-highlights/"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "press/review",
+  "persistence": "multi-year",
+  "severity": "medium",
+  "workarounds": "My Clippings.txt from device; third-party exporters.",
+  "saga_solution": "No export limits on your own files; export highlights with chapter, location, colour, note and timestamp as Markdown, JSON, CSV, and annotated EPUB.",
+  "complexity": "S"
+ },
+ {
+  "id": "R-049",
+  "category": "Annotations",
+  "type": "complaint",
+  "problem": "Apple Books users report books corrupting and PDF highlights being wiped, and EPUBs disappearing after iOS updates, with no way to recover annotations.",
+  "competitors": [
+   "Apple Books"
+  ],
+  "sources": [
+   {
+    "title": "Apple Community: Apple Books corrupted my book and wiped all my PDF highlights",
+    "url": "https://discussions-jp-prz.apple.com/thread/256149383"
+   },
+   {
+    "title": "Apple Community: EPUB books disappeared after iOS 15.4",
+    "url": "https://discussions.apple.com/thread/253751313"
+   }
+  ],
+  "evidence_strength": "weak",
+  "evidence_kind": "user-reports",
+  "persistence": "multi-year",
+  "severity": "high",
+  "workarounds": "Back up via Mac; export notes regularly.",
+  "saga_solution": "Annotations stored separately from the book file with versioned history and automatic local backups; restoring a book never deletes its notes.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-050",
+  "category": "Annotations",
+  "type": "love",
+  "problem": "Google Play Books can save notes and highlights to a Google Drive document, which users like for studying.",
+  "competitors": [
+   "Google Play Books"
+  ],
+  "sources": [
+   {
+    "title": "The eBook Reader: Google Play Books now syncs notes to Google Drive",
+    "url": "https://blog.the-ebook-reader.com/2015/07/22/google-play-books-app-now-syncs-notes-to-google-drive/"
+   }
+  ],
+  "evidence_strength": "weak",
+  "evidence_kind": "official",
+  "persistence": "multi-year",
+  "severity": "low",
+  "workarounds": "n/a",
+  "saga_solution": "Auto-export annotations to a user-chosen folder (local, iCloud Drive, Google Drive) as a live Markdown file per book.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-051",
+  "category": "Stats & habits",
+  "type": "love",
+  "problem": "StoryGraph is liked for detailed reading stats and mood/pace charts, plus features Goodreads lacked such as DNF and partial-star ratings.",
+  "competitors": [
+   "StoryGraph",
+   "Goodreads"
+  ],
+  "sources": [
+   {
+    "title": "Book Riot: StoryGraph review",
+    "url": "https://bookriot.com/storygraph-review/"
+   },
+   {
+    "title": "MakeUseOf: reasons to stop using Goodreads (no DNF, whole stars)",
+    "url": "https://www.makeuseof.com/6-reasons-why-you-should-stop-using-goodreads/"
+   },
+   {
+    "title": "NewsBytes: Goodreads finally gets half and quarter star ratings",
+    "url": "https://www.newsbytesapp.com/news/science/goodreads-finally-gets-half-and-quarter-star-ratings/story"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "press/review",
+  "persistence": "multi-year",
+  "severity": "low",
+  "workarounds": "n/a",
+  "saga_solution": "On-device stats (time read, pages/day, streaks, finish estimates, genre breakdowns) with DNF state, no social obligation, CSV export.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-052",
+  "category": "Audio & TTS",
+  "type": "complaint",
+  "problem": "Amazon restored an 'Assistive Reader' read-aloud mode on recent Kindles in Aug 2025 after previously pulling it, but it needs Bluetooth audio, is not officially announced, and a commenter reports it works only on Amazon-purchased books, not sideloads.",
+  "competitors": [
+   "Amazon Kindle"
+  ],
+  "sources": [
+   {
+    "title": "The eBook Reader: Kindle software update brings back TTS",
+    "url": "https://blog.the-ebook-reader.com/2025/08/19/another-kindle-software-update-released-brings-back-tts/"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "press/review",
+  "persistence": "recent",
+  "severity": "medium",
+  "workarounds": "Use phone app TTS; Fire tablet.",
+  "saga_solution": "TTS treats every file equally, works on phone speaker without pairing, and is never remotely withdrawn.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-053",
+  "category": "Accessibility",
+  "type": "love",
+  "problem": "Amazon officially offers OpenDyslexic on Kindle (since 2016) together with larger sizes and spacing/margin controls, which accessibility advocates count as a baseline others should match.",
+  "competitors": [
+   "Amazon Kindle"
+  ],
+  "sources": [
+   {
+    "title": "About Amazon: new accessibility features for Kindle e-readers",
+    "url": "https://aboutamazon.com/news/devices/new-accessibility-features-for-kindle-e-readers"
+   },
+   {
+    "title": "Kobo Help: fonts on Kobo eReader",
+    "url": "https://help.kobo.com/hc/en-us/articles/360020048733"
+   }
+  ],
+  "evidence_strength": "strong",
+  "evidence_kind": "official",
+  "persistence": "multi-year",
+  "severity": "medium",
+  "workarounds": "n/a",
+  "saga_solution": "Ship OpenDyslexic and Atkinson Hyperlegible by default on app and Leaf.",
+  "complexity": "S"
+ },
+ {
+  "id": "R-054",
+  "category": "Sync",
+  "type": "love",
+  "problem": "Moon+ Reader syncs positions, highlights and bookmarks through the user's own Dropbox or WebDAV rather than a vendor cloud, which suits privacy-minded Android users.",
+  "competitors": [
+   "Moon+ Reader"
+  ],
+  "sources": [
+   {
+    "title": "Moon+ Reader FAQ",
+    "url": "https://moondownload.com/faq.html"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "official",
+  "persistence": "multi-year",
+  "severity": "medium",
+  "workarounds": "n/a",
+  "saga_solution": "Offer 'bring your own storage' sync backends (WebDAV, iCloud Drive, Dropbox, Syncthing folder) alongside SAGA's hosted sync.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-055",
+  "category": "Navigation & speed",
+  "type": "complaint",
+  "problem": "Kindle owners list navigation friction: footnote pop-ups show only the first paragraph, there is no back button from search results, tap zones can't be customised, and menus take several taps.",
+  "competitors": [
+   "Amazon Kindle"
+  ],
+  "sources": [
+   {
+    "title": "The eBook Reader: What are some things you don't like about Kindles?",
+    "url": "https://blog.the-ebook-reader.com/2023/11/30/what-are-some-things-you-dont-like-about-kindles/"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "user-reports",
+  "persistence": "multi-year",
+  "severity": "medium",
+  "workarounds": "Use Page Flip; tap back via 'Go to'.",
+  "saga_solution": "Full-length footnote pop-ups with 'open in place', a persistent back stack (search, links, footnotes all reversible), and remappable tap zones.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-056",
+  "category": "Navigation & speed",
+  "type": "complaint",
+  "problem": "Accidental page turns are a recurring Kindle gripe: bezel touches and swipes flip pages or change font size, and newer models dropped physical page-turn buttons, with touch not always disable-able.",
+  "competitors": [
+   "Amazon Kindle"
+  ],
+  "sources": [
+   {
+    "title": "The eBook Reader: What are some things you don't like about Kindles?",
+    "url": "https://blog.the-ebook-reader.com/2023/11/30/what-are-some-things-you-dont-like-about-kindles/"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "user-reports",
+  "persistence": "multi-year",
+  "severity": "medium",
+  "workarounds": "Lock screen orientation; buy Kobo/PocketBook with buttons.",
+  "saga_solution": "SAGA Leaf uses physical buttons as the primary input; phone app offers a 'touch lock' and lets users disable pinch-to-zoom font changes.",
+  "complexity": "S"
+ },
+ {
+  "id": "R-057",
+  "category": "Navigation & speed",
+  "type": "complaint",
+  "problem": "In the Kindle app, reading position sometimes jumps back tens of pages after syncing, according to summaries of low-star app store reviews.",
+  "competitors": [
+   "Amazon Kindle"
+  ],
+  "sources": [
+   {
+    "title": "Unstar: Kindle, Apple Books, Kobo, Libby, Scribd apps ranked 2026 (summary of 1-3 star reviews)",
+    "url": "https://unstar.app/blog/kindle-apple-books-kobo-libby-scribd-ereader-apps-ranked-2026"
+   }
+  ],
+  "evidence_strength": "weak",
+  "evidence_kind": "user-reports",
+  "persistence": "recent",
+  "severity": "high",
+  "workarounds": "Remember page manually; disable sync.",
+  "saga_solution": "Never move the reader backward silently; when a remote position differs, show a non-blocking 'Jump to p. X from Leaf?' prompt.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-058",
+  "category": "Offline reliability",
+  "type": "complaint",
+  "problem": "Kindles have been reported to wipe Calibre-sideloaded books after long periods in airplane mode followed by reconnection; Amazon never confirmed a cause and updates through 2024 did not fix it. This hits exactly the readers who go offline on purpose.",
+  "competitors": [
+   "Amazon Kindle"
+  ],
+  "sources": [
+   {
+    "title": "The eBook Reader: Kindle ereaders deleting sideloaded ebooks",
+    "url": "https://blog.the-ebook-reader.com/2023/10/23/kindle-ereaders-deleting-sideloaded-ebooks/"
+   },
+   {
+    "title": "The eBook Reader: Beware of airplane mode on Kindles if you sideload",
+    "url": "https://blog.the-ebook-reader.com/2024/02/01/beware-of-airplane-mode-on-kindles-if-you-sideload-books/"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "user-reports",
+  "persistence": "multi-year",
+  "severity": "high",
+  "workarounds": "Keep Wi-Fi always on or always off; keep backups.",
+  "saga_solution": "Local files are never removed by sync; deletes require explicit user action and go to a recoverable 'Recently deleted' for 30 days, on app and Leaf.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-059",
+  "category": "Offline reliability",
+  "type": "complaint",
+  "problem": "A traveller's Kindle could not get past a hotel Wi-Fi login page and queued library books had never actually downloaded, so the books were unavailable until they found open Wi-Fi.",
+  "competitors": [
+   "Amazon Kindle",
+   "Libby"
+  ],
+  "sources": [
+   {
+    "title": "TechRadar: A vacation Amazon Kindle near-disaster",
+    "url": "https://techradar.com/features/a-vacation-amazon-kindle-near-disaster-almost-brought-me-back-to-books"
+   }
+  ],
+  "evidence_strength": "weak",
+  "evidence_kind": "press/review",
+  "persistence": "recent",
+  "severity": "medium",
+  "workarounds": "Download everything before travel; phone hotspot.",
+  "saga_solution": "Make download state obvious (fully on device vs. cloud-only), offer 'keep next N books on device', and let the Leaf receive books over phone-to-device Bluetooth/Wi-Fi Direct without any internet.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-060",
+  "category": "Offline reliability",
+  "type": "request",
+  "problem": "Cloud-first readers need pre-caching to work offline: Readwise Reader asks users to open the app first and choose offline sections, and Readest users requested an offline mode for its web/PWA version.",
+  "competitors": [
+   "Readwise Reader",
+   "Readest"
+  ],
+  "sources": [
+   {
+    "title": "Readwise Reader FAQs (offline)",
+    "url": "https://docs.readwise.io/reader/docs/faqs"
+   },
+   {
+    "title": "Readest issues list (#247 offline mode for PWA)",
+    "url": "https://issues.ecosyste.ms/hosts/GitHub/repositories/readest%2Freadest/issues?page=1"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "github-issue",
+  "persistence": "recent",
+  "severity": "medium",
+  "workarounds": "Open app before going offline; use native app.",
+  "saga_solution": "Local-first architecture: the library lives on-device and the cloud is a replica, so offline is the default state, not a mode.",
+  "complexity": "L"
+ },
+ {
+  "id": "R-061",
+  "category": "Offline reliability",
+  "type": "complaint",
+  "problem": "Libby audiobooks are large and sometimes fail to play offline, and loans expire after 14-21 days, according to summaries of negative app reviews.",
+  "competitors": [
+   "Libby"
+  ],
+  "sources": [
+   {
+    "title": "Unstar: Kindle, Apple Books, Kobo, Libby, Scribd apps ranked 2026 (summary of 1-3 star reviews)",
+    "url": "https://unstar.app/blog/kindle-apple-books-kobo-libby-scribd-ereader-apps-ranked-2026"
+   }
+  ],
+  "evidence_strength": "weak",
+  "evidence_kind": "user-reports",
+  "persistence": "recent",
+  "severity": "medium",
+  "workarounds": "Download over Wi-Fi in advance; renew early.",
+  "saga_solution": "For SAGA's own files: no expiry, no licence checks, and storage usage visible per book.",
+  "complexity": "S"
+ },
+ {
+  "id": "R-062",
+  "category": "Performance & battery",
+  "type": "complaint",
+  "problem": "A 2024 Kindle firmware update brought user reports of lag, freezes, battery drain while idle, fonts reverting to Bookerly, and a tiny progress indicator; not every device was affected and Amazon didn't confirm.",
+  "competitors": [
+   "Amazon Kindle"
+  ],
+  "sources": [
+   {
+    "title": "The eBook Reader: More problems caused by latest Kindle software update",
+    "url": "https://blog.the-ebook-reader.com/2024/08/15/more-problems-caused-by-latest-kindle-software-update/"
+   }
+  ],
+  "evidence_strength": "weak",
+  "evidence_kind": "user-reports",
+  "persistence": "recent",
+  "severity": "medium",
+  "workarounds": "Restart; wait for next update.",
+  "saga_solution": "Staged rollouts for Leaf firmware with a one-tap rollback, and preference migrations tested so updates never reset fonts or layout.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-063",
+  "category": "Performance & battery",
+  "type": "love",
+  "problem": "Weeks-long battery life is one of the three things Kindle owners praise most.",
+  "competitors": [
+   "Amazon Kindle"
+  ],
+  "sources": [
+   {
+    "title": "SlashGear: 3 things Kindle owners say they love most",
+    "url": "https://www.slashgear.com/2299893/things-kindle-owners-say-love-most/"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "press/review",
+  "persistence": "multi-year",
+  "severity": "medium",
+  "workarounds": "n/a",
+  "saga_solution": "Leaf target: 2+ weeks at 1 hr/day with front light; deep sleep between page turns; phone app must not drain battery with background sync.",
+  "complexity": "L"
+ },
+ {
+  "id": "R-064",
+  "category": "Stats & habits",
+  "type": "request",
+  "problem": "KOReader users build self-hosted dashboards (KoInsight, KoShelf) to see their reading statistics and notes outside the device, showing demand for owned, exportable reading stats.",
+  "competitors": [
+   "KOReader"
+  ],
+  "sources": [
+   {
+    "title": "Bright Coding: KoInsight self-hosted dashboard for KOReader stats",
+    "url": "https://blog.brightcoding.dev/2026/09/30/georgesgkoinsight-self-hosted-dashboard-for-koreader-stats"
+   },
+   {
+    "title": "Bright Coding: KoShelf reading dashboard",
+    "url": "https://blog.brightcoding.dev/2026/06/08/stop-losing-your-koreader-notes-koshelf-exposes-the-hidden-reading-dashboard"
+   },
+   {
+    "title": "KoInsight on GitHub",
+    "url": "https://github.com/dev107/KoInsight"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "github-issue",
+  "persistence": "recent",
+  "severity": "low",
+  "workarounds": "Self-host KoInsight; export statistics.sqlite.",
+  "saga_solution": "Built-in stats dashboard merging sessions from phone, desktop and Leaf, stored locally, exportable as CSV/SQLite.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-065",
+  "category": "Stats & habits",
+  "type": "request",
+  "problem": "Community KOReader plugins add cover-based home screens with progress and reading streaks, implying the stock experience lacks motivating habit features.",
+  "competitors": [
+   "KOReader"
+  ],
+  "sources": [
+   {
+    "title": "Boredom at Work: 10 best KOReader plugins (SimpleUI streaks)",
+    "url": "https://boredom-at-work.com/best-koreader-plugins/"
+   }
+  ],
+  "evidence_strength": "weak",
+  "evidence_kind": "press/review",
+  "persistence": "recent",
+  "severity": "low",
+  "workarounds": "Install SimpleUI plugin.",
+  "saga_solution": "Optional, gentle streaks and goals (off by default, no guilt notifications); Leaf sleep screen can show progress.",
+  "complexity": "S"
+ },
+ {
+  "id": "R-066",
+  "category": "Small screens",
+  "type": "unmet-need",
+  "problem": "Syncing position between a tiny ESP32 reader (Xteink X4 on CrossPoint) and KOReader is hard: memory limits prevent full-book layout, positions drifted 2-3 pages, and large books crashed during indexing.",
+  "competitors": [
+   "Xteink X4",
+   "KOReader"
+  ],
+  "sources": [
+   {
+    "title": "CrossPoint GitHub discussion #61: KOReader progress sync",
+    "url": "https://github.com/crosspoint-reader/crosspoint-reader/discussions/61"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "github-issue",
+  "persistence": "recent",
+  "severity": "high",
+  "workarounds": "Manual chapter-level sync; percentage hacks.",
+  "saga_solution": "Have the phone app pre-paginate/pre-process books for the Leaf (chapter-split, pre-indexed anchors) so position maps by stable text anchors (CFI-like), not page numbers.",
+  "complexity": "L"
+ },
+ {
+  "id": "R-067",
+  "category": "Library organization",
+  "type": "complaint",
+  "problem": "Kindle libraries can't sort or filter by series or author well, collections are hard to manage for Calibre users, and sort settings don't carry into collections.",
+  "competitors": [
+   "Amazon Kindle"
+  ],
+  "sources": [
+   {
+    "title": "The eBook Reader: What are some things you don't like about Kindles?",
+    "url": "https://blog.the-ebook-reader.com/2023/11/30/what-are-some-things-you-dont-like-about-kindles/"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "user-reports",
+  "persistence": "multi-year",
+  "severity": "medium",
+  "workarounds": "Calibre collections plugin; manual collections.",
+  "saga_solution": "Series-aware library (read from EPUB/Calibre metadata), sort/filter by author, series, tag, status, with saved views shared across devices.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-068",
+  "category": "Library organization",
+  "type": "request",
+  "problem": "Readest users requested recursive import of a folder of books, a basic need for people moving existing libraries.",
+  "competitors": [
+   "Readest"
+  ],
+  "sources": [
+   {
+    "title": "Readest issues list (#179 import directory recursively)",
+    "url": "https://issues.ecosyste.ms/hosts/GitHub/repositories/readest%2Freadest/issues?page=1"
+   }
+  ],
+  "evidence_strength": "weak",
+  "evidence_kind": "github-issue",
+  "persistence": "recent",
+  "severity": "medium",
+  "workarounds": "Import files in batches.",
+  "saga_solution": "Watch-folder and recursive import with dedupe by content hash.",
+  "complexity": "S"
+ },
+ {
+  "id": "R-069",
+  "category": "Privacy & ownership",
+  "type": "request",
+  "problem": "Readest users asked to self-host its web reader and sync API rather than depend on the developer's cloud.",
+  "competitors": [
+   "Readest"
+  ],
+  "sources": [
+   {
+    "title": "Readest issues list (#192 self-hosting sync)",
+    "url": "https://issues.ecosyste.ms/hosts/GitHub/repositories/readest%2Freadest/issues?page=1"
+   }
+  ],
+  "evidence_strength": "weak",
+  "evidence_kind": "github-issue",
+  "persistence": "recent",
+  "severity": "low",
+  "workarounds": "Use KOReader sync server; Syncthing.",
+  "saga_solution": "Documented, open sync protocol with a self-hostable server option; also folder-based sync via iCloud Drive/Syncthing.",
+  "complexity": "L"
+ },
+ {
+  "id": "R-070",
+  "category": "Personalization",
+  "type": "request",
+  "problem": "Custom font support is a recurring request for newer readers (open Readest feature request) and Kindle commenters complain fonts apply globally, not per book.",
+  "competitors": [
+   "Readest",
+   "Amazon Kindle"
+  ],
+  "sources": [
+   {
+    "title": "Readest issues list (#237 custom fonts)",
+    "url": "https://issues.ecosyste.ms/hosts/GitHub/repositories/readest%2Freadest/issues?page=1"
+   },
+   {
+    "title": "The eBook Reader: What are some things you don't like about Kindles?",
+    "url": "https://blog.the-ebook-reader.com/2023/11/30/what-are-some-things-you-dont-like-about-kindles/"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "github-issue",
+  "persistence": "multi-year",
+  "severity": "low",
+  "workarounds": "Edit CSS; sideload fonts folder.",
+  "saga_solution": "Drag-in TTF/OTF fonts that sync (where licence allows) to every device and convert to Leaf bitmap format; per-book overrides.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-071",
+  "category": "Reading interface & typography",
+  "type": "complaint",
+  "problem": "Kindle typography controls are limited compared with Kobo: few usable font sizes, only three margin and line-spacing settings.",
+  "competitors": [
+   "Amazon Kindle",
+   "Kobo"
+  ],
+  "sources": [
+   {
+    "title": "The eBook Reader: What are some things you don't like about Kindles?",
+    "url": "https://blog.the-ebook-reader.com/2023/11/30/what-are-some-things-you-dont-like-about-kindles/"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "user-reports",
+  "persistence": "multi-year",
+  "severity": "medium",
+  "workarounds": "Custom fonts; switch to Kobo/KOReader.",
+  "saga_solution": "Continuous sliders (with sensible steps) for size, margins, line height, paragraph spacing.",
+  "complexity": "S"
+ },
+ {
+  "id": "R-072",
+  "category": "Pricing & subscriptions",
+  "type": "complaint",
+  "problem": "Moon+ Reader's free version shows a home-screen banner and occasional full-screen ads, and PDF support needs the paid Pro upgrade.",
+  "competitors": [
+   "Moon+ Reader"
+  ],
+  "sources": [
+   {
+    "title": "Yahoo Tech: Moon+ Reader review",
+    "url": "https://www.yahoo.com/tech/moon-reader-review-220655508.html"
+   }
+  ],
+  "evidence_strength": "weak",
+  "evidence_kind": "press/review",
+  "persistence": "multi-year",
+  "severity": "low",
+  "workarounds": "Buy Pro (one-off).",
+  "saga_solution": "No ads, ever; PDF and EPUB both free.",
+  "complexity": "S"
+ },
+ {
+  "id": "R-073",
+  "category": "Personalization",
+  "type": "love",
+  "problem": "Moon+ Reader is praised as a smooth, highly customisable Android reader: many themes with auto day/night switching, gesture/tap mapping, TTS and dictionaries.",
+  "competitors": [
+   "Moon+ Reader"
+  ],
+  "sources": [
+   {
+    "title": "Yahoo Tech: Moon+ Reader review",
+    "url": "https://www.yahoo.com/tech/moon-reader-review-220655508.html"
+   },
+   {
+    "title": "MobileRead Wiki: Moon+ Reader",
+    "url": "https://wiki.mobileread.com/wiki/Moon+ Reader"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "press/review",
+  "persistence": "multi-year",
+  "severity": "medium",
+  "workarounds": "n/a",
+  "saga_solution": "Match Moon+ on themes and auto day/night; keep the UI cleaner than Moon+.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-074",
+  "category": "Pricing & subscriptions",
+  "type": "complaint",
+  "problem": "Kobo Plus titles rotate out and it isn't always clear which books are included, per summaries of negative reviews.",
+  "competitors": [
+   "Kobo"
+  ],
+  "sources": [
+   {
+    "title": "Unstar: Kindle, Apple Books, Kobo, Libby, Scribd apps ranked 2026 (summary of 1-3 star reviews)",
+    "url": "https://unstar.app/blog/kindle-apple-books-kobo-libby-scribd-ereader-apps-ranked-2026"
+   }
+  ],
+  "evidence_strength": "weak",
+  "evidence_kind": "user-reports",
+  "persistence": "recent",
+  "severity": "low",
+  "workarounds": "Track titles manually.",
+  "saga_solution": "No rotating catalogue; anything imported stays.",
+  "complexity": "S"
+ },
+ {
+  "id": "R-075",
+  "category": "Discovery & purchasing",
+  "type": "complaint",
+  "problem": "Popular Libby bestsellers can take 8-16 weeks of waiting, and libraries are tightening hold rules (e.g., suspended holds now auto-cancel after a year) to speed circulation.",
+  "competitors": [
+   "Libby"
+  ],
+  "sources": [
+   {
+    "title": "Unstar: Kindle, Apple Books, Kobo, Libby, Scribd apps ranked 2026 (summary of 1-3 star reviews)",
+    "url": "https://unstar.app/blog/kindle-apple-books-kobo-libby-scribd-ereader-apps-ranked-2026"
+   },
+   {
+    "title": "TRL: Libby holds are changing",
+    "url": "https://trl.org/blogs/post/libby-holds-update/"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "official",
+  "persistence": "recent",
+  "severity": "low",
+  "workarounds": "Multiple library cards; buy the book.",
+  "saga_solution": "Out of scope for DRM loans; SAGA can show 'available free' links for public-domain editions (Standard Ebooks/Gutenberg).",
+  "complexity": "S"
+ },
+ {
+  "id": "R-076",
+  "category": "Discovery & purchasing",
+  "type": "love",
+  "problem": "Libby is loved for being free, supporting local libraries, and having no ads or recommendation clutter.",
+  "competitors": [
+   "Libby"
+  ],
+  "sources": [
+   {
+    "title": "Unstar: Kindle, Apple Books, Kobo, Libby, Scribd apps ranked 2026 (summary of 1-3 star reviews)",
+    "url": "https://unstar.app/blog/kindle-apple-books-kobo-libby-scribd-ereader-apps-ranked-2026"
+   },
+   {
+    "title": "Everyday Reading: Why I love the Libby app",
+    "url": "https://everyday-reading.com/libby-app/comment-page-1/"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "user-reports",
+  "persistence": "multi-year",
+  "severity": "medium",
+  "workarounds": "n/a",
+  "saga_solution": "Adopt Libby's calm, clutter-free tone; never put store promotion on the home screen.",
+  "complexity": "S"
+ },
+ {
+  "id": "R-077",
+  "category": "Discovery & purchasing",
+  "type": "complaint",
+  "problem": "Kindle's app home screen is dominated by recommendations, and Kindle devices push the store heavily.",
+  "competitors": [
+   "Amazon Kindle"
+  ],
+  "sources": [
+   {
+    "title": "Unstar: Kindle, Apple Books, Kobo, Libby, Scribd apps ranked 2026 (summary of 1-3 star reviews)",
+    "url": "https://unstar.app/blog/kindle-apple-books-kobo-libby-scribd-ereader-apps-ranked-2026"
+   },
+   {
+    "title": "The eBook Reader: What are some things you don't like about Kindles?",
+    "url": "https://blog.the-ebook-reader.com/2023/11/30/what-are-some-things-you-dont-like-about-kindles/"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "user-reports",
+  "persistence": "multi-year",
+  "severity": "low",
+  "workarounds": "Switch to library view.",
+  "saga_solution": "Home opens to 'Continue reading' and your shelves; no store.",
+  "complexity": "S"
+ },
+ {
+  "id": "R-078",
+  "category": "Annotations",
+  "type": "complaint",
+  "problem": "Apple Books annotation export is per-book and awkward for heavy note-takers.",
+  "competitors": [
+   "Apple Books"
+  ],
+  "sources": [
+   {
+    "title": "Unstar: Kindle, Apple Books, Kobo, Libby, Scribd apps ranked 2026 (summary of 1-3 star reviews)",
+    "url": "https://unstar.app/blog/kindle-apple-books-kobo-libby-scribd-ereader-apps-ranked-2026"
+   }
+  ],
+  "evidence_strength": "weak",
+  "evidence_kind": "user-reports",
+  "persistence": "multi-year",
+  "severity": "medium",
+  "workarounds": "Email notes per book; third-party exporters.",
+  "saga_solution": "Library-wide annotation view with search and bulk export.",
+  "complexity": "S"
+ },
+ {
+  "id": "R-079",
+  "category": "Import & formats",
+  "type": "love",
+  "problem": "Apple Books handles sideloaded EPUBs and PDFs smoothly with no extra account, and is preinstalled with a clean UI.",
+  "competitors": [
+   "Apple Books"
+  ],
+  "sources": [
+   {
+    "title": "Unstar: Kindle, Apple Books, Kobo, Libby, Scribd apps ranked 2026 (summary of 1-3 star reviews)",
+    "url": "https://unstar.app/blog/kindle-apple-books-kobo-libby-scribd-ereader-apps-ranked-2026"
+   }
+  ],
+  "evidence_strength": "weak",
+  "evidence_kind": "user-reports",
+  "persistence": "multi-year",
+  "severity": "medium",
+  "workarounds": "n/a",
+  "saga_solution": "Match the 'open in' import ease on iOS: share sheet, Files app, AirDrop.",
+  "complexity": "S"
+ },
+ {
+  "id": "R-080",
+  "category": "Import & formats",
+  "type": "complaint",
+  "problem": "Getting non-Kobo EPUBs into the Kobo iOS app requires a desktop workflow, per review summaries.",
+  "competitors": [
+   "Kobo"
+  ],
+  "sources": [
+   {
+    "title": "Unstar: Kindle, Apple Books, Kobo, Libby, Scribd apps ranked 2026 (summary of 1-3 star reviews)",
+    "url": "https://unstar.app/blog/kindle-apple-books-kobo-libby-scribd-ereader-apps-ranked-2026"
+   }
+  ],
+  "evidence_strength": "weak",
+  "evidence_kind": "user-reports",
+  "persistence": "multi-year",
+  "severity": "medium",
+  "workarounds": "Use Kobo desktop/Dropbox on device.",
+  "saga_solution": "Import directly on phone from Files, share sheet, browser downloads, OPDS.",
+  "complexity": "S"
+ },
+ {
+  "id": "R-081",
+  "category": "Import & formats",
+  "type": "love",
+  "problem": "PocketBook devices are praised for broad format support (EPUB, PDF, MOBI, FB2, comics, DRM-free AZW), multilingual TTS, and free cloud storage for moving books between devices.",
+  "competitors": [
+   "PocketBook"
+  ],
+  "sources": [
+   {
+    "title": "Notebookcheck: PocketBook Verse Pro Color review",
+    "url": "https://www.notebookcheck.net/PocketBook-Verse-Pro-Color-review-A-color-display-and-audiobooks-in-a-compact-e-reader.895892.0.html"
+   },
+   {
+    "title": "Expert Reviews: PocketBook InkPad One - diverse file support",
+    "url": "https://www.expertreviews.co.uk/technology/tablets-ereaders/pocketbook-inkpad-one-review"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "press/review",
+  "persistence": "multi-year",
+  "severity": "medium",
+  "workarounds": "n/a",
+  "saga_solution": "Support EPUB, PDF, TXT, and add FB2/CBZ/DRM-free AZW3 import (convert to EPUB) early.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-082",
+  "category": "Audio & TTS",
+  "type": "unmet-need",
+  "problem": "Whispersync's link between Kindle text and Audible narration lets readers swap between reading and listening without losing their place; Apple Books doesn't link audio and ebook positions automatically.",
+  "competitors": [
+   "Amazon Kindle",
+   "Apple Books"
+  ],
+  "sources": [
+   {
+    "title": "Android Authority: the Kindle feature stopping me switching",
+    "url": "https://www.androidauthority.com/kindle-feature-stopping-me-switching-3591123"
+   },
+   {
+    "title": "Unstar: Kindle, Apple Books, Kobo, Libby, Scribd apps ranked 2026 (summary of 1-3 star reviews)",
+    "url": "https://unstar.app/blog/kindle-apple-books-kobo-libby-scribd-ereader-apps-ranked-2026"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "press/review",
+  "persistence": "multi-year",
+  "severity": "medium",
+  "workarounds": "Buy both formats on Amazon.",
+  "saga_solution": "TTS-based 'listen from here' that hands off exactly to reading position; later, align user-owned DRM-free audiobooks to EPUB text (forced alignment).",
+  "complexity": "XL"
+ },
+ {
+  "id": "R-083",
+  "category": "Audio & TTS",
+  "type": "request",
+  "problem": "Readest users request custom TTS engines, and its free AI voices are time-capped with paid plans for more.",
+  "competitors": [
+   "Readest"
+  ],
+  "sources": [
+   {
+    "title": "Readest issues list (#258 custom TTS engine)",
+    "url": "https://issues.ecosyste.ms/hosts/GitHub/repositories/readest%2Freadest/issues?page=1"
+   },
+   {
+    "title": "Make Tech Easier: Readest ebook reader",
+    "url": "https://maketecheasier.com/readest-ebook-reader/"
+   }
+  ],
+  "evidence_strength": "weak",
+  "evidence_kind": "github-issue",
+  "persistence": "recent",
+  "severity": "low",
+  "workarounds": "Use OS TTS.",
+  "saga_solution": "Default to free on-device/OS voices; pluggable engines.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-084",
+  "category": "Academic & technical reading",
+  "type": "love",
+  "problem": "Readest's side-by-side parallel reading of two books is singled out as useful for language learning and research, alongside built-in dictionary and Wikipedia lookups.",
+  "competitors": [
+   "Readest"
+  ],
+  "sources": [
+   {
+    "title": "Make Tech Easier: Readest ebook reader",
+    "url": "https://maketecheasier.com/readest-ebook-reader/"
+   }
+  ],
+  "evidence_strength": "weak",
+  "evidence_kind": "press/review",
+  "persistence": "recent",
+  "severity": "low",
+  "workarounds": "n/a",
+  "saga_solution": "Desktop split view (book + book, or book + notes) and offline dictionary packs.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-085",
+  "category": "Sync",
+  "type": "complaint",
+  "problem": "Readest sync can take minutes, a book can't be removed from its cloud directly, and syncing requires an account.",
+  "competitors": [
+   "Readest"
+  ],
+  "sources": [
+   {
+    "title": "Make Tech Easier: Readest ebook reader",
+    "url": "https://maketecheasier.com/readest-ebook-reader/"
+   }
+  ],
+  "evidence_strength": "weak",
+  "evidence_kind": "press/review",
+  "persistence": "recent",
+  "severity": "low",
+  "workarounds": "Delete from originating device and re-upload.",
+  "saga_solution": "Near-real-time position sync (small payloads), clear per-book 'remove from cloud / remove from device' controls.",
+  "complexity": "M"
+ },
+ {
+  "id": "R-086",
+  "category": "Device connectivity",
+  "type": "love",
+  "problem": "Kobo's seamless Calibre support and the ability to install KOReader without jailbreaking are cited as reasons tinkerers prefer Kobo; Kindle's advantage is syncing Send-to-Kindle docs.",
+  "competitors": [
+   "Kobo",
+   "Calibre",
+   "KOReader",
+   "Amazon Kindle"
+  ],
+  "sources": [
+   {
+    "title": "The eBook Reader: Kindle + Kobo is the best combination",
+    "url": "https://blog.the-ebook-reader.com/2025/01/08/kindle-kobo-is-the-best-combination-why-take-sides"
+   }
+  ],
+  "evidence_strength": "moderate",
+  "evidence_kind": "press/review",
+  "persistence": "multi-year",
+  "severity": "medium",
+  "workarounds": "n/a",
+  "saga_solution": "Leaf should be open: documented transfer protocol, Calibre device driver, user-flashable firmware.",
+  "complexity": "L"
+ }
+]

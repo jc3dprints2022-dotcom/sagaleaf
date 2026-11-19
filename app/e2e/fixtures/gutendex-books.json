@@ -1,0 +1,322 @@
+[
+ {
+  "id": 1342,
+  "title": "Pride and Prejudice",
+  "authors": [
+   {
+    "name": "Austen, Jane",
+    "birth_year": 1775,
+    "death_year": 1817
+   }
+  ],
+  "summaries": [
+   "\"Pride and Prejudice\" is a classic work. (This is an automatically generated summary.)"
+  ],
+  "editors": [],
+  "translators": [],
+  "subjects": [
+   "Courtship -- Fiction",
+   "England -- Fiction",
+   "Love stories",
+   "Sisters -- Fiction"
+  ],
+  "bookshelves": [
+   "Category: Classics of Literature",
+   "Category: Romance",
+   "Best Books Ever Listings"
+  ],
+  "languages": [
+   "en"
+  ],
+  "copyright": false,
+  "media_type": "Text",
+  "formats": {
+   "text/html": "https://www.gutenberg.org/ebooks/1342.html.images",
+   "application/epub+zip": "https://www.gutenberg.org/ebooks/1342.epub3.images",
+   "application/x-mobipocket-ebook": "https://www.gutenberg.org/ebooks/1342.kf8.images",
+   "text/plain; charset=us-ascii": "https://www.gutenberg.org/ebooks/1342.txt.utf-8",
+   "application/rdf+xml": "https://www.gutenberg.org/ebooks/1342.rdf",
+   "image/jpeg": "https://www.gutenberg.org/cache/epub/1342/pg1342.cover.medium.jpg",
+   "application/octet-stream": "https://www.gutenberg.org/cache/epub/1342/pg1342-h.zip"
+  },
+  "download_count": 90000
+ },
+ {
+  "id": 84,
+  "title": "Frankenstein; Or, The Modern Prometheus",
+  "authors": [
+   {
+    "name": "Shelley, Mary Wollstonecraft",
+    "birth_year": 1797,
+    "death_year": 1851
+   }
+  ],
+  "summaries": [
+   "\"Frankenstein\" is a classic work. (This is an automatically generated summary.)"
+  ],
+  "editors": [],
+  "translators": [],
+  "subjects": [
+   "Frankenstein, Victor (Fictitious character) -- Fiction",
+   "Monsters -- Fiction",
+   "Science fiction",
+   "Gothic fiction"
+  ],
+  "bookshelves": [
+   "Category: Science-Fiction & Fantasy",
+   "Category: Classics of Literature",
+   "Gothic Fiction"
+  ],
+  "languages": [
+   "en"
+  ],
+  "copyright": false,
+  "media_type": "Text",
+  "formats": {
+   "text/html": "https://www.gutenberg.org/ebooks/84.html.images",
+   "application/epub+zip": "https://www.gutenberg.org/ebooks/84.epub3.images",
+   "application/x-mobipocket-ebook": "https://www.gutenberg.org/ebooks/84.kf8.images",
+   "text/plain; charset=us-ascii": "https://www.gutenberg.org/ebooks/84.txt.utf-8",
+   "application/rdf+xml": "https://www.gutenberg.org/ebooks/84.rdf",
+   "image/jpeg": "https://www.gutenberg.org/cache/epub/84/pg84.cover.medium.jpg",
+   "application/octet-stream": "https://www.gutenberg.org/cache/epub/84/pg84-h.zip"
+  },
+  "download_count": 81000
+ },
+ {
+  "id": 1661,
+  "title": "The Adventures of Sherlock Holmes",
+  "authors": [
+   {
+    "name": "Doyle, Arthur Conan",
+    "birth_year": 1859,
+    "death_year": 1930
+   }
+  ],
+  "summaries": [
+   "\"The Adventures of Sherlock Holmes\" is a classic work. (This is an automatically generated summary.)"
+  ],
+  "editors": [],
+  "translators": [],
+  "subjects": [
+   "Detective and mystery stories, English",
+   "Holmes, Sherlock (Fictitious character) -- Fiction"
+  ],
+  "bookshelves": [
+   "Category: Crime, Thrillers & Mystery",
+   "Category: Short Stories"
+  ],
+  "languages": [
+   "en"
+  ],
+  "copyright": false,
+  "media_type": "Text",
+  "formats": {
+   "text/html": "https://www.gutenberg.org/ebooks/1661.html.images",
+   "application/epub+zip": "https://www.gutenberg.org/ebooks/1661.epub3.images",
+   "application/x-mobipocket-ebook": "https://www.gutenberg.org/ebooks/1661.kf8.images",
+   "text/plain; charset=us-ascii": "https://www.gutenberg.org/ebooks/1661.txt.utf-8",
+   "application/rdf+xml": "https://www.gutenberg.org/ebooks/1661.rdf",
+   "image/jpeg": "https://www.gutenberg.org/cache/epub/1661/pg1661.cover.medium.jpg",
+   "application/octet-stream": "https://www.gutenberg.org/cache/epub/1661/pg1661-h.zip"
+  },
+  "download_count": 72000
+ },
+ {
+  "id": 2701,
+  "title": "Moby Dick; Or, The Whale",
+  "authors": [
+   {
+    "name": "Melville, Herman",
+    "birth_year": 1819,
+    "death_year": 1891
+   }
+  ],
+  "summaries": [
+   "\"Moby Dick\" is a classic work. (This is an automatically generated summary.)"
+  ],
+  "editors": [],
+  "translators": [],
+  "subjects": [
+   "Whaling -- Fiction",
+   "Sea stories",
+   "Adventure stories"
+  ],
+  "bookshelves": [
+   "Category: Adventure",
+   "Category: Classics of Literature"
+  ],
+  "languages": [
+   "en"
+  ],
+  "copyright": false,
+  "media_type": "Text",
+  "formats": {
+   "text/html": "https://www.gutenberg.org/ebooks/2701.html.images",
+   "application/epub+zip": "https://www.gutenberg.org/ebooks/2701.epub3.images",
+   "application/x-mobipocket-ebook": "https://www.gutenberg.org/ebooks/2701.kf8.images",
+   "text/plain; charset=us-ascii": "https://www.gutenberg.org/ebooks/2701.txt.utf-8",
+   "application/rdf+xml": "https://www.gutenberg.org/ebooks/2701.rdf",
+   "image/jpeg": "https://www.gutenberg.org/cache/epub/2701/pg2701.cover.medium.jpg",
+   "application/octet-stream": "https://www.gutenberg.org/cache/epub/2701/pg2701-h.zip"
+  },
+  "download_count": 63000
+ },
+ {
+  "id": 11,
+  "title": "Alice's Adventures in Wonderland",
+  "authors": [
+   {
+    "name": "Carroll, Lewis",
+    "birth_year": 1832,
+    "death_year": 1898
+   }
+  ],
+  "summaries": [
+   "\"Alice's Adventures in Wonderland\" is a classic work. (This is an automatically generated summary.)"
+  ],
+  "editors": [],
+  "translators": [],
+  "subjects": [
+   "Fantasy fiction",
+   "Children's stories"
+  ],
+  "bookshelves": [
+   "Category: Children & Young Adult Reading",
+   "Category: Science-Fiction & Fantasy"
+  ],
+  "languages": [
+   "en"
+  ],
+  "copyright": false,
+  "media_type": "Text",
+  "formats": {
+   "text/html": "https://www.gutenberg.org/ebooks/11.html.images",
+   "application/epub+zip": "https://www.gutenberg.org/ebooks/11.epub3.images",
+   "application/x-mobipocket-ebook": "https://www.gutenberg.org/ebooks/11.kf8.images",
+   "text/plain; charset=us-ascii": "https://www.gutenberg.org/ebooks/11.txt.utf-8",
+   "application/rdf+xml": "https://www.gutenberg.org/ebooks/11.rdf",
+   "image/jpeg": "https://www.gutenberg.org/cache/epub/11/pg11.cover.medium.jpg",
+   "application/octet-stream": "https://www.gutenberg.org/cache/epub/11/pg11-h.zip"
+  },
+  "download_count": 54000
+ },
+ {
+  "id": 345,
+  "title": "Dracula",
+  "authors": [
+   {
+    "name": "Stoker, Bram",
+    "birth_year": 1847,
+    "death_year": 1912
+   }
+  ],
+  "summaries": [
+   "\"Dracula\" is a classic work. (This is an automatically generated summary.)"
+  ],
+  "editors": [],
+  "translators": [],
+  "subjects": [
+   "Vampires -- Fiction",
+   "Horror tales",
+   "Gothic fiction"
+  ],
+  "bookshelves": [
+   "Category: Gothic Fiction",
+   "Category: Horror"
+  ],
+  "languages": [
+   "en"
+  ],
+  "copyright": false,
+  "media_type": "Text",
+  "formats": {
+   "text/html": "https://www.gutenberg.org/ebooks/345.html.images",
+   "application/epub+zip": "https://www.gutenberg.org/ebooks/345.epub3.images",
+   "application/x-mobipocket-ebook": "https://www.gutenberg.org/ebooks/345.kf8.images",
+   "text/plain; charset=us-ascii": "https://www.gutenberg.org/ebooks/345.txt.utf-8",
+   "application/rdf+xml": "https://www.gutenberg.org/ebooks/345.rdf",
+   "image/jpeg": "https://www.gutenberg.org/cache/epub/345/pg345.cover.medium.jpg",
+   "application/octet-stream": "https://www.gutenberg.org/cache/epub/345/pg345-h.zip"
+  },
+  "download_count": 45000
+ },
+ {
+  "id": 1497,
+  "title": "The Republic",
+  "authors": [
+   {
+    "name": "Plato",
+    "birth_year": -428,
+    "death_year": -348
+   }
+  ],
+  "summaries": [
+   "\"The Republic\" is a classic work. (This is an automatically generated summary.)"
+  ],
+  "editors": [],
+  "translators": [],
+  "subjects": [
+   "Political science -- Early works to 1800",
+   "Utopias"
+  ],
+  "bookshelves": [
+   "Category: Philosophy & Ethics",
+   "Category: Politics"
+  ],
+  "languages": [
+   "en"
+  ],
+  "copyright": false,
+  "media_type": "Text",
+  "formats": {
+   "text/html": "https://www.gutenberg.org/ebooks/1497.html.images",
+   "application/epub+zip": "https://www.gutenberg.org/ebooks/1497.epub3.images",
+   "application/x-mobipocket-ebook": "https://www.gutenberg.org/ebooks/1497.kf8.images",
+   "text/plain; charset=us-ascii": "https://www.gutenberg.org/ebooks/1497.txt.utf-8",
+   "application/rdf+xml": "https://www.gutenberg.org/ebooks/1497.rdf",
+   "image/jpeg": "https://www.gutenberg.org/cache/epub/1497/pg1497.cover.medium.jpg",
+   "application/octet-stream": "https://www.gutenberg.org/cache/epub/1497/pg1497-h.zip"
+  },
+  "download_count": 36000
+ },
+ {
+  "id": 2009,
+  "title": "The Origin of Species",
+  "authors": [
+   {
+    "name": "Darwin, Charles",
+    "birth_year": 1809,
+    "death_year": 1882
+   }
+  ],
+  "summaries": [
+   "\"The Origin of Species\" is a classic work. (This is an automatically generated summary.)"
+  ],
+  "editors": [],
+  "translators": [],
+  "subjects": [
+   "Evolution (Biology)",
+   "Natural selection"
+  ],
+  "bookshelves": [
+   "Category: Science - Biology",
+   "Category: History - General"
+  ],
+  "languages": [
+   "en"
+  ],
+  "copyright": false,
+  "media_type": "Text",
+  "formats": {
+   "text/html": "https://www.gutenberg.org/ebooks/2009.html.images",
+   "application/epub+zip": "https://www.gutenberg.org/ebooks/2009.epub3.images",
+   "application/x-mobipocket-ebook": "https://www.gutenberg.org/ebooks/2009.kf8.images",
+   "text/plain; charset=us-ascii": "https://www.gutenberg.org/ebooks/2009.txt.utf-8",
+   "application/rdf+xml": "https://www.gutenberg.org/ebooks/2009.rdf",
+   "image/jpeg": "https://www.gutenberg.org/cache/epub/2009/pg2009.cover.medium.jpg",
+   "application/octet-stream": "https://www.gutenberg.org/cache/epub/2009/pg2009-h.zip"
+  },
+  "download_count": 27000
+ }
+]

@@ -1,0 +1,2 @@
+{ "compilerOptions": { "target": "ES2022", "module": "ESNext", "moduleResolution": "Bundler", "jsx": "react-jsx", "strict": true, "skipLibCheck": true, "allowJs": true, "checkJs": false, "noEmit": true, "lib": ["ES2023", "DOM", "DOM.Iterable"], "types": ["node", "vite/client"], "esModuleInterop": true, "resolveJsonModule": true },
+  "include": ["src", "sim", "server", "tests", "e2e", "bench", "vite.config.ts", "vite.standalone.config.ts", "pwa"] }

@@ -1,0 +1,7 @@
+node_modules/
+dist/
+dist-standalone/
+dev-dist/
+server/.data/
+sim/.leaf-data/
+*.log

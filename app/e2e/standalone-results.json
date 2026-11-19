@@ -1,0 +1,129 @@
+{
+  "at": "2026-11-18T18:54:15.605Z",
+  "file": "/home/claude/saga/dist-standalone/saga-reader.html",
+  "results": [
+    {
+      "step": "Opens from disk with no server",
+      "ok": true,
+      "ms": 513,
+      "detail": "6.2 MB single file, file:///home/claude/saga/dist-standalone/saga-reader.html…"
+    },
+    {
+      "step": "Add the built-in classic books",
+      "ok": true,
+      "ms": 1932,
+      "detail": "3 EPUB/TXT + 1 PDF embedded in the file"
+    },
+    {
+      "step": "Read and highlight a passage",
+      "ok": true,
+      "ms": 4310,
+      "detail": "“are not in a way to know…” at 1.2%"
+    },
+    {
+      "step": "Quit and reopen: highlight and place survive (IndexedDB on file://)",
+      "ok": true,
+      "ms": 2318
+    },
+    {
+      "step": "PDF renders with its worker (no main-thread fallback)",
+      "ok": true,
+      "ms": 830,
+      "detail": "45 selectable text spans"
+    },
+    {
+      "step": "Pair the in-page simulated Leaf using the code on its screen",
+      "ok": true,
+      "ms": 2715,
+      "detail": "code 816954; book sent"
+    },
+    {
+      "step": "Read and highlight on the simulated Leaf, then sync",
+      "ok": true,
+      "ms": 2129,
+      "detail": "Leaf at 2%"
+    },
+    {
+      "step": "Back in the reader: jump to the Leaf’s place; Leaf highlight arrived",
+      "ok": true,
+      "ms": 1825,
+      "detail": "resumed at 2%"
+    },
+    {
+      "step": "Names and hidden portals: only SAGA Reader / SAGA Leaf; no Author or Publisher anywhere",
+      "ok": true,
+      "ms": 3993
+    },
+    {
+      "step": "Discover: popular free books from Project Gutenberg, with covers",
+      "ok": true,
+      "ms": 194,
+      "detail": "8 books after “Show more”"
+    },
+    {
+      "step": "Discover: topic filter and search",
+      "ok": true,
+      "ms": 946
+    },
+    {
+      "step": "Get book: EPUB downloads and imports; works as a normal library book",
+      "ok": true,
+      "ms": 705
+    },
+    {
+      "step": "Get book: falls back to plain text when there is no EPUB",
+      "ok": true,
+      "ms": 120
+    },
+    {
+      "step": "Get book: when the browser blocks the download, opens it in a new tab with a note",
+      "ok": true,
+      "ms": 300
+    },
+    {
+      "step": "Discover offline: clear message, last popular list still shown",
+      "ok": true,
+      "ms": 174,
+      "detail": "6 books from the cached Popular page"
+    },
+    {
+      "step": "Settings: account is optional; from a file, sign-in explains it needs the web address",
+      "ok": true,
+      "ms": 136
+    },
+    {
+      "step": "Network: only Gutendex/Gutenberg on Discover; nothing else, no Supabase",
+      "ok": true,
+      "ms": 0,
+      "detail": "25 requests, all to Gutendex/Gutenberg during Discover"
+    }
+  ],
+  "consoleErrors": [],
+  "network": [
+    "discover|https://gutendex.com/books/?copyright=false&sort=popular",
+    "discover|https://www.gutenberg.org/cache/epub/1342/pg1342.cover.medium.jpg",
+    "discover|https://www.gutenberg.org/cache/epub/84/pg84.cover.medium.jpg",
+    "discover|https://www.gutenberg.org/cache/epub/1661/pg1661.cover.medium.jpg",
+    "discover|https://www.gutenberg.org/cache/epub/2701/pg2701.cover.medium.jpg",
+    "discover|https://www.gutenberg.org/cache/epub/11/pg11.cover.medium.jpg",
+    "discover|https://www.gutenberg.org/cache/epub/345/pg345.cover.medium.jpg",
+    "discover|https://gutendex.com/books/?copyright=false&sort=popular",
+    "discover|https://gutendex.com/books/?copyright=false&sort=popular&page=2",
+    "discover|https://www.gutenberg.org/cache/epub/1497/pg1497.cover.medium.jpg",
+    "discover|https://www.gutenberg.org/cache/epub/2009/pg2009.cover.medium.jpg",
+    "discover|https://gutendex.com/books/?copyright=false&topic=Mystery&sort=popular",
+    "discover|https://gutendex.com/books/?copyright=false&sort=popular",
+    "discover|https://gutendex.com/books/?copyright=false&search=shelley",
+    "discover|https://gutendex.com/books/1342",
+    "discover|https://www.gutenberg.org/ebooks/1342.epub3.images",
+    "discover|https://gutendex.com/books/1661",
+    "discover|https://www.gutenberg.org/ebooks/1661.epub3.images",
+    "discover|https://www.gutenberg.org/ebooks/1661.epub.noimages",
+    "discover|https://www.gutenberg.org/ebooks/1661.txt.utf-8",
+    "discover|https://gutendex.com/books/84",
+    "discover|https://www.gutenberg.org/ebooks/84.epub3.images",
+    "discover|https://www.gutenberg.org/ebooks/84.epub.noimages",
+    "discover|https://www.gutenberg.org/ebooks/84.txt.utf-8",
+    "discover|https://www.gutenberg.org/ebooks/84.epub3.images"
+  ]
+}

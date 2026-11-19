@@ -1,0 +1,33 @@
+{
+  "at": "2026-11-18T18:52:00.670Z",
+  "results": [
+    {
+      "step": "First visit online: service worker installs, books added, sync turned on",
+      "ok": true,
+      "detail": "library code saga-fpgav…"
+    },
+    {
+      "step": "Fully offline: the app relaunches from the service worker",
+      "ok": true
+    },
+    {
+      "step": "Offline: open a book, turn pages, highlight",
+      "ok": true
+    },
+    {
+      "step": "Offline: status says changes are waiting, in plain words",
+      "ok": true,
+      "detail": "Offline. 3 changes will sync later"
+    },
+    {
+      "step": "Back online: the queued change syncs by itself",
+      "ok": true,
+      "detail": "Up to date, just now"
+    },
+    {
+      "step": "A second device joins with the code and receives the offline highlight and the books",
+      "ok": true,
+      "detail": "5 books and the highlight arrived"
+    }
+  ]
+}

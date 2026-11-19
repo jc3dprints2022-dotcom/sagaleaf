@@ -1,0 +1,80 @@
+{
+  "at": "2026-11-18T18:54:39.692Z",
+  "results": [
+    {
+      "step": "No account needed: nothing is loaded from Supabase until Settings",
+      "ok": true,
+      "ms": 2479
+    },
+    {
+      "step": "Email magic link: sends the link with the site’s redirect address",
+      "ok": true,
+      "ms": 138,
+      "detail": "redirect_to https://saga.proxima-3d.com/saga-reader.html"
+    },
+    {
+      "step": "Opening the link signs in (PKCE code exchange) and returns to Settings",
+      "ok": true,
+      "ms": 597
+    },
+    {
+      "step": "Turn on sync: first device gets a library code; rows are encrypted, one per book",
+      "ok": true,
+      "ms": 445,
+      "detail": "2 rows (_saga_ke, a78d6d84), ciphertext only"
+    },
+    {
+      "step": "Second device: Continue with Google signs in to the same account",
+      "ok": true,
+      "ms": 2896
+    },
+    {
+      "step": "Sync asks for the library code; a wrong code is refused, the right one works",
+      "ok": true,
+      "ms": 441
+    },
+    {
+      "step": "Notes arrive on the second device, labelled with the book even before it’s added",
+      "ok": true,
+      "ms": 120
+    },
+    {
+      "step": "After adding the same book, it opens at the first device’s reading place",
+      "ok": true,
+      "ms": 4464,
+      "detail": "opened in section 6 (4% through)"
+    },
+    {
+      "step": "An edit on the second device reaches the first",
+      "ok": true,
+      "ms": 312
+    },
+    {
+      "step": "Changes sync automatically a few seconds after you make them",
+      "ok": true,
+      "ms": 4649,
+      "detail": "uploaded 4.6 s after the edit"
+    },
+    {
+      "step": "Reload keeps you signed in and sync on",
+      "ok": true,
+      "ms": 712
+    },
+    {
+      "step": "Sign out: email gone, sync off, notes stay on the device; no Supabase calls on next launch",
+      "ok": true,
+      "ms": 2076
+    },
+    {
+      "step": "Empty configuration: no sign-in UI, no requests, everything else works",
+      "ok": true,
+      "ms": 2012
+    },
+    {
+      "step": "Supabase or its CDN unreachable: sign-in is disabled with a note; no errors",
+      "ok": true,
+      "ms": 1100
+    }
+  ],
+  "consoleErrors": []
+}
