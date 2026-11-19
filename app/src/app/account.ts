@@ -96,10 +96,15 @@ function cleanCallbackUrl() {
 /** At startup: reconnect a saved session, or finish a sign-in link. Otherwise do nothing (no network). */
 export function initAccount() {
   if (isCallback()) callback = { error: new URLSearchParams(location.search).get('error_description') }
-  if (state.availability === 'idle' && (hadSession() || callback)) void load()
+  if (state.availability === 'idle' && (hadSession() || callback)) whenOnline(load)
 }
 /** Settings calls this so it can show whether sign-in is available before you use it. */
-export const prepareSignIn = () => { if (state.availability === 'idle') void load() }
+export const prepareSignIn = () => { if (state.availability === 'idle') whenOnline(load) }
+/** Offline (e.g. the installed app opened with no network), wait for the network instead of trying the CDN and failing. */
+function whenOnline(fn: () => unknown) {
+  if (typeof navigator === 'undefined' || navigator.onLine !== false) { fn(); return }
+  addEventListener('online', () => { if (state.availability === 'idle') fn() }, { once: true })
+}
 
 async function onSession(session: Session | null) {
   const email = session?.user.email ?? null, userId = session?.user.id ?? null

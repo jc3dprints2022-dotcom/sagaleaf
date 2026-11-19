@@ -1,7 +1,7 @@
 import { useEffect, useState, lazy, Suspense } from 'react'
 import { useRoute, store, useLive, href } from '../app/state'
 import { Icon, Wordmark } from './icons'
-import { SyncStatusLine, Toasts } from './components'
+import { SyncStatusLine, Toasts, InstallHintBar } from './components'
 import { importWithFeedback } from '../app/data'
 import { Home } from './screens/Home'
 import { Library } from './screens/Library'
@@ -92,7 +92,7 @@ export function App() {
         </nav>
         <div className="rail-foot"><SyncStatusLine /></div>
       </aside>
-      <main className="main" id="main">{screen}</main>
+      <main className="main" id="main">{route.name === 'home' && <InstallHintBar />}{screen}</main>
       <nav className="tabbar" aria-label="Main">
         {NAV.filter(n => n.name !== 'collections').map(n => <a key={n.name} href={href(n.path)} aria-current={active(n.name) ? 'page' : undefined}><n.icon />{n.short ?? n.label}</a>)}
       </nav>

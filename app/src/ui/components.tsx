@@ -4,6 +4,8 @@ import { store, useLive, useToasts, useSyncStatus, usePlatformImage } from '../a
 import { useAccount } from '../app/account'
 import { Icon } from './icons'
 import { ago } from '../core/util'
+import { useInstallHint, dismissInstallHint } from '../app/pwa'
+import { PRODUCT } from '../app/product'
 
 const coverUrls = new Map<string, string>()
 export function useCoverUrl(bookId: string, has: boolean) {
@@ -58,6 +60,19 @@ export function Modal({ title, children, onClose, actions, wide }: { title: stri
 export function Toasts() {
   const list = useToasts()
   return <div className="toasts" role="status" aria-live="polite">{list.map(t => <div key={t.id} className="toast"><span>{t.text}</span>{t.action && <button onClick={t.action.run}>{t.action.label}</button>}</div>)}</div>
+}
+
+/** "Install app" where the browser offers it; a short how-to on iOS. Dismissed for good with ✕. */
+export function InstallHintBar() {
+  const h = useInstallHint()
+  if (!h) return null
+  return (
+    <div className="panel row wrap install-hint" role="region" aria-label="Install app" style={{ marginBottom: 20 }}>
+      <span style={{ flex: 1 }}>{h.kind === 'prompt' ? `Install ${PRODUCT.name} to open it like an app, even offline.` : <>To install {PRODUCT.name}: tap <b>Share</b>, then <b>Add to Home Screen</b>.</>}</span>
+      {h.kind === 'prompt' && <button className="btn primary" onClick={h.install}>Install app</button>}
+      <button className="btn quiet" onClick={dismissInstallHint} aria-label="Dismiss install hint">Not now</button>
+    </div>
+  )
 }
 
 export function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) {

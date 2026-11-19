@@ -1,0 +1,39 @@
+{
+  "at": "2026-11-19T06:44:37.137Z",
+  "results": [
+    {
+      "step": "First online visit loads; service worker controls only the reader page",
+      "ok": true,
+      "detail": "scope /saga-reader.html; landing page not controlled"
+    },
+    {
+      "step": "Installable: manifest and icons valid, no installability errors, no 404s",
+      "ok": true,
+      "detail": "SAGA Reader / SAGA, display standalone, start_url /saga-reader.html, 4 PNG icons"
+    },
+    {
+      "step": "Author/Publisher hidden; sign-in UI present",
+      "ok": true,
+      "detail": "no Author/Publisher links or routes; Settings shows “Email me a sign-in link”"
+    },
+    {
+      "step": "Online: import EPUB, PDF and TXT; highlight with a note",
+      "ok": true
+    },
+    {
+      "step": "Fully offline after a relaunch: the reader opens from the service worker",
+      "ok": true,
+      "detail": "server unreachable and browser offline; page served from the worker cache"
+    },
+    {
+      "step": "Offline: the highlight and note show; EPUB, PDF and TXT open; export works; no network requests",
+      "ok": true,
+      "detail": "page requests: 0; server attempts: none"
+    },
+    {
+      "step": "A new deploy is picked up: new worker activates, old cache removed, page offers a reload",
+      "ok": true,
+      "detail": "worker 5130711cac02 → newdeploy001; caches now saga-shell-newdeploy001; fresh HTML served online"
+    }
+  ]
+}
