@@ -39,7 +39,8 @@ async function launch() {
   // No network: anything that isn't the page's own origin fails, like a phone in airplane mode.
   await ctx.route('**/*', r => { const u = r.request().url(); if (u.startsWith(ORIGIN) || /^(data|blob):/.test(u)) return r.continue(); blocked.push(u); return r.abort('internetdisconnected') })
   page = ctx.pages()[0] ?? await ctx.newPage()
-  page.on('pageerror', e => errors.push(e.message))
+  page.on('pageerror', e => errors.push((e.stack ?? e.message).split('\n').slice(0, 4).join(' ← ')))
+  page.on('console', m => { if (m.type() === 'error') errors.push('console: ' + m.text().slice(0, 300)) })
 }
 async function step(name: string, fn: () => Promise<string | void>) {
   try { const d = await fn(); results.push({ step: name, ok: true, detail: d || undefined }); console.log(`✓ ${name}${d ? ' — ' + d : ''}`) }

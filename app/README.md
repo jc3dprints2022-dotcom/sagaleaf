@@ -79,7 +79,7 @@ send for review; SAGA Publisher, approve; Discover, get the book.
 |---|---|
 | `npm run dev` | Vite dev server + Leaf simulators + platform server |
 | `npm run app` / `leaf` / `platform` | Each piece on its own |
-| `npm test` | 93 unit and integration tests (Vitest) |
+| `npm test` | 99 unit and integration tests (Vitest) |
 | `npm run test:e2e` | Full user journey in Chrome (needs `npm run dev` running and Chrome at `/usr/bin/google-chrome`, or set the path in `e2e/run.ts`) |
 | `npx tsx e2e/offline.ts` | Offline behaviour against the production build (`npm run build && npx vite preview --port 4173` first) |
 | `npm run bench` | Node benchmarks: 1,000-book import, 10,000-book library, sync stress, transfer stress |

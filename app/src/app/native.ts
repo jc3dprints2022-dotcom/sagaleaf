@@ -9,7 +9,19 @@ import { importFiles } from '../core/library'
 import { importDropped } from './importers'
 import { go, store, toast } from './state'
 
+/** Native build or Capacitor WebView: decides service worker and sign-in (build-time decisions). */
 export const IS_NATIVE = import.meta.env.VITE_NATIVE === '1' || Capacitor.isNativePlatform()
+
+/** Plugin calls go through here. They run only inside the Capacitor shell, only when that shell
+ *  has the plugin, and never throw: a sync throw or a rejected promise is swallowed. The native
+ *  bundle in a plain browser (e2e/native.ts) or an older shell without a plugin does nothing. */
+export const pluginAvailable = (name: string) => {
+  try { return Capacitor.isNativePlatform() && Capacitor.isPluginAvailable(name) } catch { return false }
+}
+export function callPlugin<T>(name: string, fn: () => Promise<T> | T): Promise<T | undefined> {
+  if (!pluginAvailable(name)) return Promise.resolve(undefined)
+  try { return Promise.resolve(fn()).catch(() => undefined) } catch { return Promise.resolve(undefined) }
+}
 
 interface OpenedFile { uri: string; name: string; type?: string | null }
 interface OpenedFilesPlugin {
@@ -50,10 +62,11 @@ export async function openExternalFiles(list: OpenedFile[]) {
 }
 
 function followAppearance() {
+  if (!pluginAvailable('SystemBars')) return
   const apply = () => {
     const dark = document.documentElement.dataset.appearance === 'dark'
     // Dark = light icons on a dark page.
-    void SystemBars.setStyle({ style: dark ? SystemBarsStyle.Dark : SystemBarsStyle.Light }).catch(() => {})
+    void callPlugin('SystemBars', () => SystemBars.setStyle({ style: dark ? SystemBarsStyle.Dark : SystemBarsStyle.Light }))
   }
   apply()
   new MutationObserver(apply).observe(document.documentElement, { attributes: true, attributeFilter: ['data-appearance'] })
@@ -63,16 +76,16 @@ function followAppearance() {
 if (import.meta.env.VITE_NATIVE === '1') (globalThis as Record<string, unknown>).__sagaNative = { openExternalFiles }
 
 /** The splash waits for this (launchAutoHide is off), so every start path must end here or in initNative. */
-export const hideSplash = () => { if (IS_NATIVE) void SplashScreen.hide().catch(() => {}) }
+export const hideSplash = () => { void callPlugin('SplashScreen', () => SplashScreen.hide()) }
 
-/** Call once the app has rendered. */
+/** Call once the app has rendered. Safe anywhere: without the shell or a plugin, that part is skipped. */
 export async function initNative() {
   if (!IS_NATIVE) return
   followAppearance()
   requestAnimationFrame(hideSplash)
-  try {
-    await OpenedFiles.addListener('filesOpened', e => { void openExternalFiles(e.files) })
-    const { files } = await OpenedFiles.takePending()
-    if (files.length) await openExternalFiles(files)
-  } catch { /* plugin missing (older shell): opening files from other apps just isn't available */ }
+  await callPlugin('OpenedFiles', async () => {
+    await OpenedFiles.addListener('filesOpened', e => { const files = e?.files; if (files?.length) void openExternalFiles(files) })
+    const files = (await OpenedFiles.takePending())?.files
+    if (files?.length) await openExternalFiles(files)
+  })
 }
