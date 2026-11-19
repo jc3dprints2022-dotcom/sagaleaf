@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='utf-8'?>
+<package xmlns="http://www.idpf.org/2007/opf" unique-identifier="uuid_id" version="2.0">
+    <metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf">
+        <dc:identifier opf:scheme="calibre" id="calibre_id">7</dc:identifier>
+        <dc:identifier opf:scheme="uuid" id="uuid_id">0b7c6d8e-1a2b-4c3d-9e8f-123456789abc</dc:identifier>
+        <dc:title>Pride and Prejudice (Calibre edition)</dc:title>
+        <dc:creator opf:file-as="Austen, Jane" opf:role="aut">Jane Austen</dc:creator>
+        <dc:contributor opf:file-as="calibre" opf:role="bkp">calibre (7.0.0) [https://calibre-ebook.com]</dc:contributor>
+        <dc:publisher>Standard Ebooks</dc:publisher>
+        <dc:identifier opf:scheme="ISBN">9780000000001</dc:identifier>
+        <dc:language>eng</dc:language>
+        <dc:subject>Fiction</dc:subject>
+        <dc:subject>Romance</dc:subject>
+        <meta name="calibre:series" content="Austen Novels"/>
+        <meta name="calibre:series_index" content="2.0"/>
+        <meta name="calibre:timestamp" content="2024-01-02T03:04:05+00:00"/>
+    </metadata>
+    <guide><reference type="cover" title="Cover" href="cover.jpg"/></guide>
+</package>

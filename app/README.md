@@ -26,8 +26,13 @@ Everything works without a server, including a simulated SAGA Leaf that runs ins
 - **Devices → Find my SAGA Leaf → SAGA Leaf (simulated in this page)** pairs the in-page SAGA Leaf.
   Its screen, with the pairing code, appears right in the dialog. Open it again later from
   the device page to read and highlight on it, then press Sync now.
-- **Discover** lists free public-domain books from Project Gutenberg (through the Gutendex API).
-  **Get book** downloads the file once and adds it to your library like any import.
+- **Discover** lists free public-domain books from Project Gutenberg (through the Gutendex API)
+  and new releases from Standard Ebooks. **Get book** downloads the file once and adds it to your
+  library like any import. You can also paste a Gutenberg or Standard Ebooks link.
+- **Library → Import** brings in a Calibre library (folder or zip; DRM-free EPUB, PDF and TXT,
+  with Calibre's titles and authors) and Kindle highlights (`My Clippings.txt`, or a Kindle app's
+  notebook HTML/CSV export). Notes only: SAGA never opens Kindle book files or removes DRM.
+  See [docs/IMPORT.md](docs/IMPORT.md) for formats, matching rules and the URLs used.
 - **Settings → Account (optional)**: sign in with an email link or Google (Supabase Auth) and
   turn on "Sync my notes and reading progress". Notes are encrypted on the device with your
   library code before upload; book files never leave the device. Sign-in needs the web
@@ -74,13 +79,14 @@ send for review; SAGA Publisher, approve; Discover, get the book.
 |---|---|
 | `npm run dev` | Vite dev server + Leaf simulators + platform server |
 | `npm run app` / `leaf` / `platform` | Each piece on its own |
-| `npm test` | 50 unit and integration tests (Vitest) |
+| `npm test` | 93 unit and integration tests (Vitest) |
 | `npm run test:e2e` | Full user journey in Chrome (needs `npm run dev` running and Chrome at `/usr/bin/google-chrome`, or set the path in `e2e/run.ts`) |
 | `npx tsx e2e/offline.ts` | Offline behaviour against the production build (`npm run build && npx vite preview --port 4173` first) |
 | `npm run bench` | Node benchmarks: 1,000-book import, 10,000-book library, sync stress, transfer stress |
 | `npx tsx bench/browser.ts` | Browser benchmarks and axe-core accessibility scan (needs dev server) |
 | `npm run build` | Production build into `dist/` (installable PWA) |
 | `npm run build:standalone` | The whole app as one HTML file that runs from disk, `dist-standalone/saga-reader.html` |
+| `npx tsx e2e/import.ts` | Calibre, Kindle, Gutenberg and Standard Ebooks import against the published PWA files, then offline reading (network mocked; 7 steps) |
 | `npx tsx e2e/standalone.ts` | Opens that file from `file://` and runs the journey, Discover included (17 steps) |
 | `npx tsx e2e/accounts.ts` | Serves the file at its web address and tests sign-in and encrypted notes sync across two devices (14 steps) |
 | `npm run typecheck` | TypeScript, strict |

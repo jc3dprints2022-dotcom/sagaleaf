@@ -30,6 +30,23 @@ function isProbablyText(b: Uint8Array) {
   return n > 0 && bad / n < 0.01
 }
 
+export const DRM_MESSAGE = 'This book is DRM-protected. SAGA doesn’t remove DRM, so it can’t be opened.'
+
+/** PDFs locked with Adobe DRM (ADEPT/"EBX") or Adobe LiveCycle policy server.
+ *  Detection only: SAGA refuses them, it never tries to open them. */
+export function isDrmPdf(b: Uint8Array) {
+  return indexOfAscii(b, '/EBX_HANDLER') >= 0 || indexOfAscii(b, '/Adobe.APS') >= 0
+}
+function indexOfAscii(b: Uint8Array, needle: string) {
+  const n = Array.from(needle, c => c.charCodeAt(0)), first = n[0]
+  for (let i = b.indexOf(first); i >= 0 && i <= b.length - n.length; i = b.indexOf(first, i + 1)) {
+    let j = 1
+    while (j < n.length && b[i + j] === n[j]) j++
+    if (j === n.length) return i
+  }
+  return -1
+}
+
 export async function importBytes(store: Store, name: string, bytes: Uint8Array, extra: Partial<Book> = {}): Promise<ImportResult> {
   const t0 = performance.now()
   const fmt = detectFormat(name, bytes)
@@ -45,11 +62,12 @@ export async function importBytes(store: Store, name: string, bytes: Uint8Array,
   try {
     if (fmt === 'epub') {
       const p = parseEpub(bytes)
-      if (p.drm) return { name, status: 'failed', error: 'This book is DRM-protected. SAGA doesn’t remove DRM, so it can’t be opened.' }
+      if (p.drm) return { name, status: 'failed', error: DRM_MESSAGE }
       texts = extractEpubText(bytes, p)
       meta = { title: p.title, author: p.author, language: p.language, publisher: p.publisher, description: p.description, published: p.published, series: p.series, seriesIndex: p.seriesIndex, subjects: p.subjects.slice(0, 12), identifiers: p.identifiers }
       cover = p.cover ?? null
     } else if (fmt === 'pdf') {
+      if (isDrmPdf(bytes)) return { name, status: 'failed', error: DRM_MESSAGE }
       const p = await parsePdf(bytes)
       texts = p.pages
       meta = { title: p.title || cleanName(name), author: p.author || 'Unknown author' }
@@ -69,8 +87,9 @@ export async function importBytes(store: Store, name: string, bytes: Uint8Array,
     return { name, status: 'failed', error: 'No readable text was found in this file.' }
   }
 
-  const title = (meta.title || cleanName(name)).trim()
-  const author = (meta.author || 'Unknown author').trim()
+  // Metadata the caller already knows (a Calibre library's metadata.opf) wins over the file's own.
+  const title = (extra.title || meta.title || cleanName(name)).trim()
+  const author = (extra.author || meta.author || 'Unknown author').trim()
   const wk = workKey(title, author)
   const others = (await store.db.books.where('sortTitle').equals(sortKey(title)).toArray())
     .filter(b => b.id !== id && !b.deleted && workKey(b.title, b.author) === wk)

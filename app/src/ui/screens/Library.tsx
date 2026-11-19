@@ -70,10 +70,10 @@ export function Library() {
             <button className="btn small quiet" onClick={() => setSel(null)}>Done</button>
           </div>
         ) : (
-          <div className="row"><button className="btn quiet small" onClick={() => setSel(new Set())}>Select</button><button className="btn primary" onClick={doImport}><Icon.plus />Add books</button></div>
+          <div className="row"><button className="btn quiet small" onClick={() => setSel(new Set())}>Select</button><a className="btn" href={href('import')}><Icon.upload />Import</a><button className="btn primary" onClick={doImport}><Icon.plus />Add books</button></div>
         )}
       </div>
-      <p className="page-sub">{books.length} book{books.length === 1 ? '' : 's'}, all stored on this device. Drop files anywhere to add more.</p>
+      <p className="page-sub">{books.length} book{books.length === 1 ? '' : 's'}, all stored on this device. Drop files anywhere to add more, or <a href={href('import')}>import a Calibre library, Kindle highlights or a free book from a link</a>.</p>
 
       {visibleDupes.slice(0, 1).map(g => (
         <div key={g[0].id} className="banner warn">

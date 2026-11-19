@@ -1,0 +1,38 @@
+{
+  "at": "2026-11-19T15:31:08.888Z",
+  "results": [
+    {
+      "step": "Import screen is reachable from the Library",
+      "ok": true
+    },
+    {
+      "step": "Calibre folder: title and author from metadata.opf; DRM book refused with the existing message",
+      "ok": true,
+      "detail": "Pride and Prejudice (Calibre edition) Jane Austen added from Pride and Prejudice - Jane Austen.epub · Open | Frankenstein Mary Shelley skipped Frankenstein - Mary Shelley.epub: This book is DRM-protected. SAGA doesn’t remove DRM, so it can’t be opened."
+    },
+    {
+      "step": "Calibre zip imports too",
+      "ok": true
+    },
+    {
+      "step": "Kindle My Clippings.txt: attaches to the matching book; unmatched titles wait for review",
+      "ok": true,
+      "detail": "1 highlight added to 1 book, 3 waiting for you to choose a book. Added to “Pride and Prejudice (Calibre edition)” (1). 1 bookmark skipped. Review"
+    },
+    {
+      "step": "Gutenberg book via “paste a link” (Gutendex and the Gutenberg proxy)",
+      "ok": true,
+      "detail": "book 4979bfd1d516480d; proxy saw 3 requests"
+    },
+    {
+      "step": "Standard Ebooks in Discover: public feed listed, EPUB downloaded directly (not via the proxy)",
+      "ok": true,
+      "detail": "requests to standardebooks.org: /feeds/atom/new-releases, /ebooks/herman-melville/moby-dick/downloads/herman-melville_moby-dick.epub"
+    },
+    {
+      "step": "Fully offline after a relaunch: both downloaded books and the Calibre book open",
+      "ok": true,
+      "detail": "Gutenberg, Standard Ebooks and Calibre books render from IndexedDB with the server down"
+    }
+  ]
+}

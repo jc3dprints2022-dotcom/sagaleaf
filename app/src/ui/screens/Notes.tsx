@@ -4,6 +4,8 @@ import { loadBooks, loadAnnotations, downloadBytes } from '../../app/data'
 import { HL_COLORS, hlCss } from '../components'
 import { Icon } from '../icons'
 import { annotationsMarkdown, webAnnotations } from '../../core/library'
+import { loadPending, attachPending, discardPending, matchBook, type Clipping } from '../../core/kindle'
+import type { BookView } from '../../app/data'
 import { ago, norm, hlcTime } from '../../core/util'
 import type { Annotation } from '../../core/types'
 
@@ -30,11 +32,13 @@ export function Notes() {
     <>
       <div className="row wrap"><h1 className="page-title" style={{ flex: 1 }}>Highlights and notes</h1>
         <div className="row">
+          <a className="btn small" href={href('import')}><Icon.upload />Import Kindle highlights</a>
           <button className="btn small" disabled={!live.length} onClick={() => downloadBytes('saga-highlights.md', annotationsMarkdown(books, live), 'text/markdown')}><Icon.download />Markdown</button>
           <button className="btn small" disabled={!live.length} onClick={() => downloadBytes('saga-highlights.jsonld', JSON.stringify(webAnnotations(books, live), null, 1), 'application/ld+json')} title="W3C Web Annotation format, readable by other tools">Web Annotation</button>
         </div>
       </div>
       <p className="page-sub">{live.filter(a => a.kind !== 'bookmark').length} highlights across {new Set(live.map(a => a.bookId)).size} books. Every highlight keeps the quoted text, so it survives font changes, new editions and moving between devices.</p>
+      <KindleReview books={books} />
       {conflicts > 0 && <div className="banner warn"><span>{conflicts} note{conflicts > 1 ? ' was' : 's were'} edited on two devices at once. Both versions are kept until you choose.</span></div>}
       <div className="toolbar">
         <label className="search-input"><span className="sr-only">Search notes</span><Icon.search /><input className="input" value={q} onChange={e => setQ(e.target.value)} placeholder="Search highlights, notes and tags" /></label>
@@ -63,18 +67,60 @@ export function Notes() {
 function NoteRow({ a, canOpen }: { a: Annotation; canOpen: boolean }) {
   return (
     <div className="note-row" style={{ '--hl': hlCss(a.color) } as React.CSSProperties}>
-      <blockquote>{a.exact}</blockquote>
+      {a.exact && <blockquote>{a.exact}</blockquote>}
       {a.note && <p className="note">{a.note}</p>}
       {a.conflicts?.map((c, i) => <div key={i} className="conflict"><b>Also written on another device</b> {ago(hlcTime(c.at))}: {c.note} <button className="btn small quiet" onClick={() => store.put<Annotation>('annotation', a.id, { note: c.note, noteResolved: a.conflicts!.map(x => x.at), updatedAt: Date.now() } as Partial<Annotation>)}>Use this</button><button className="btn small quiet" onClick={() => store.put<Annotation>('annotation', a.id, { note: `${a.note}\n\n${c.note}`, noteResolved: [c.at], updatedAt: Date.now() } as Partial<Annotation>)}>Keep both</button></div>)}
       <div className="meta">
         <span>{a.label || 'Location'}, {Math.round(a.fraction * 100)}%</span>
         {(a.tags ?? []).map(t => <span key={t}>#{t}</span>)}
         {a.origin && a.origin !== store.deviceName && <span>from {a.origin}</span>}
-        {a.orphaned && <span className="pill warn">Passage not found in this edition (kept)</span>}
+        {a.orphaned && a.exact && <span className="pill warn">Passage not found in this edition (kept)</span>}
         <span className="spacer" />
         {a.deleted ? <button className="btn small" onClick={async () => { await store.put<Annotation>('annotation', a.id, { deleted: false }); toast('Restored') }}><Icon.restore />Restore</button>
           : canOpen && <a className="btn small quiet" href={href(`read/${a.bookId}?ann=${a.id}`)}>Open in book</a>}
       </div>
+    </div>
+  )
+}
+
+/** Kindle clippings whose book wasn't obviously in the library. They stay here
+ *  (on this device) until the reader attaches them to a book or discards them. */
+function KindleReview({ books }: { books: BookView[] }) {
+  const pending = useLive(() => loadPending(store), [], ['meta'])
+  const groups = useMemo(() => {
+    const m = new Map<string, Clipping[]>()
+    for (const c of pending ?? []) { const k = c.title + '\u0001' + c.author; m.set(k, [...(m.get(k) ?? []), c]) }
+    return [...m.values()]
+  }, [pending])
+  if (!groups.length) return null
+  const local = books.filter(b => b.fileState === 'local').sort((a, b) => a.sortTitle.localeCompare(b.sortTitle))
+  return (
+    <section className="card kindle-review" aria-labelledby="kr-h" style={{ marginBottom: 26 }}>
+      <h2 className="section-title" id="kr-h">Kindle highlights waiting for a book <span className="muted small">{pending!.length}</span></h2>
+      <p className="small muted" style={{ marginTop: -6 }}>These titles didn’t clearly match a book in your library. Choose the book to attach them to, or add the book and they attach themselves.</p>
+      <div className="list">{groups.map(g => <ReviewGroup key={g[0].title + g[0].author} list={g} books={local} />)}</div>
+    </section>
+  )
+}
+
+function ReviewGroup({ list, books }: { list: Clipping[]; books: BookView[] }) {
+  const guess = matchBook(list[0].title, '', books)
+  const [bookId, setBookId] = useState(guess?.id ?? '')
+  const [open, setOpen] = useState(false)
+  const ids = list.map(c => c.id)
+  return (
+    <div className="list-row" style={{ display: 'block' }} data-kindle-title={list[0].title}>
+      <div className="row wrap" style={{ alignItems: 'baseline' }}>
+        <div style={{ flex: 1, minWidth: 200 }}><b className="title-serif">{list[0].title}</b>{list[0].author && <span className="muted small"> · {list[0].author}</span>} <span className="muted small">· {list.length} item{list.length === 1 ? '' : 's'}</span></div>
+        <select className="input" style={{ width: 'auto', maxWidth: 260 }} value={bookId} onChange={e => setBookId(e.target.value)} aria-label={`Book for “${list[0].title}”`}>
+          <option value="">Choose a book…</option>
+          {books.map(b => <option key={b.id} value={b.id}>{b.title} — {b.author}</option>)}
+        </select>
+        <button className="btn small primary" disabled={!bookId} onClick={async () => { try { const n = await attachPending(store, ids, bookId); toast(`${n} Kindle highlight${n === 1 ? '' : 's'} attached`) } catch (e) { toast((e as Error).message) } }}>Attach</button>
+        <button className="btn small quiet" onClick={async () => { await discardPending(store, ids); toast('Discarded') }}>Discard</button>
+        <button className="btn small quiet" aria-expanded={open} onClick={() => setOpen(!open)}>{open ? 'Hide' : 'Show'}</button>
+      </div>
+      {open && <ul className="small" style={{ margin: '10px 0 0', paddingLeft: 18 }}>{list.slice(0, 50).map(c => <li key={c.id}>{c.kind === 'note' ? <i>Note: {c.text}</i> : <>“{c.text}”{c.note && <i> — {c.note}</i>}</>} <span className="muted">{c.location ? `(location ${c.location})` : ''}</span></li>)}</ul>}
     </div>
   )
 }

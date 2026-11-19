@@ -80,7 +80,7 @@ function ReaderInner({ book }: { book: Book }) {
         lengths.current = texts.map(t => t.text.length); titles.current = texts.map(t => t.title)
         // annotations that arrived from elsewhere without a location (Leaf, merged edition): place them now
         const all = await loadAnnotations(book.id)
-        for (const a of all) if (!a.deleted && (a.section < 0 || a.orphaned)) {
+        for (const a of all) if (!a.deleted && a.exact && (a.section < 0 || a.orphaned)) {
           const m = findQuote(texts.map(t => t.text), a, { fraction: a.fraction })
           await store.put<Annotation>('annotation', a.id, m ? { section: m.section, start: m.start, end: m.end, cfi: undefined, orphaned: false, fraction: absoluteFraction(lengths.current, m.section, m.start) } : { orphaned: true })
         }
@@ -291,9 +291,9 @@ function NotesPanel({ anns, onGo, onEdit }: { anns: Annotation[]; onGo: (a: Anno
       <div className="r-notes">{list.map(a => (
         <div key={a.id} className="r-note" style={{ '--hl': hlCss(a.color) } as React.CSSProperties}>
           <button className="r-note-main" onClick={() => onGo(a)}>
-            {a.kind === 'bookmark' ? <span className="small"><Icon.bookmark width={14} /> {a.label || 'Bookmark'}, {Math.round(a.fraction * 100)}%</span> : <blockquote>{a.exact.length > 220 ? a.exact.slice(0, 220) + '…' : a.exact}</blockquote>}
+            {a.kind === 'bookmark' ? <span className="small"><Icon.bookmark width={14} /> {a.label || 'Bookmark'}, {Math.round(a.fraction * 100)}%</span> : a.exact ? <blockquote>{a.exact.length > 220 ? a.exact.slice(0, 220) + '…' : a.exact}</blockquote> : null}
             {a.note && <p>{a.note}</p>}
-            {a.orphaned && <span className="pill warn">Not found in this edition</span>}
+            {a.orphaned && a.exact && <span className="pill warn">Not found in this edition</span>}
             {!!a.conflicts?.length && <span className="pill warn">Edited on two devices</span>}
           </button>
           {a.kind !== 'bookmark' && <button className="btn quiet small" onClick={() => onEdit(a)}>Edit</button>}

@@ -2,6 +2,7 @@ import { store, toast, go } from './state'
 import type { Annotation, Book, Collection, Member, Position } from '../core/types'
 import { importFiles, importBytes, removeBook, type ImportResult } from '../core/library'
 import { hlcTime, uid } from '../core/util'
+import { autoAttachPending } from '../core/kindle'
 
 export interface BookView extends Book { progress: number; lastAt: number; lastDevice?: string; position?: Position; positions: Position[] }
 
@@ -26,6 +27,9 @@ export async function importWithFeedback(files: File[], onProgress?: (done: numb
   const added = results.filter(r => r.status === 'added' || r.status === 'restored')
   const dup = results.filter(r => r.status === 'duplicate')
   const failed = results.filter(r => r.status === 'failed')
+  // Kindle highlights waiting for one of these books attach themselves now.
+  const attached = added.length ? await autoAttachPending(store).catch(() => 0) : 0
+  if (attached) toast(`${attached} Kindle highlight${attached === 1 ? '' : 's'} added to the new book${added.length === 1 ? '' : 's'}`, { label: 'View', run: () => go('notes') })
   if (results.length === 1) {
     const r = results[0]
     if (r.status === 'failed') toast(`${r.name}: ${r.error}`, undefined, 7000)

@@ -1,5 +1,6 @@
 import { store, useLive, href, go } from '../../app/state'
-import { loadBooks, addSamples, pickFiles, importWithFeedback, loadAnnotations, type BookView } from '../../app/data'
+import { importDropped } from '../../app/importers'
+import { loadBooks, addSamples, pickFiles, loadAnnotations, type BookView } from '../../app/data'
 import { Cover, ProgressBar, hlCss, pct, chapterLabel } from '../components'
 import { Icon } from '../icons'
 import { ago } from '../../core/util'
@@ -44,10 +45,11 @@ export function Home() {
         <h2>Add your first book</h2>
         <p>Drop EPUB, PDF or text files anywhere on this page, or choose them from your computer. DRM-free files only.</p>
         <div className="row" style={{ justifyContent: 'center' }}>
-          <button className="btn primary" onClick={async () => importWithFeedback(await pickFiles())}><Icon.plus />Choose files</button>
+          <button className="btn primary" onClick={async () => importDropped(await pickFiles())}><Icon.plus />Choose files</button>
           <button className="btn" disabled={busy} onClick={async () => { setBusy(true); await addSamples(); setBusy(false) }}>{busy ? 'Adding…' : 'Add classic books'}</button>
         </div>
         <p className="small muted" style={{ marginTop: 18 }}>The classics are public-domain editions (Standard Ebooks and Project Gutenberg).</p>
+        <p className="small muted">Coming from Calibre or Kindle? <a href={href('import')}>Import your library or highlights</a>.</p>
       </div>
     </>
   )

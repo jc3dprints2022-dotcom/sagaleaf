@@ -105,8 +105,8 @@ export function BookDetails({ id }: { id: string }) {
           {hl.length ? (
             <div className="list">{hl.slice(0, 8).map(a => (
               <a key={a.id} className="note-row" href={href(`read/${book.id}?ann=${a.id}`)} style={{ display: 'block', color: 'inherit', textDecoration: 'none', '--hl': hlCss(a.color) } as React.CSSProperties}>
-                <blockquote>{a.exact}</blockquote>{a.note && <p className="note">{a.note}</p>}
-                <div className="meta"><span>{a.label}</span><span>{Math.round(a.fraction * 100)}%</span>{a.orphaned && <span className="pill warn">Passage not found in this edition</span>}</div>
+                {a.exact && <blockquote>{a.exact}</blockquote>}{a.note && <p className="note">{a.note}</p>}
+                <div className="meta"><span>{a.label}</span><span>{Math.round(a.fraction * 100)}%</span>{a.orphaned && a.exact && <span className="pill warn">Passage not found in this edition</span>}</div>
               </a>
             ))}{hl.length > 8 && <a className="list-row" href={href(`notes?book=${book.id}`)}>See all {hl.length}</a>}</div>
           ) : <p className="muted">Select text while reading to highlight it or add a note.</p>}
