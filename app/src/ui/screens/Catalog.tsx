@@ -10,6 +10,7 @@ import { tintOf, fmtBytes } from '../../core/util'
 import { UrlImport } from './Import'
 import { cachedSE, fetchSENewReleases, cachedSEBook, getStandardEbook, seCatalogId, seSegmentsOf, unslug, SE_ORIGIN, type SEBook } from '../../app/standardebooks'
 import { TOPICS, listUrl, fetchPage, cachedPopular, cachePopular, cachedBook, fetchBook, getBook, DownloadBlocked, authorsOf, personName, coverOf, shortTitle, catalogIdOf, gutenbergPage, type GBook } from '../../app/gutendex'
+import { PRODUCT } from '../../app/product'
 
 export interface CatalogItem { id: string; title: string; author: string; description: string; language: string; subjects: string[]; price: number; license: string; words: number; hasCover: boolean; fileSize: number; publishedAt: number; series?: string }
 const reader = DEMO_USERS[0]
@@ -124,7 +125,7 @@ function SEItemView({ id }: { id: string }) {
             {owned ? <a className="btn primary" href={href(`read/${owned}`)}>Read</a> : <button className="btn primary" disabled={busy} onClick={get}><Icon.download />{busy ? 'Getting book…' : 'Get book'}</button>}
             {owned && <span className="pill ok"><Icon.check width={14} />In your library</span>}
           </div>
-          {blocked && <div className="banner" style={{ marginTop: 16, maxWidth: 620 }} role="status"><span>Your browser didn’t let SAGA Reader download this file directly. <a href={blocked} target="_blank" rel="noreferrer">Download it from Standard Ebooks</a>, then add it with <b>Add books</b> in your Library or drop it onto this window.</span></div>}
+          {blocked && <div className="banner" style={{ marginTop: 16, maxWidth: 620 }} role="status"><span>Your browser didn’t let {PRODUCT.name} download this file directly. <a href={blocked} target="_blank" rel="noreferrer">Download it from Standard Ebooks</a>, then add it with <b>Add books</b> in your Library or drop it onto this window.</span></div>}
           {b.summary && <p className="desc" style={{ marginTop: 22 }}>{b.summary}</p>}
           <dl className="facts" style={{ marginTop: 22 }}>
             <dt>Rights</dt><dd>Public domain in the USA; Standard Ebooks releases its own work on the edition under CC0. If you live elsewhere, check your country’s copyright rules.</dd>
@@ -225,7 +226,7 @@ function GutenbergItemView({ id }: { id: number }) {
             {owned ? <a className="btn primary" href={href(`read/${owned}`)}>Read</a> : <button className="btn primary" disabled={busy} onClick={get}><Icon.download />{busy ? 'Getting book…' : 'Get book'}</button>}
             {owned && <span className="pill ok"><Icon.check width={14} />In your library</span>}
           </div>
-          {blocked && <div className="banner" style={{ marginTop: 16, maxWidth: 620 }} role="status"><span>Your browser didn’t let SAGA Reader download this file directly, so the download opens from Project Gutenberg in a new tab (<a href={blocked} target="_blank" rel="noreferrer">open it here</a> if nothing appeared). When it has downloaded, add it with <b>Add books</b> in your Library, or drop the file onto this window.</span></div>}
+          {blocked && <div className="banner" style={{ marginTop: 16, maxWidth: 620 }} role="status"><span>Your browser didn’t let {PRODUCT.name} download this file directly, so the download opens from Project Gutenberg in a new tab (<a href={blocked} target="_blank" rel="noreferrer">open it here</a> if nothing appeared). When it has downloaded, add it with <b>Add books</b> in your Library, or drop the file onto this window.</span></div>}
           {!!b.summaries?.length && <p className="desc" style={{ marginTop: 22 }}>{b.summaries[0]}</p>}
           <dl className="facts" style={{ marginTop: 22 }}>
             {!!b.subjects.length && <><dt>Subjects</dt><dd>{b.subjects.join('; ')}</dd></>}

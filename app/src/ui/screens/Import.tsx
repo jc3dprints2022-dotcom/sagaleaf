@@ -12,12 +12,13 @@ import type { ClippingImportResult } from '../../core/kindle'
 import type { TreeFile } from '../../core/calibre'
 import { ProgressBar } from '../components'
 import { Icon } from '../icons'
+import { PRODUCT } from '../../app/product'
 
 export function ImportScreen() {
   return (
     <>
       <h1 className="page-title">Import</h1>
-      <p className="page-sub">Bring in books and highlights you already have. Everything is stored in this browser on this device; nothing is uploaded. SAGA opens DRM-free books only and never removes DRM.</p>
+      <p className="page-sub">Bring in books and highlights you already have. Everything is stored in this browser on this device; nothing is uploaded. {PRODUCT.shortName} opens DRM-free books only and never removes DRM.</p>
       <section className="card import-card" aria-labelledby="imp-files">
         <h2 className="section-title" id="imp-files">EPUB, PDF and text files</h2>
         <p className="small muted">Choose files, or drop them anywhere in the app.</p>
@@ -83,7 +84,7 @@ function KindleImport() {
   return (
     <section className="card import-card" aria-labelledby="imp-kindle">
       <h2 className="section-title" id="imp-kindle">Kindle highlights and notes</h2>
-      <p className="small muted">Choose <b>My Clippings.txt</b> (in the “documents” folder when your Kindle is connected by USB), or a notebook export from a Kindle app (HTML or CSV). Highlights attach to the matching book in your library; the rest wait in Highlights &amp; notes until you choose a book. Only your notes are read: SAGA doesn’t open or convert Kindle book files.</p>
+      <p className="small muted">Choose <b>My Clippings.txt</b> (in the “documents” folder when your Kindle is connected by USB), or a notebook export from a Kindle app (HTML or CSV). Highlights attach to the matching book in your library; the rest wait in Highlights &amp; notes until you choose a book. Only your notes are read: {PRODUCT.shortName} doesn’t open or convert Kindle book files.</p>
       <button className="btn" disabled={busy} onClick={async () => {
         const [f] = await pickFiles('.txt,.html,.htm,.csv,text/plain,text/html,text/csv', false); if (!f) return
         setBusy(true)
@@ -126,7 +127,7 @@ export function UrlImport() {
         <input id="url-import-input" className="input" type="url" inputMode="url" placeholder="https://standardebooks.org/ebooks/…  or  https://www.gutenberg.org/ebooks/…" value={url} onChange={e => setUrl(e.target.value)} />
         <button className="btn primary" type="submit" disabled={busy || !url.trim()}><Icon.download />{busy ? 'Getting book…' : 'Get book'}</button>
       </div>
-      {blocked && <div className="banner" style={{ marginTop: 12, maxWidth: 620 }} role="status"><span>Your browser didn’t let SAGA Reader download this file directly. <a href={blocked} target="_blank" rel="noreferrer">Download it here</a>, then add it with <b>Choose files</b> or drop it onto this window.</span></div>}
+      {blocked && <div className="banner" style={{ marginTop: 12, maxWidth: 620 }} role="status"><span>Your browser didn’t let {PRODUCT.name} download this file directly. <a href={blocked} target="_blank" rel="noreferrer">Download it here</a>, then add it with <b>Choose files</b> or drop it onto this window.</span></div>}
     </form>
   )
 }

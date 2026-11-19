@@ -8,6 +8,7 @@ import { downloadBytes, pickFiles } from '../../app/data'
 import { fmtBytes } from '../../core/util'
 import { FONTS, THEMES } from '../reader/engine'
 import type { ReaderPrefs } from '../../core/types'
+import { PRODUCT } from '../../app/product'
 
 export function Settings() {
   const appearance = useLive(() => store.getMeta<'system' | 'light' | 'dark'>('appearance', 'system'), [], ['meta'])
@@ -42,7 +43,7 @@ export function Settings() {
 
       <h2 className="section-title">Your library</h2>
       <div className="list">
-        <div className="list-row"><div style={{ flex: 1 }}><b>Back up everything</b><p className="small muted" style={{ margin: 0 }}>One .zip with your original files, highlights, notes, positions and collections. Readable without SAGA Reader: notes are included as Markdown and W3C Web Annotations.</p></div>
+        <div className="list-row"><div style={{ flex: 1 }}><b>Back up everything</b><p className="small muted" style={{ margin: 0 }}>One .zip with your original files, highlights, notes, positions and collections. Readable without {PRODUCT.name}: notes are included as Markdown and W3C Web Annotations.</p></div>
           <button className="btn small" disabled={!!busy} onClick={async () => { setBusy('export'); const z = await exportLibrary(store); downloadBytes(`saga-library-${new Date().toISOString().slice(0, 10)}.zip`, z, 'application/zip'); setBusy(''); toast(`Backup saved (${fmtBytes(z.length)})`) }}><Icon.download />{busy === 'export' ? 'Preparing…' : 'Export library'}</button></div>
         <div className="list-row"><div style={{ flex: 1 }}><b>Notes only</b><p className="small muted" style={{ margin: 0 }}>Small backup without book files.</p></div>
           <button className="btn small" onClick={async () => { const z = await exportLibrary(store, { includeFiles: false }); downloadBytes(`saga-notes-${new Date().toISOString().slice(0, 10)}.zip`, z, 'application/zip') }}>Export notes</button></div>
@@ -54,7 +55,7 @@ export function Settings() {
       <h2 className="section-title">Privacy</h2>
       <div className="panel">
         <ul style={{ margin: 0, paddingLeft: 18, lineHeight: 1.8 }}>
-          <li>No account is needed. No analytics, no ads. SAGA Reader doesn’t record what you read.</li>
+          <li>No account is needed. No analytics, no ads. {PRODUCT.name} doesn’t record what you read.</li>
           <li>Books, highlights, notes and reading positions are stored on this device.</li>
           <li>If you sign in, we store your email address (through Supabase, our sign-in provider). Only if you turn on “Sync my notes and reading progress” do we also store your highlights, notes, bookmarks and reading positions (with each book’s title, so they’re labelled on your other devices), encrypted on this device with your library code first. Your book files are never uploaded.</li>
           <li>Device sync and the SAGA Leaf are off until you set them up. Device sync is encrypted here first too; the sync service can’t read it.</li>
@@ -64,15 +65,15 @@ export function Settings() {
 
       <h2 className="section-title">Storage</h2>
       <div className="panel">
-        <p style={{ marginTop: 0 }}>{est.usage != null ? <>Using <b>{fmtBytes(est.usage)}</b>{est.quota ? ` of about ${fmtBytes(est.quota)} available to SAGA Reader` : ''}.</> : 'Storage size isn’t available in this browser.'} {est.persisted ? 'The browser has agreed not to clear this data.' : 'The browser may clear this data under storage pressure; install SAGA Reader or allow persistent storage to prevent that.'}</p>
+        <p style={{ marginTop: 0 }}>{est.usage != null ? <>Using <b>{fmtBytes(est.usage)}</b>{est.quota ? ` of about ${fmtBytes(est.quota)} available to ${PRODUCT.name}` : ''}.</> : 'Storage size isn’t available in this browser.'} {est.persisted ? 'The browser has agreed not to clear this data.' : `The browser may clear this data under storage pressure; install ${PRODUCT.name} or allow persistent storage to prevent that.`}</p>
         <div className="row wrap">
-          {!est.persisted && <button className="btn small" onClick={async () => { const ok = await navigator.storage?.persist?.(); setBusy(String(Math.random())); toast(ok ? 'Storage is now persistent' : 'The browser declined. Installing SAGA Reader as an app usually allows it.') }}>Keep my data</button>}
+          {!est.persisted && <button className="btn small" onClick={async () => { const ok = await navigator.storage?.persist?.(); setBusy(String(Math.random())); toast(ok ? 'Storage is now persistent' : `The browser declined. Installing ${PRODUCT.name} as an app usually allows it.`) }}>Keep my data</button>}
           <button className="btn small quiet" onClick={async () => { const n = await sweepOrphans(store); toast(n ? `Cleaned up ${n} leftover item${n > 1 ? 's' : ''}` : 'Nothing to clean up') }}>Clean up leftovers</button>
         </div>
       </div>
 
       <h2 className="section-title">About</h2>
-      <p className="small muted">SAGA Reader 0.2. Reads EPUB, PDF and TXT on your devices and the SAGA Leaf. Free books in Discover come from Project Gutenberg. EPUB rendering by foliate-js, PDF by pdf.js. Device: {store.deviceName} ({store.deviceId}).</p>
+      <p className="small muted">{PRODUCT.name} 0.2. Reads EPUB, PDF and TXT on your devices and the SAGA Leaf. Free books in Discover come from Project Gutenberg. EPUB rendering by foliate-js, PDF by pdf.js. Device: {store.deviceName} ({store.deviceId}).</p>
     </>
   )
 }
@@ -97,7 +98,7 @@ function AccountSection() {
       <div className="panel" aria-live="polite">
         {!signedIn ? <>
           <p style={{ marginTop: 0 }}>You don’t need an account. Sign in only if you want your notes and reading progress on your other devices.</p>
-          {a.availability === 'needs-web' && <p className="small muted" style={{ marginBottom: 0 }}>Sign-in works when SAGA Reader is opened from its web address, not from a file on this computer.</p>}
+          {a.availability === 'needs-web' && <p className="small muted" style={{ marginBottom: 0 }}>Sign-in works when {PRODUCT.name} is opened from its web address, not from a file on this computer.</p>}
           {a.availability === 'unavailable' && <p className="small muted" style={{ marginBottom: 0 }}>Sign-in isn’t available right now (the sign-in service couldn’t be reached). Everything else works without it.</p>}
           {(a.availability === 'idle' || a.availability === 'loading' || a.availability === 'ready') && <>
             <form className="row wrap" style={{ gap: 8 }} onSubmit={e => { e.preventDefault(); if (email.includes('@')) void run(() => signInWithEmail(email)) }}>

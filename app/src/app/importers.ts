@@ -6,6 +6,7 @@ import { importWithFeedback } from './data'
 import { importCalibre, filesFromZip, zipLooksLikeCalibre, type TreeFile, type CalibreResult } from '../core/calibre'
 import { parseKindleExport, importClippings, autoAttachPending, type ClippingImportResult } from '../core/kindle'
 import { isZip } from '../core/epub'
+import { PRODUCT } from './product'
 
 // ---------------------------------------------------------------- folders
 type DirHandle = { kind: 'directory'; name: string; values(): AsyncIterable<DirHandle | FileHandle> }
@@ -67,7 +68,7 @@ export async function calibreFromZipFile(f: File) {
 export async function importKindleFile(f: File): Promise<ClippingImportResult> {
   const text = new TextDecoder().decode(await f.arrayBuffer())
   const clippings = parseKindleExport(f.name, text)
-  if (!clippings.length) throw new Error(`${f.name} has no Kindle highlights or notes SAGA recognises. Use “My Clippings.txt” from your Kindle, or the notebook export (HTML or CSV) from a Kindle app.`)
+  if (!clippings.length) throw new Error(`${f.name} has no Kindle highlights or notes ${PRODUCT.shortName} recognises. Use “My Clippings.txt” from your Kindle, or the notebook export (HTML or CSV) from a Kindle app.`)
   return importClippings(store, clippings)
 }
 

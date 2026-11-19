@@ -17,7 +17,7 @@ Everything Leaf-related is simulator-tested only.
 ## M2: Native shells and browsers
 
 1. Tauri desktop build (macOS, Windows, Linux): watched folders, mDNS discovery, LAN access without browser limits.
-2. Capacitor Android and iOS builds; background sync; share-sheet import.
+2. Capacitor Android build (started: see ANDROID.md; open-with and share-sheet import done, sign-in redirect pending) and iOS; background sync.
 3. Safari and Firefox runs of the e2e suite; fix what breaks.
 
 **Exit:** e2e passes on Chrome, Safari, Firefox, the Android app and the iOS app.

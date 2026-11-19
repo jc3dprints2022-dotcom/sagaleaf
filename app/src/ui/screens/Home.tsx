@@ -5,6 +5,7 @@ import { Cover, ProgressBar, hlCss, pct, chapterLabel } from '../components'
 import { Icon } from '../icons'
 import { ago } from '../../core/util'
 import { useState } from 'react'
+import { PRODUCT } from '../../app/product'
 
 const FONT_STACK: Record<string, string> = {
   Literata: "'Literata Variable', Georgia, serif", Newsreader: "'Newsreader Variable', Georgia, serif",
@@ -40,7 +41,7 @@ export function Home() {
   if (!books.length) return (
     <>
       <h1 className="page-title">Your library starts here</h1>
-      <p className="page-sub">SAGA Reader keeps your books, highlights and notes on your own devices. Nothing is uploaded unless you turn on sync.</p>
+      <p className="page-sub">{PRODUCT.name} keeps your books, highlights and notes on your own devices. Nothing is uploaded unless you turn on sync.</p>
       <div className="empty">
         <h2>Add your first book</h2>
         <p>Drop EPUB, PDF or text files anywhere on this page, or choose them from your computer. DRM-free files only.</p>
@@ -75,7 +76,7 @@ export function Home() {
       ) : (
         <section className="resume" style={{ gridTemplateColumns: '1fr' }}>
           <div>
-            <p className="passage" style={{ fontFamily: font }}>Pick something to read. SAGA Reader will remember the exact sentence you stop on, on every device.</p>
+            <p className="passage" style={{ fontFamily: font }}>Pick something to read. {PRODUCT.name} will remember the exact sentence you stop on, on every device.</p>
             <div className="actions"><a className="btn primary" href={href('library')}>Open your library</a></div>
           </div>
         </section>

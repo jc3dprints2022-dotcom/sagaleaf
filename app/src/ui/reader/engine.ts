@@ -88,16 +88,62 @@ type FView = HTMLElement & {
   deselect(): void; close(): void; lastLocation?: unknown
 }
 
-export async function createEpubEngine(host: HTMLElement, file: File, ev: EngineEvents, start: { cfi?: string; section?: number; offset?: number } | null): Promise<Engine> {
+/** Thrown when the reader closes while a book is still opening; callers ignore it. */
+export class EngineAborted extends Error { constructor() { super('closed while opening'); this.name = 'EngineAborted' } }
+
+export async function createEpubEngine(host: HTMLElement, file: File, ev: EngineEvents, start: { cfi?: string; section?: number; offset?: number } | null, signal?: AbortSignal): Promise<Engine> {
   const { makeBook } = await import('foliate-js/view.js') as unknown as { makeBook: (f: File) => Promise<{ transformTarget?: EventTarget }> }
   const { Overlayer } = await import('foliate-js/overlayer.js')
   installBlobRegistry()
   const view = document.createElement('foliate-view') as FView
   view.style.cssText = 'display:block;width:100%;height:100%'
+
+  // ---- lifecycle guards
+  // foliate renders a section by navigating a fresh iframe to it. Between the navigation
+  // committing and the parser creating <html>, iframe.contentDocument exists but has no
+  // documentElement/body, and foliate's render()/setStyles() then throw inside
+  // setStylesImportant(doc.documentElement) and #replaceBackground. Renders arrive from
+  // attribute changes (applyPrefs), foliate's ResizeObserver and page turns, so they can land in
+  // that window or after close. Gate both entry points on a ready document, retry once per
+  // frame until it is, and stop everything once closed.
+  let closed = false, retry = 0, pendingCss: string | null = null
+  const r = () => view.renderer as (FView['renderer'] & { render(): void }) | undefined
+  const docReady = () => { const d = r()?.getContents()[0]?.doc; return !d || (!!d.documentElement && !!d.body) }
+  let rawRender: (() => void) | null = null, rawSetStyles: ((css: string) => void) | null = null
+  const flush = () => {
+    retry = 0
+    if (closed) return
+    if (!docReady()) { retry = requestAnimationFrame(flush); return }
+    if (pendingCss != null) { const css = pendingCss; pendingCss = null; rawSetStyles?.(css) }
+    rawRender?.()
+  }
+  const later = () => { if (!retry && !closed) retry = requestAnimationFrame(flush) }
+  const guardRenderer = () => {
+    const ren = r()
+    if (!ren || rawRender) return
+    rawRender = ren.render.bind(ren); rawSetStyles = ren.setStyles.bind(ren)
+    // Own properties shadow the prototype; foliate calls this.render() / setStyles() through them.
+    ren.render = () => { if (closed) return; if (docReady()) rawRender!(); else later() }
+    ren.setStyles = (css: string) => { if (closed) return; if (docReady()) rawSetStyles!(css); else { pendingCss = css; later() } }
+  }
+  const teardown = () => {
+    if (closed) return
+    closed = true
+    if (retry) cancelAnimationFrame(retry); retry = 0
+    // foliate queues requestAnimationFrame work (setStyles → background) that reads its view;
+    // close one frame later so those callbacks, queued earlier, still find it.
+    requestAnimationFrame(() => { try { view.close() } catch { /* already closed */ } view.remove() })
+  }
+  const bail = () => { if (signal?.aborted) { teardown(); throw new EngineAborted() } }
+
+  bail()
   host.append(view)
   const book = await makeBook(file)
+  bail()
   inlineSubresources(book)
   await view.open(book as unknown as File)
+  guardRenderer()
+  bail()
   let loc: Loc | null = null
   let marks: Mark[] = []
   const byCfi = new Map<string, Mark>()
@@ -208,8 +254,9 @@ export async function createEpubEngine(host: HTMLElement, file: File, ev: Engine
   }
 
   if (start?.cfi) await view.init({ lastLocation: start.cfi })
-  else if (start?.section != null) { await view.init({ showTextStart: false }); await goToOffset(start.section, start.offset ?? 0) }
+  else if (start?.section != null) { await view.init({ showTextStart: false }); bail(); await goToOffset(start.section, start.offset ?? 0) }
   else await view.init({ showTextStart: true })
+  bail()
 
   // foliate ignores turns for ~100 ms after each one; queue them instead of
   // dropping a quick second tap (capped so a held key can't run away).
@@ -218,16 +265,17 @@ export async function createEpubEngine(host: HTMLElement, file: File, ev: Engine
   const turn = async (dir: number) => {
     if (queue.length < 2) queue.push(dir)
     if (turning) return
-    turning = (async () => { try { while (queue.length) { const d = queue.shift()!; await (d > 0 ? view.next() : view.prev()) } } finally { turning = null } })()
+    turning = (async () => { try { while (queue.length && !closed) { const d = queue.shift()!; await (d > 0 ? view.next() : view.prev()) } } finally { turning = null } })()
     await turning
   }
   return {
     toc,
-    next: () => turn(1), prev: () => turn(-1),
-    goToFraction: async f => { queue = []; await idle(); await view.goToFraction(f) },
-    goToTarget: async t => { queue = []; await idle(); await view.goTo(t as string) },
-    goToOffset: async (section, start, end, select) => { queue = []; await idle(); await goToOffset(section, start, end, select) },
+    next: () => closed ? Promise.resolve() : turn(1), prev: () => closed ? Promise.resolve() : turn(-1),
+    goToFraction: async f => { queue = []; await idle(); if (!closed) await view.goToFraction(f) },
+    goToTarget: async t => { queue = []; await idle(); if (!closed) await view.goTo(t as string) },
+    goToOffset: async (section, start, end, select) => { queue = []; await idle(); if (!closed) await goToOffset(section, start, end, select) },
     setMarks(next) {
+      if (closed) return
       // remove stale
       for (const [cfi, m] of [...byCfi]) if (!next.find(n => n.id === m.id && n.color === m.color && n.start === m.start)) { view.deleteAnnotation({ value: cfi }); byCfi.delete(cfi); drawn.delete(m.id) }
       marks = next
@@ -238,6 +286,7 @@ export async function createEpubEngine(host: HTMLElement, file: File, ev: Engine
       }
     },
     applyPrefs(p, t) {
+      if (closed) return
       flow = p.flow
       const r = view.renderer
       r.setAttribute('flow', p.flow)
@@ -248,8 +297,8 @@ export async function createEpubEngine(host: HTMLElement, file: File, ev: Engine
       r.setStyles(bookCss(p, t))
     },
     location: () => loc,
-    clearSelection() { for (const c of view.renderer.getContents()) c.doc.getSelection()?.removeAllRanges(); ev.select(null) },
-    destroy() { try { view.close() } catch { /* already closed */ } view.remove() },
+    clearSelection() { if (!closed) for (const c of view.renderer.getContents()) c.doc?.getSelection()?.removeAllRanges(); ev.select(null) },
+    destroy: teardown,
   }
 }
 const HEX: Record<string, string> = { amber: '#f2d27a', sage: '#a9d39c', sky: '#a6cbe8', rose: '#efb3ba' }

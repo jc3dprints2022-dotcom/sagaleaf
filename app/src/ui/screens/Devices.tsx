@@ -11,6 +11,7 @@ import { LOCAL_LEAF_URL } from '../../app/localLeaf'
 import { LeafScreen } from './LeafScreen'
 import { addLeafPeer } from '../../core/leaf/sync'
 import type { Peer } from '../../core/types'
+import { PRODUCT } from '../../app/product'
 
 export function Devices() {
   const peers = useLive(() => store.db.peers.toArray(), [], ['peers'])
@@ -74,7 +75,7 @@ function RelayCard({ relay, status }: { relay: Peer; status: ReturnType<typeof u
       </div>
       <div style={{ marginTop: 18 }}>
         <b>Add another device</b>
-        <p className="small muted" style={{ margin: '2px 0 10px' }}>Open SAGA Reader there, choose “I have a library code”, and enter this code. Anyone with the code can read your synced library, so keep it private.</p>
+        <p className="small muted" style={{ margin: '2px 0 10px' }}>Open {PRODUCT.name} there, choose “I have a library code”, and enter this code. Anyone with the code can read your synced library, so keep it private.</p>
         {show ? <div className="code-box">{relay.secret}</div> : <button className="btn small" onClick={() => setShow(true)}>Show library code</button>}
       </div>
       <div className="row" style={{ marginTop: 18 }}><span className="spacer" /><button className="btn small quiet danger" onClick={async () => { if (!confirm('Stop syncing this device? Your library stays here, nothing is deleted.')) return; await store.db.peers.delete(relay.id); store.emit('peers'); toast('Sync turned off on this device') }}>Turn off sync on this device</button></div>
@@ -107,7 +108,7 @@ function LinkSync({ mode, onClose }: { mode: 'new' | 'join'; onClose: () => void
         <p>This is your library code. Your devices use it to encrypt and find your library. Write it down or keep it in a password manager: if you lose every device, it’s the only way back to your synced notes.</p>
         <div className="code-box">{secret}</div>
       </> : <div className="field" style={{ marginTop: 12 }}><label htmlFor="lc">Library code</label><input id="lc" className="input" autoFocus value={code} onChange={e => setCode(e.target.value)} placeholder="saga-xxxxx-xxxxx-xxxxx" autoComplete="off" spellCheck={false} /><span className="hint">Find it on a device that already syncs: Devices, then Show library code.</span></div>}
-      <details style={{ marginTop: 16 }} open={STANDALONE}><summary className="small muted">Sync service address</summary>{STANDALONE && <p className="small" style={{ marginBottom: 0 }}>This copy of SAGA Reader runs straight from a file, so there’s no sync service built in. Start one on a computer your devices can reach (<code>npm run platform</code> in the SAGA Reader project) and enter its address here. Everything else, including the simulated SAGA Leaf, works without it.</p>}<input className="input" value={url} onChange={e => setUrl(e.target.value)} style={{ marginTop: 8 }} aria-label="Sync service address" /><p className="small muted">You can run your own; it only stores encrypted data.</p></details>
+      <details style={{ marginTop: 16 }} open={STANDALONE}><summary className="small muted">Sync service address</summary>{STANDALONE && <p className="small" style={{ marginBottom: 0 }}>This copy of {PRODUCT.name} runs straight from a file, so there’s no sync service built in. Start one on a computer your devices can reach (<code>npm run platform</code> in the {PRODUCT.name} project) and enter its address here. Everything else, including the simulated SAGA Leaf, works without it.</p>}<input className="input" value={url} onChange={e => setUrl(e.target.value)} style={{ marginTop: 8 }} aria-label="Sync service address" /><p className="small muted">You can run your own; it only stores encrypted data.</p></details>
       {err && <p style={{ color: 'var(--danger)' }}>{err}</p>}
     </Modal>
   )
@@ -177,7 +178,7 @@ function PairLeaf({ onClose }: { onClose: () => void }) {
   async function choose(h: LeafHello) {
     setChosen(h); setErr('')
     if (h.protocol === 2) {
-      try { const r = await new LeafClient(h.url).pairStart(store.deviceId, `SAGA Reader on ${store.deviceName}`); setPairingId(r.pairingId) } catch (e) { setErr((e as Error).message) }
+      try { const r = await new LeafClient(h.url).pairStart(store.deviceId, `${PRODUCT.name} on ${store.deviceName}`); setPairingId(r.pairingId) } catch (e) { setErr((e as Error).message) }
     }
   }
   async function confirm() {
@@ -214,7 +215,7 @@ function PairLeaf({ onClose }: { onClose: () => void }) {
           <input className="input" placeholder="Address, e.g. 192.168.1.40" value={manual} onChange={e => setManual(e.target.value)} aria-label="SAGA Leaf address" />
           <button className="btn" type="submit">Look</button>
         </form>
-        <p className="small muted" style={{ marginTop: 14 }}>Browsers can’t scan your network, so SAGA Reader checks the SAGA Leaf’s usual addresses. Using SAGA Reader from a secure (https) address? Browsers block it from reaching a SAGA Leaf; use the installed app or the local address.</p>
+        <p className="small muted" style={{ marginTop: 14 }}>Browsers can’t scan your network, so {PRODUCT.name} checks the SAGA Leaf’s usual addresses. Using {PRODUCT.name} from a secure (https) address? Browsers block it from reaching a SAGA Leaf; use the installed app or the local address.</p>
       </> : chosen.protocol === 2 ? <>
         <p>Enter the 6-digit code now showing on the SAGA Leaf’s screen.</p>
         {isLocalDevice(chosen.url) ? <div style={{ margin: '10px 0 16px' }}><LeafScreen showLog={false} /></div>
@@ -246,7 +247,7 @@ export function DeviceDetail({ id }: { id: string }) {
   const set = async (patch: Partial<typeof L>) => { peer.leaf = { ...L, ...patch }; await store.db.peers.put(peer); store.emit('peers') }
   const caps: [string, boolean, string][] = [
     ['Receive books', true, v2 ? 'Resumable, checked by checksum' : 'Whole-file upload; restarts if interrupted'],
-    ['Highlights and notes', true, v2 ? 'Both ways' : 'From the SAGA Leaf to SAGA Reader only'],
+    ['Highlights and notes', true, v2 ? 'Both ways' : `From the SAGA Leaf to ${PRODUCT.name} only`],
     ['Reading position', v2, v2 ? 'Both ways, by matching text' : 'Needs firmware 2 (progress endpoints)'],
     ['Battery level', !!L.battery?.available, L.battery?.available ? 'Reported by the device' : 'Needs a battery-sense line on the board'],
     ['Secure pairing', v2, v2 ? 'Code shown on the device, per-app token' : 'Shared device password'],
@@ -285,7 +286,7 @@ export function DeviceDetail({ id }: { id: string }) {
                 </p>
                 {t && (t.state === 'sending' || t.state === 'paused') && <div style={{ marginTop: 6, maxWidth: 320 }}><ProgressBar value={t.sent / Math.max(1, t.size)} copper /></div>}
               </div>
-              {on && <button className="btn small quiet" onClick={async () => { await new LeafClient(peer.url, peer.token).deleteBook(L.map[b.id]).catch(e => toast((e as Error).message)); const m = { ...L.map }; delete m[b.id]; await set({ map: m, send: { ...L.send, [b.id]: false } }); toast(`Removed from ${peer.name}. Highlights made there are kept in SAGA Reader.`) }}>Remove from SAGA Leaf</button>}
+              {on && <button className="btn small quiet" onClick={async () => { await new LeafClient(peer.url, peer.token).deleteBook(L.map[b.id]).catch(e => toast((e as Error).message)); const m = { ...L.map }; delete m[b.id]; await set({ map: m, send: { ...L.send, [b.id]: false } }); toast(`Removed from ${peer.name}. Highlights made there are kept in ${PRODUCT.name}.`) }}>Remove from SAGA Leaf</button>}
               {!on && <Toggle label={`Send ${b.title}`} checked={want} onChange={v => { void set({ send: { ...L.send, [b.id]: v } }).then(() => { if (v) void engine.syncPeer(peer) }) }} />}
             </div>
           )

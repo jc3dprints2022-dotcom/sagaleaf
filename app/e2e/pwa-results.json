@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-19T15:49:15.601Z",
+  "at": "2026-11-19T16:37:54.220Z",
   "results": [
     {
       "step": "First online visit loads; service worker controls only the reader page",
@@ -33,7 +33,7 @@
     {
       "step": "A new deploy is picked up: new worker activates, old cache removed, page offers a reload",
       "ok": true,
-      "detail": "worker dfb6a55e09c5 → newdeploy001; caches now saga-shell-newdeploy001; fresh HTML served online"
+      "detail": "worker 04496f3f8b09 → newdeploy001; caches now saga-shell-newdeploy001; fresh HTML served online"
     }
   ]
 }

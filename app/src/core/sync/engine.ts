@@ -8,6 +8,7 @@ import type { Book, Op, Peer } from '../types'
 import { deriveKeys, sealJson, openJson, seal, open, blobName, type LibraryKeys } from './crypto'
 import { importBytes } from '../library'
 import { sha256 } from '../util'
+import { PRODUCT } from '../../app/product'
 
 export const CHUNK = 512 * 1024
 export type Fetch = typeof fetch
@@ -193,7 +194,7 @@ export class SyncEngine {
 
 export async function addRelayPeer(store: Store, url: string, secret: string, syncFiles = true): Promise<Peer> {
   const keys = await deriveKeys(secret)
-  const peer: Peer = { id: 'relay-' + keys.libraryId.slice(0, 8), kind: 'relay', name: 'SAGA Sync', url, secret, pushedSeq: 0, pulledCursor: 0, syncFiles }
+  const peer: Peer = { id: 'relay-' + keys.libraryId.slice(0, 8), kind: 'relay', name: `${PRODUCT.shortName} Sync`, url, secret, pushedSeq: 0, pulledCursor: 0, syncFiles }
   await store.db.peers.put(peer)
   await store.setMeta('librarySecret', secret)
   return peer

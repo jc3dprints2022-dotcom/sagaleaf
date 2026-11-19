@@ -7,7 +7,7 @@ import { bookTexts, searchText, type Hit } from '../../core/library'
 import { findQuote, quoteAt, absoluteFraction, fromFraction } from '../../core/anchor'
 import { txtToEpub } from '../../core/txt'
 import { hlcTime, ago, uid } from '../../core/util'
-import { createEpubEngine, createPdfEngine, THEMES, FONTS, type Engine, type Loc, type Sel, type TocItem } from './engine'
+import { createEpubEngine, createPdfEngine, EngineAborted, THEMES, FONTS, type Engine, type Loc, type Sel, type TocItem } from './engine'
 import { Icon } from '../icons'
 import { HL_COLORS, hlCss, Toggle, chapterLabel } from '../components'
 import './reader.css'
@@ -73,6 +73,7 @@ function ReaderInner({ book }: { book: Book }) {
   // ---- open
   useEffect(() => {
     let dead = false
+    const abort = new AbortController()   // stops an EPUB that is still opening when the reader closes
     ;(async () => {
       try {
         const [file, texts, positions] = await Promise.all([store.db.files.get(book.hash), bookTexts(store, book.id), store.db.positions.where('bookId').equals(book.id).toArray()])
@@ -109,14 +110,14 @@ function ReaderInner({ book }: { book: Book }) {
         else {
           let f = new File([file.data as BlobPart], book.filename ?? 'book.epub', { type: 'application/epub+zip' })
           if (book.format === 'txt') f = new File([await txtToEpub(texts.map(t => ({ title: t.title, text: t.text.split('\n').join('\n\n') })), { title: book.title, author: book.author, language: book.language })], 'book.epub')
-          e = await createEpubEngine(host.current!, f, events, start)
+          e = await createEpubEngine(host.current!, f, events, start, abort.signal)
         }
         if (dead) { e.destroy(); return }
         eng.current = e; setToc(e.toc); setReady(true)
         if (target?.section != null && target.section >= 0) void e.goToOffset(target.section, target.start, target.end, true)
-      } catch (err) { console.error(err); setError((err as Error).message || 'This book couldn’t be opened.') }
+      } catch (err) { if (dead || err instanceof EngineAborted) return; console.error(err); setError((err as Error).message || 'This book couldn’t be opened.') }
     })()
-    return () => { dead = true; eng.current?.destroy(); eng.current = null }
+    return () => { dead = true; abort.abort(); eng.current?.destroy(); eng.current = null }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [book.id])
 

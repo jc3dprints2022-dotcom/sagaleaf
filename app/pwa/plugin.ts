@@ -42,7 +42,8 @@ export function manifest() {
   }
 }
 
-export function sagaPwa(): Plugin {
+/** `native`: build for the Capacitor shell. Still stamps the build id, but writes no manifest, worker or icons. */
+export function sagaPwa({ native = false } = {}): Plugin {
   let outDir = ''
   return {
     name: 'saga-pwa',
@@ -50,7 +51,7 @@ export function sagaPwa(): Plugin {
     enforce: 'post',
     config: () => ({ define: { 'import.meta.env.VITE_SAGA_BUILD': JSON.stringify(BUILD_PLACEHOLDER) } }),
     configResolved(c) { outDir = resolve(c.root, c.build.outDir) },
-    transformIndexHtml: html => ({ html: html.replace(/<title>[^<]*<\/title>/, `<title>${PRODUCT.name}</title>`), tags: [
+    transformIndexHtml: html => ({ html: html.replace(/<title>[^<]*<\/title>/, `<title>${PRODUCT.name}</title>`), tags: native ? [] : [
       { tag: 'link', attrs: { rel: 'manifest', href: MANIFEST }, injectTo: 'head' },
       { tag: 'link', attrs: { rel: 'apple-touch-icon', href: APPLE_ICON }, injectTo: 'head' },
       { tag: 'meta', attrs: { name: 'apple-mobile-web-app-capable', content: 'yes' }, injectTo: 'head' },
@@ -64,6 +65,8 @@ export function sagaPwa(): Plugin {
       if (!html.includes(BUILD_PLACEHOLDER)) throw new Error('saga-pwa: build id placeholder missing from the HTML')
       const build = createHash('sha256').update(html).digest('hex').slice(0, 12)
       writeFileSync(htmlPath, html.replaceAll(BUILD_PLACEHOLDER, build))
+      writeFileSync(join(outDir, 'build-id.txt'), build + '\n')
+      if (native) return
 
       const svg = readFileSync(join(here, '..', 'public', 'icon.svg'), 'utf8')
       mkdirSync(join(outDir, 'icons'), { recursive: true })
@@ -78,7 +81,6 @@ export function sagaPwa(): Plugin {
         .replaceAll('__PAGE__', PRODUCT.page)
         .replace('__ASSETS__', assets.map(a => JSON.stringify(a)).join(', '))
       writeFileSync(join(outDir, 'sw.js'), sw)
-      writeFileSync(join(outDir, 'build-id.txt'), build + '\n')
       writeFileSync(join(outDir, 'published-files.json'), JSON.stringify(PUBLISHED_FILES))
     },
   }

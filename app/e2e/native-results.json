@@ -1,0 +1,38 @@
+[
+  {
+    "step": "Starts with no network, no account, no service worker",
+    "ok": true
+  },
+  {
+    "step": "No sign-in anywhere (Settings has no Account section)",
+    "ok": true
+  },
+  {
+    "step": "Import a local EPUB with the file picker",
+    "ok": true,
+    "detail": "Frankenstein"
+  },
+  {
+    "step": "Read and add a highlight",
+    "ok": true,
+    "detail": "“You will rejoice to hear that no disaste”"
+  },
+  {
+    "step": "Kill the app and relaunch: the highlight is still there",
+    "ok": true
+  },
+  {
+    "step": "Reader survives resizes and section jumps while sections load",
+    "ok": true,
+    "detail": "24 jumps × 3 resizes, 4 open/close cycles"
+  },
+  {
+    "step": "\"Open with\" from another app (web half): imports and opens the book",
+    "ok": true,
+    "detail": "Frankenstein, Moby Dick"
+  },
+  {
+    "step": "Made no requests outside the app",
+    "ok": true
+  }
+]

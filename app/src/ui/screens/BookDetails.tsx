@@ -7,6 +7,7 @@ import { ago, fmtBytes, hlcTime, sortKey } from '../../core/util'
 import { annotationsMarkdown } from '../../core/library'
 import { RelayClient } from '../../core/sync/engine'
 import type { Book } from '../../core/types'
+import { PRODUCT } from '../../app/product'
 
 export function BookDetails({ id }: { id: string }) {
   const book = useLive(async () => (await loadBooks()).find(b => b.id === id) ?? null, [id], ['books', 'positions'])
@@ -28,7 +29,7 @@ export function BookDetails({ id }: { id: string }) {
       const relay = (await store.db.peers.toArray()).find(p => p.kind === 'relay')
       if (!relay) throw new Error('Turn on sync to fetch books from your other devices.')
       const ok = await engine.downloadBlob(new RelayClient(relay), book!)
-      if (!ok) throw new Error('The file hasn’t been uploaded from your other device yet. Open SAGA Reader there with file sync on.')
+      if (!ok) throw new Error(`The file hasn’t been uploaded from your other device yet. Open ${PRODUCT.name} there with file sync on.`)
       toast('Downloaded. Ready to read offline.')
     } catch (e) { toast((e as Error).message, undefined, 7000) } finally { setFetching(false) }
   }
@@ -132,7 +133,7 @@ function EditBook({ book, onClose }: { book: Book; onClose: () => void }) {
   }
   return (
     <Modal title="Edit details" onClose={onClose} actions={<><button className="btn quiet" onClick={onClose}>Cancel</button><button className="btn primary" onClick={save}>Save</button></>}>
-      <p className="small muted">Changes stay in SAGA Reader. Your original file isn’t modified.</p>
+      <p className="small muted">Changes stay in {PRODUCT.name}. Your original file isn’t modified.</p>
       <div className="field"><label htmlFor="e-t">Title</label><input id="e-t" className="input" value={f.title} onChange={set('title')} /></div>
       <div className="field"><label htmlFor="e-a">Author</label><input id="e-a" className="input" value={f.author} onChange={set('author')} /></div>
       <div className="row"><div className="field" style={{ flex: 3 }}><label htmlFor="e-s">Series</label><input id="e-s" className="input" value={f.series} onChange={set('series')} /></div><div className="field" style={{ flex: 1 }}><label htmlFor="e-n">Number</label><input id="e-n" className="input" inputMode="decimal" value={f.seriesIndex} onChange={set('seriesIndex')} /></div></div>
