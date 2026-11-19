@@ -92,40 +92,49 @@ Paste a link into **Import → A free book from a link** or **Discover → Have 
 - Gutendex and Gutenberg don't allow browser (CORS) requests, so all of these go through SAGA's
   read-only proxy (`PROXY` in `gutendex.ts`). Books marked as in copyright in the USA are refused.
 
-**Standard Ebooks** (`src/app/standardebooks.ts`), fetched **directly**, never through the proxy,
-because Standard Ebooks downloads send `Access-Control-Allow-Origin: *`:
+**Standard Ebooks** (`src/app/standardebooks.ts`). EPUB downloads are fetched **directly**, never
+through the proxy; the Atom feed goes through the proxy:
 
 - Book page: `https://standardebooks.org/ebooks/<author>/<title>[/<translator-or-illustrator>…]`.
   Links to pages inside a book (`…/text/chapter-1`) and to its downloads are accepted too.
-- EPUB: `https://standardebooks.org/ebooks/<segments>/downloads/<segments joined by _>.epub`, the
-  "compatible epub", for example
-  `https://standardebooks.org/ebooks/jane-austen/pride-and-prejudice/downloads/jane-austen_pride-and-prejudice.epub`.
-  A pasted `…_advanced.epub` link is kept; `.azw3` and `.kepub.epub` links are replaced by the compatible EPUB.
+- EPUB: `https://standardebooks.org/ebooks/<segments>/downloads/<segments joined by _>.epub?source=download`,
+  the "compatible epub", for example
+  `https://standardebooks.org/ebooks/jane-austen/pride-and-prejudice/downloads/jane-austen_pride-and-prejudice.epub?source=download`.
+  The `?source=download` query is required: without it the server answers with an HTML "Your Download Has
+  Started!" page; with it, it returns `application/epub+zip` with `Access-Control-Allow-Origin: *`, which
+  is why the browser can fetch it directly. Every EPUB URL SAGA builds or receives (pasted links, feed
+  enclosures, lists cached by older versions) is normalised to carry it (`seDownload`).
+- A pasted `…_advanced.epub` link is kept (with `?source=download`); `.azw3` and `.kepub.epub` links are
+  replaced by the compatible EPUB.
 - The response is checked to be a zip. If the site answers with an HTML page instead, SAGA says
   so and asks you to download from the book page; if the browser blocks the request, it links
   to the file to download by hand.
 - Books are stored with `catalogId` `se~<author>~<title>…` so Discover shows them as owned.
 
 **Standard Ebooks in Discover** lists the public new-releases Atom feed,
-`https://standardebooks.org/feeds/atom/new-releases`. Standard Ebooks' full catalogue feeds (OPDS
-at `https://standardebooks.org/feeds/opds`, and `/feeds/atom/all` with its `query` search) need a
-Patrons Circle login, so SAGA doesn't use them; for anything not in the new-releases list,
-Discover points to `https://standardebooks.org/ebooks` and the paste box. Only `standardebooks.org`
-links from the feed are trusted. The last list is cached in `localStorage` for offline viewing.
+`https://standardebooks.org/feeds/atom/new-releases`. The feed sends no CORS header, so it is fetched
+through the same proxy as Gutendex (`withProxy` in `gutendex.ts`; the proxy allows standardebooks.org).
+If the feed can't be loaded, Discover shows a banner pointing to standardebooks.org and the paste box.
+Standard Ebooks' full catalogue feeds (OPDS at `https://standardebooks.org/feeds/opds`, and
+`/feeds/atom/all` with its `query` search) need a Patrons Circle login, so SAGA doesn't use them; for
+anything not in the new-releases list, Discover points to `https://standardebooks.org/ebooks` and the
+paste box. Only `standardebooks.org` links from the feed are trusted. The last list is cached in
+`localStorage` for offline viewing.
 
 **Not verified from this build environment.** The sandbox this was built in could not reach
-standardebooks.org, so the URL patterns above follow Standard Ebooks' documented layout and the
-CORS behaviour stated for this task; tests mock the responses. If the new-releases feed turns out
-not to allow browser requests, Discover shows a notice and the paste box still works for downloads.
+standardebooks.org or the proxy; tests mock both, matching the behaviour described above (EPUB only
+with `?source=download`, no CORS header on the feed).
 
 ## Tests
 
 - `tests/library-import.test.ts`: Kindle parsing (`tests/fixtures/kindle/`), matching, attaching
   and the review list; Calibre OPF parsing, a mock tree (`tests/fixtures/calibre/metadata.opf` +
   sample EPUB), DRM refusal, format fallback, zip import; link parsing, direct Standard Ebooks
-  download vs proxied Gutenberg download (mocked `fetch`); feed parsing; the DRM-circumvention scan.
-- `e2e/import.ts`: against the published `saga-reader.html` + `sw.js`, with Gutenberg (via the
-  proxy URL) and standardebooks.org mocked by Playwright. Calibre folder and zip, Kindle
+  download with `?source=download` vs proxied Gutenberg download, the feed fetched through the proxy
+  (mocked `fetch`); feed parsing; the DRM-circumvention scan.
+- `e2e/import.ts`: against the published `saga-reader.html` + `sw.js`, with the proxy and
+  standardebooks.org mocked by Playwright (the mock serves the EPUB only with `?source=download`
+  and gives the direct feed no CORS header). Calibre folder and zip, Kindle
   clippings and review, one Gutenberg and one Standard Ebooks book obtained through the UI,
   then a relaunch with the browser offline and the server down: all three books open.
   Run with `npm run build:standalone && npm run publish:site && npx tsx e2e/import.ts`.

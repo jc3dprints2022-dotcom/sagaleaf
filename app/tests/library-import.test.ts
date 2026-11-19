@@ -313,25 +313,54 @@ describe('Gutenberg and Standard Ebooks links', async () => {
   })
 
   it('recognises Standard Ebooks links and builds the direct EPUB URL', () => {
-    const want = { kind: 'standardebooks', segments: ['jane-austen', 'pride-and-prejudice'], pageUrl: 'https://standardebooks.org/ebooks/jane-austen/pride-and-prejudice', epubUrl: 'https://standardebooks.org/ebooks/jane-austen/pride-and-prejudice/downloads/jane-austen_pride-and-prejudice.epub' }
+    const want = { kind: 'standardebooks', segments: ['jane-austen', 'pride-and-prejudice'], pageUrl: 'https://standardebooks.org/ebooks/jane-austen/pride-and-prejudice', epubUrl: 'https://standardebooks.org/ebooks/jane-austen/pride-and-prejudice/downloads/jane-austen_pride-and-prejudice.epub?source=download' }
     for (const u of ['https://standardebooks.org/ebooks/jane-austen/pride-and-prejudice', 'https://standardebooks.org/ebooks/jane-austen/pride-and-prejudice/', 'standardebooks.org/ebooks/jane-austen/pride-and-prejudice/text/chapter-1', 'https://standardebooks.org/ebooks/jane-austen/pride-and-prejudice/downloads/jane-austen_pride-and-prejudice.azw3', 'https://standardebooks.org/ebooks/jane-austen/pride-and-prejudice/downloads/jane-austen_pride-and-prejudice.epub?source=download'])
       expect(se.parseBookUrl(u), u).toEqual(want)
-    expect(se.parseBookUrl('https://standardebooks.org/ebooks/leo-tolstoy/war-and-peace/louise-maude_aylmer-maude')!).toMatchObject({ epubUrl: 'https://standardebooks.org/ebooks/leo-tolstoy/war-and-peace/louise-maude_aylmer-maude/downloads/leo-tolstoy_war-and-peace_louise-maude_aylmer-maude.epub' })
-    expect(se.parseBookUrl('https://standardebooks.org/ebooks/jane-austen/emma/downloads/jane-austen_emma_advanced.epub')!).toMatchObject({ epubUrl: 'https://standardebooks.org/ebooks/jane-austen/emma/downloads/jane-austen_emma_advanced.epub' })
+    expect(se.parseBookUrl('https://standardebooks.org/ebooks/leo-tolstoy/war-and-peace/louise-maude_aylmer-maude')!).toMatchObject({ epubUrl: 'https://standardebooks.org/ebooks/leo-tolstoy/war-and-peace/louise-maude_aylmer-maude/downloads/leo-tolstoy_war-and-peace_louise-maude_aylmer-maude.epub?source=download' })
+    expect(se.parseBookUrl('https://standardebooks.org/ebooks/jane-austen/emma/downloads/jane-austen_emma_advanced.epub')!).toMatchObject({ epubUrl: 'https://standardebooks.org/ebooks/jane-austen/emma/downloads/jane-austen_emma_advanced.epub?source=download' })
     for (const u of ['https://standardebooks.org/ebooks/jane-austen', 'https://standardebooks.org/about', 'https://example.com/ebooks/a/b', 'not a url', 'https://evil.example/standardebooks.org/ebooks/a/b'])
       expect(se.parseBookUrl(u), u).toBeNull()
   })
 
   it('downloads Standard Ebooks EPUBs directly, never through the Gutenberg proxy', async () => {
     const calls: string[] = []
-    vi.stubGlobal('fetch', async (u: string, init?: RequestInit) => { calls.push(u); expect(init?.mode).toBe('cors'); return new Response(sample('pride-and-prejudice.epub') as BodyInit, { headers: { 'access-control-allow-origin': '*' } }) })
+    // Like the real server: the EPUB only comes with ?source=download; without it, an HTML "download started" page.
+    vi.stubGlobal('fetch', async (u: string, init?: RequestInit) => {
+      calls.push(u); expect(init?.mode).toBe('cors')
+      return new URL(u).searchParams.get('source') === 'download'
+        ? new Response(sample('pride-and-prejudice.epub') as BodyInit, { headers: { 'content-type': 'application/epub+zip', 'access-control-allow-origin': '*' } })
+        : new Response('<html><h1>Your Download Has Started!</h1></html>', { headers: { 'content-type': 'text/html' } })
+    })
     const r = await se.importFromUrl('https://standardebooks.org/ebooks/jane-austen/pride-and-prejudice')
-    expect(calls).toEqual(['https://standardebooks.org/ebooks/jane-austen/pride-and-prejudice/downloads/jane-austen_pride-and-prejudice.epub'])
+    expect(calls).toEqual(['https://standardebooks.org/ebooks/jane-austen/pride-and-prejudice/downloads/jane-austen_pride-and-prejudice.epub?source=download'])
     expect(calls.some(c => c.startsWith(gx.PROXY))).toBe(false)
     expect(r.title).toBe('Pride and Prejudice')
     const b = (await store.db.books.get(r.bookId))!
     expect(b).toMatchObject({ source: 'catalog', catalogId: 'se~jane-austen~pride-and-prejudice', fileState: 'local' })
     expect((await store.db.files.get(b.hash))!.data.length).toBe(sample('pride-and-prejudice.epub').length)   // stored locally: readable offline
+  })
+
+  it('adds ?source=download to any Standard Ebooks EPUB URL, including old cached ones', async () => {
+    expect(se.seDownload('https://standardebooks.org/ebooks/a/b/downloads/a_b.epub')).toBe('https://standardebooks.org/ebooks/a/b/downloads/a_b.epub?source=download')
+    expect(se.seDownload('https://standardebooks.org/ebooks/a/b/downloads/a_b.epub?source=download')).toBe('https://standardebooks.org/ebooks/a/b/downloads/a_b.epub?source=download')
+    const calls: string[] = []
+    vi.stubGlobal('fetch', async (u: string) => { calls.push(u); return new Response(sample('frankenstein.epub') as BodyInit) })
+    await se.getStandardEbook({ segments: ['mary-shelley', 'frankenstein'], pageUrl: 'https://standardebooks.org/ebooks/mary-shelley/frankenstein', epubUrl: 'https://standardebooks.org/ebooks/mary-shelley/frankenstein/downloads/mary-shelley_frankenstein.epub' })
+    expect(calls).toEqual(['https://standardebooks.org/ebooks/mary-shelley/frankenstein/downloads/mary-shelley_frankenstein.epub?source=download'])
+  })
+
+  it('fetches the new-releases feed through the proxy (it has no CORS header)', async () => {
+    const calls: string[] = []
+    vi.stubGlobal('fetch', async (u: string) => { calls.push(u); return new Response('<feed xmlns="http://www.w3.org/2005/Atom"><entry><id>https://standardebooks.org/ebooks/jane-austen/emma</id><title>Emma</title><link href="https://standardebooks.org/ebooks/jane-austen/emma/downloads/jane-austen_emma.epub" rel="enclosure" type="application/epub+zip"/></entry></feed>') })
+    const books = await se.fetchSENewReleases()
+    expect(calls).toEqual([gx.PROXY + encodeURIComponent('https://standardebooks.org/feeds/atom/new-releases')])
+    expect(books[0].epubUrl).toBe('https://standardebooks.org/ebooks/jane-austen/emma/downloads/jane-austen_emma.epub?source=download')   // the download itself stays direct
+    expect(books[0].epubUrl.startsWith(gx.PROXY)).toBe(false)
+  })
+
+  it('a failing feed throws, so Discover shows its fallback banner', async () => {
+    vi.stubGlobal('fetch', async () => new Response('bad gateway', { status: 502 }))
+    await expect(se.fetchSENewReleases()).rejects.toThrow(/feed didn’t answer \(502\)/)
   })
 
   it('reports an HTML page instead of an EPUB honestly', async () => {
@@ -387,8 +416,8 @@ describe('Gutenberg and Standard Ebooks links', async () => {
 </feed>`
     const books = se.parseSEFeed(feed)
     expect(books).toHaveLength(2)
-    expect(books[0]).toMatchObject({ title: 'Emma', author: 'Jane Austen', epubUrl: 'https://standardebooks.org/ebooks/jane-austen/emma/downloads/jane-austen_emma.epub', cover: 'https://standardebooks.org/images/covers/jane-austen_emma-cover-thumbnail.jpg' })
-    expect(books[1]).toMatchObject({ title: 'The Odyssey', author: 'Homer', epubUrl: 'https://standardebooks.org/ebooks/homer/the-odyssey/william-cullen-bryant/downloads/homer_the-odyssey_william-cullen-bryant.epub' })
+    expect(books[0]).toMatchObject({ title: 'Emma', author: 'Jane Austen', epubUrl: 'https://standardebooks.org/ebooks/jane-austen/emma/downloads/jane-austen_emma.epub?source=download', cover: 'https://standardebooks.org/images/covers/jane-austen_emma-cover-thumbnail.jpg' })
+    expect(books[1]).toMatchObject({ title: 'The Odyssey', author: 'Homer', epubUrl: 'https://standardebooks.org/ebooks/homer/the-odyssey/william-cullen-bryant/downloads/homer_the-odyssey_william-cullen-bryant.epub?source=download' })
   })
 })
 

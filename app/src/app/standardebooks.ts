@@ -2,24 +2,35 @@
 //
 // URLs used (see docs/IMPORT.md):
 //   Book page        https://standardebooks.org/ebooks/<author>/<title>[/<translator>…]
-//   EPUB download    https://standardebooks.org/ebooks/<segments>/downloads/<segments joined by _>.epub
+//   EPUB download    https://standardebooks.org/ebooks/<segments>/downloads/<segments joined by _>.epub?source=download
+//                    (without ?source=download the server answers with an HTML
+//                    "Your Download Has Started!" page instead of the file)
 //                    (the "compatible epub"; "_advanced.epub" is also accepted when pasted)
 //   New releases     https://standardebooks.org/feeds/atom/new-releases   (public Atom feed)
 // The full OPDS and Atom catalogue feeds (/feeds/opds, /feeds/atom/all) need a
 // Patrons Circle login, so Discover lists the public new-releases feed and
 // offers the paste box for anything else.
 //
-// Standard Ebooks downloads send Access-Control-Allow-Origin: *, so they are
-// fetched directly, never through the Gutenberg proxy. Gutenberg links go
+// Standard Ebooks downloads (with ?source=download) send Access-Control-Allow-Origin: *,
+// so they are fetched directly, never through the proxy. The new-releases Atom
+// feed sends no CORS header, so it goes through the same proxy as Gutendex. Gutenberg links go
 // through the existing Discover code in gutendex.ts (Gutendex + proxy).
 import { importBytes } from '../core/library'
 import { isZip } from '../core/epub'
 import { store } from './state'
-import { fetchBook, cachedBook, getBook, DownloadBlocked, type GBook } from './gutendex'
+import { fetchBook, cachedBook, getBook, DownloadBlocked, withProxy, type GBook } from './gutendex'
 
 export const SE_ORIGIN = 'https://standardebooks.org'
 export const SE_NEW_RELEASES = SE_ORIGIN + '/feeds/atom/new-releases'
 export const SE_LICENSE = 'Public domain in the USA. Standard Ebooks edition, released under CC0.'
+
+/** The direct-download form of an EPUB URL: always carries ?source=download. */
+export function seDownload(url: string) {
+  const u = new URL(url)
+  u.search = ''; u.hash = ''
+  u.searchParams.set('source', 'download')
+  return u.href
+}
 
 export type ParsedUrl =
   | { kind: 'gutenberg'; id: number }
@@ -48,7 +59,7 @@ export function parseBookUrl(input: string): ParsedUrl | null {
     const file = dl >= 0 ? parts[dl + 1] ?? '' : ''
     const stem = segs.join('_')
     // Keep the advanced EPUB if that is what was pasted; anything else (azw3, kepub) becomes the compatible EPUB.
-    const epubUrl = file === `${stem}_advanced.epub` ? `${base}/downloads/${file}` : `${base}/downloads/${stem}.epub`
+    const epubUrl = seDownload(file === `${stem}_advanced.epub` ? `${base}/downloads/${file}` : `${base}/downloads/${stem}.epub`)
     return { kind: 'standardebooks', segments: segs, pageUrl: base, epubUrl }
   }
   return null
@@ -67,12 +78,12 @@ export function unslug(s: string) {
 export async function getStandardEbook(p: { segments: string[]; pageUrl: string; epubUrl: string }, title?: string): Promise<{ bookId: string; title: string }> {
   let bytes: Uint8Array
   try {
-    const r = await fetch(p.epubUrl, { mode: 'cors', credentials: 'omit', signal: AbortSignal.timeout(60_000) })
+    const r = await fetch(seDownload(p.epubUrl), { mode: 'cors', credentials: 'omit', signal: AbortSignal.timeout(60_000) })
     if (!r.ok) throw new Error(r.status === 404 ? 'Standard Ebooks has no book at that address.' : `Standard Ebooks didn’t send the file (${r.status}).`)
     bytes = new Uint8Array(await r.arrayBuffer())
   } catch (e) {
     if (e instanceof Error && /Standard Ebooks/.test(e.message)) throw e
-    throw new DownloadBlocked(p.epubUrl)
+    throw new DownloadBlocked(seDownload(p.epubUrl))
   }
   if (!isZip(bytes)) throw new Error('Standard Ebooks sent a page instead of the EPUB. Open the book’s page and download it there, then add the file to your library.')
   const name = `${p.segments.join('_')}.epub`
@@ -116,11 +127,11 @@ export function parseSEFeed(xml: string): SEBook[] {
     const page = [txt(els(entry, 'id')[0]), ...links.filter(l => l.rel === 'alternate' || !l.rel).map(l => l.href)].map(abs).find(h => parseBookUrl(h)?.kind === 'standardebooks')
     if (!page) continue
     const p = parseBookUrl(page) as Extract<ParsedUrl, { kind: 'standardebooks' }>
-    const enclosure = links.filter(l => l.type === 'application/epub+zip' && /\.epub$/.test(l.href) && !/kepub|advanced/.test(l.href)).map(l => abs(l.href)).find(h => h.startsWith(SE_ORIGIN + '/'))
+    const enclosure = links.filter(l => l.type === 'application/epub+zip' && /\.epub(\?|$)/.test(l.href) && !/kepub|advanced/.test(l.href)).map(l => abs(l.href)).find(h => h.startsWith(SE_ORIGIN + '/'))
     const thumb = links.find(l => /image\/thumbnail|thumbnail/.test(l.rel))?.href ?? links.find(l => /opds-spec\.org\/image$/.test(l.rel))?.href
     const author = els(entry, 'author').map(a => txt(els(a, 'name')[0])).filter(Boolean).join(' and ')
     out.push({
-      segments: p.segments, pageUrl: p.pageUrl, epubUrl: enclosure ?? p.epubUrl,
+      segments: p.segments, pageUrl: p.pageUrl, epubUrl: enclosure ? seDownload(enclosure) : p.epubUrl,
       title: txt(els(entry, 'title')[0]) || unslug(p.segments[1]), author: author || unslug(p.segments[0]),
       summary: txt(els(entry, 'summary')[0]) || undefined, cover: thumb ? abs(thumb) : undefined, updated: txt(els(entry, 'updated')[0]) || undefined,
     })
@@ -131,7 +142,8 @@ export function parseSEFeed(xml: string): SEBook[] {
 const SE_KEY = 'saga.discover.se.v1'
 export function cachedSE(): { at: number; books: SEBook[] } | null { try { const s = localStorage.getItem(SE_KEY); return s ? JSON.parse(s) : null } catch { return null } }
 export async function fetchSENewReleases(): Promise<SEBook[]> {
-  const r = await fetch(SE_NEW_RELEASES, { mode: 'cors', credentials: 'omit', signal: AbortSignal.timeout(30_000) })
+  // No CORS header on the feed: fetch it through the proxy (downloads stay direct).
+  const r = await fetch(withProxy(SE_NEW_RELEASES), { signal: AbortSignal.timeout(30_000) })
   if (!r.ok) throw new Error(`Standard Ebooks’ feed didn’t answer (${r.status}).`)
   const books = parseSEFeed(await r.text())
   try { localStorage.setItem(SE_KEY, JSON.stringify({ at: Date.now(), books })) } catch { /* storage full */ }

@@ -95,7 +95,7 @@ function StandardEbooksList() {
 
 function SEItemView({ id }: { id: string }) {
   const segments = seSegmentsOf(id)
-  const b: SEBook = cachedSEBook(segments) ?? { segments, title: unslug(segments[1] ?? ''), author: unslug(segments[0] ?? ''), pageUrl: `${SE_ORIGIN}/ebooks/${segments.join('/')}`, epubUrl: `${SE_ORIGIN}/ebooks/${segments.join('/')}/downloads/${segments.join('_')}.epub` }
+  const b: SEBook = cachedSEBook(segments) ?? { segments, title: unslug(segments[1] ?? ''), author: unslug(segments[0] ?? ''), pageUrl: `${SE_ORIGIN}/ebooks/${segments.join('/')}`, epubUrl: `${SE_ORIGIN}/ebooks/${segments.join('/')}/downloads/${segments.join('_')}.epub?source=download` }
   const [owned, setOwned] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [blocked, setBlocked] = useState<string | null>(null)

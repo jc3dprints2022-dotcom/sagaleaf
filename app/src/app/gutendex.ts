@@ -13,7 +13,9 @@ export const GUTENDEX = 'https://gutendex.com'
 export const PROXY = 'https://uxlvtbqmhcheklazboxr.supabase.co/functions/v1/gutenberg-proxy?url='
 const PROXIED_HOSTS = /^https?:\/\/(gutendex\.com|(www\.)?gutenberg\.org|gutenberg\.pglaf\.org|aleph\.gutenberg\.org)\//i
 /** The URL to actually fetch: Gutendex/Gutenberg URLs are wrapped in the proxy, anything else is unchanged. */
-export const viaProxy = (url: string) => PROXIED_HOSTS.test(url) ? PROXY + encodeURIComponent(url) : url
+/** Wraps any URL in the proxy. Also used for Standard Ebooks' Atom feed, which sends no CORS header. */
+export const withProxy = (url: string) => PROXY + encodeURIComponent(url)
+export const viaProxy = (url: string) => PROXIED_HOSTS.test(url) ? withProxy(url) : url
 const proxiedFetch = (url: string, init?: RequestInit) => fetch(viaProxy(url), init)
 export interface GPerson { name: string; birth_year: number | null; death_year: number | null }
 export interface GBook {

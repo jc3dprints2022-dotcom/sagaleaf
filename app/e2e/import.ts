@@ -73,13 +73,17 @@ async function mockNetwork(ctx: BrowserContext) {
   await ctx.route('https://standardebooks.org/**', async route => {
     const u = route.request().url(); seCalls.push(u)
     const cors = { 'access-control-allow-origin': '*' }
-    if (u.endsWith('/feeds/atom/new-releases')) return route.fulfill({ status: 200, headers: { ...cors, 'content-type': 'application/atom+xml' }, body: SE_FEED })
-    if (u.endsWith('/downloads/herman-melville_moby-dick.epub')) return route.fulfill({ status: 200, headers: { ...cors, 'content-type': 'application/epub+zip' }, body: readFileSync(join(SAMPLES, 'moby-dick.epub')) })
+    // Like the real site: the feed has no CORS header (so a direct fetch fails in the browser), and
+    // a download only returns the EPUB with ?source=download; without it, an HTML "download started" page.
+    if (u.endsWith('/feeds/atom/new-releases')) return route.fulfill({ status: 200, headers: { 'content-type': 'application/atom+xml' }, body: SE_FEED })
+    if (u === 'https://standardebooks.org/ebooks/herman-melville/moby-dick/downloads/herman-melville_moby-dick.epub?source=download') return route.fulfill({ status: 200, headers: { ...cors, 'content-type': 'application/epub+zip' }, body: readFileSync(join(SAMPLES, 'moby-dick.epub')) })
+    if (u.includes('/downloads/')) return route.fulfill({ status: 200, headers: { 'content-type': 'text/html' }, body: '<html><h1>Your Download Has Started!</h1></html>' })
     return route.fulfill({ status: 404, headers: cors, body: '' })
   })
   await ctx.route(PROXY.split('?')[0] + '**', async route => {
     const target = decodeURIComponent(new URL(route.request().url()).searchParams.get('url') ?? ''); proxyCalls.push(target)
     const cors = { 'access-control-allow-origin': '*' }
+    if (target === 'https://standardebooks.org/feeds/atom/new-releases') return route.fulfill({ status: 200, headers: { ...cors, 'content-type': 'application/atom+xml' }, body: SE_FEED })
     if (target === 'https://gutendex.com/books/84') return route.fulfill({ status: 200, headers: { ...cors, 'content-type': 'application/json' }, body: JSON.stringify({ id: 84, title: 'Frankenstein; Or, The Modern Prometheus', authors: [{ name: 'Shelley, Mary Wollstonecraft', birth_year: 1797, death_year: 1851 }], subjects: [], bookshelves: [], languages: ['en'], copyright: false, media_type: 'Text', formats: { 'application/epub+zip': 'https://www.gutenberg.org/ebooks/84.epub3.images' }, download_count: 1 }) })
     if (target === 'https://www.gutenberg.org/ebooks/84.epub3.images') return route.fulfill({ status: 200, headers: { ...cors, 'content-type': 'application/epub+zip' }, body: readFileSync(join(SAMPLES, 'frankenstein.epub')) })
     return route.fulfill({ status: 404, headers: cors, body: '{}' })
@@ -152,7 +156,7 @@ await step('Gutenberg book via “paste a link” (Gutendex and the Gutenberg pr
   return `book ${gutenbergId}; proxy saw ${proxyCalls.length} requests`
 })
 
-await step('Standard Ebooks in Discover: public feed listed, EPUB downloaded directly (not via the proxy)', async () => {
+await step('Standard Ebooks in Discover: feed via the proxy, EPUB downloaded directly with ?source=download', async () => {
   const before = proxyCalls.length
   await page.goto(APP + '#/catalog')
   await page.getByRole('button', { name: 'Standard Ebooks' }).click()
@@ -160,11 +164,13 @@ await step('Standard Ebooks in Discover: public feed listed, EPUB downloaded dir
   await page.getByRole('button', { name: 'Get book' }).click()
   await page.waitForSelector('text=/is in your library/', { timeout: 30000 })
   await page.waitForSelector('a.btn:has-text("Read")')
-  if (proxyCalls.length !== before) throw new Error('Standard Ebooks went through the proxy')
-  if (!seCalls.includes('https://standardebooks.org/ebooks/herman-melville/moby-dick/downloads/herman-melville_moby-dick.epub')) throw new Error('no direct download: ' + seCalls.join())
+  // (Opening Discover also loads Gutenberg's popular list through the proxy; only the Standard Ebooks requests matter here.)
+  const viaProxy = proxyCalls.slice(before).filter(u => u.startsWith('https://standardebooks.org/'))
+  if (viaProxy.join() !== 'https://standardebooks.org/feeds/atom/new-releases') throw new Error('proxy saw: ' + viaProxy.join())
+  if (seCalls.join() !== 'https://standardebooks.org/ebooks/herman-melville/moby-dick/downloads/herman-melville_moby-dick.epub?source=download') throw new Error('direct requests: ' + seCalls.join())
   seId = await page.evaluate(async () => { const s = (window as unknown as { __saga: { store: { db: { books: { where(k: string): { equals(v: string): { first(): Promise<{ id: string } | undefined> } } } } } } }).__saga.store; return (await s.db.books.where('catalogId').equals('se~herman-melville~moby-dick').first())?.id ?? '' })
   if (!seId) throw new Error('book not stored')
-  return `requests to standardebooks.org: ${seCalls.map(u => new URL(u).pathname).join(', ')}`
+  return `via proxy: feed only; direct: ${seCalls.join()}`
 })
 
 await step('Fully offline after a relaunch: both downloaded books and the Calibre book open', async () => {
