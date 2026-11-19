@@ -102,6 +102,30 @@ await step('Kill the app and relaunch: the highlight is still there', async () =
   await page.goto(ORIGIN + '/#/notes'); await page.waitForSelector(`text=${hl.trim().slice(0, 20)}`, { timeout: 8000 })
   await page.screenshot({ path: `${SHOTS}/03-after-relaunch.png` })
 })
+await step('Reader survives resizes and section jumps while sections load', async () => {
+  // Renders that land while a section's iframe is between documents used to throw inside
+  // foliate (setStylesImportant on a null documentElement). Jump across section boundaries with
+  // the slider while the viewport keeps changing size, so resize-driven renders hit that window.
+  const before = errors.length
+  await page.goto(ORIGIN + `/#/read/${bookId}`); await bookFrame()
+  const sizes = [{ width: 412, height: 915 }, { width: 380, height: 700 }, { width: 640, height: 900 }, { width: 412, height: 800 }]
+  for (let i = 0; i < 24; i++) {
+    const v = ((i * 397) % 1000)
+    await page.evaluate(val => {
+      const el = document.querySelector<HTMLInputElement>('.r-slider'); if (!el) return
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(el, String(val))
+      el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true }))
+    }, v)
+    for (let k = 0; k < 3; k++) { await page.setViewportSize(sizes[(i + k) % sizes.length]); await page.waitForTimeout(8) }
+  }
+  await page.setViewportSize({ width: 412, height: 915 }); await page.waitForTimeout(600)
+  // Leave the reader mid-render, then come back: teardown must not leave renders behind.
+  for (let i = 0; i < 4; i++) { await page.goto(ORIGIN + `/#/read/${bookId}`); await page.waitForTimeout(40 * i); await page.goto(ORIGIN + '/#/library'); await page.waitForTimeout(30) }
+  await page.waitForTimeout(800)
+  const fresh = errors.slice(before)
+  if (fresh.length) throw new Error(fresh.slice(0, 2).join(' | '))
+  return '24 jumps × 3 resizes, 4 open/close cycles'
+})
 await step('"Open with" from another app (web half): imports and opens the book', async () => {
   // On a phone the URI is content://…; Capacitor.convertFileSrc maps it to the local server. Here it's a plain URL,
   // with a provider-style name that has no extension.

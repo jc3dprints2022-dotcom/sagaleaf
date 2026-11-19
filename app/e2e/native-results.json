@@ -22,6 +22,11 @@
     "ok": true
   },
   {
+    "step": "Reader survives resizes and section jumps while sections load",
+    "ok": true,
+    "detail": "24 jumps × 3 resizes, 4 open/close cycles"
+  },
+  {
     "step": "\"Open with\" from another app (web half): imports and opens the book",
     "ok": true,
     "detail": "Frankenstein, Moby Dick"
