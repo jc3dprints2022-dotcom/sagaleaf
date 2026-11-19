@@ -1,0 +1,86 @@
+{
+  "at": "2026-11-17T16:40:54.897Z",
+  "env": "Chrome (playwright-core), real IndexedDB, dev server",
+  "uiBulkImport": {
+    "files": 300,
+    "imported": 300,
+    "totalSeconds": 20.4,
+    "msPerBook": 68.1
+  },
+  "libraryRenderMs": {
+    "books": 300,
+    "msToTiles": 144
+  },
+  "libraryFilterMs": 80,
+  "longBook": {
+    "title": "Moby Dick",
+    "importMs": 318,
+    "openToTextMs": 544,
+    "pageTurnMs": {
+      "p50": 37,
+      "p95": 67,
+      "max": 90
+    },
+    "jumpTo85PercentMs": 83,
+    "landedAt": "85%",
+    "jsHeapMB": 30.4,
+    "libraryBooks": 301
+  },
+  "accessibility": {
+    "home": {
+      "violations": 0,
+      "serious": 0,
+      "rules": []
+    },
+    "library": {
+      "violations": 0,
+      "serious": 0,
+      "rules": []
+    },
+    "book/7ecce6cf0c7dee91": {
+      "violations": 0,
+      "serious": 0,
+      "rules": []
+    },
+    "notes": {
+      "violations": 0,
+      "serious": 0,
+      "rules": []
+    },
+    "search?q=whale": {
+      "violations": 0,
+      "serious": 0,
+      "rules": []
+    },
+    "collections": {
+      "violations": 0,
+      "serious": 0,
+      "rules": []
+    },
+    "devices": {
+      "violations": 0,
+      "serious": 0,
+      "rules": []
+    },
+    "settings": {
+      "violations": 0,
+      "serious": 0,
+      "rules": []
+    },
+    "catalog": {
+      "violations": 0,
+      "serious": 0,
+      "rules": []
+    },
+    "author": {
+      "violations": 0,
+      "serious": 0,
+      "rules": []
+    },
+    "reader (app chrome)": {
+      "violations": 0,
+      "serious": 0,
+      "rules": []
+    }
+  }
+}

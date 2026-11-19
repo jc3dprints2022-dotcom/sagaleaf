@@ -1,0 +1,795 @@
+[
+  {
+    "id": "E-001",
+    "stakeholder": "Authors",
+    "problem": "KDP 70% royalty only applies within a price band ($2.99-$12.99 on Amazon.com since 2026-07-07) and deducts a per-MB delivery fee; outside it authors get 35%.",
+    "competitors": [
+      "Amazon KDP"
+    ],
+    "sources": [
+      {
+        "title": "KDP list price requirements",
+        "url": "https://kdp.amazon.com/en_US/help/topic/G200634560"
+      },
+      {
+        "title": "KDP digital pricing page",
+        "url": "https://kdp.amazon.com/en_US/help/topic/G200634500"
+      },
+      {
+        "title": "KDP eBook royalty options",
+        "url": "https://kdp.amazon.com/en_US/help/topic/G200644210"
+      }
+    ],
+    "evidence_strength": "strong",
+    "severity": "medium",
+    "workarounds": "Price inside band; compress images",
+    "saga_solution": "Flat author share at any price, no delivery fee; show exact payout before publishing",
+    "complexity": "S"
+  },
+  {
+    "id": "E-002",
+    "stakeholder": "Authors",
+    "problem": "KDP pays about 60 days after month end (90 for expanded distribution), creating cash-flow lag.",
+    "competitors": [
+      "Amazon KDP",
+      "Draft2Digital"
+    ],
+    "sources": [
+      {
+        "title": "KDP: when will I get paid",
+        "url": "https://kdp.amazon.com/en_US/help/topic/GK2MKZUL6U3SFBPZ"
+      },
+      {
+        "title": "Draft2Digital FAQ",
+        "url": "https://draft2digital.com/faq/"
+      }
+    ],
+    "evidence_strength": "strong",
+    "severity": "medium",
+    "workarounds": "Direct sales via Stripe/Payhip for faster payouts",
+    "saga_solution": "Weekly payouts after a refund window via Stripe Connect",
+    "complexity": "M"
+  },
+  {
+    "id": "E-003",
+    "stakeholder": "Authors",
+    "problem": "Kindle+ (formerly Kindle Unlimited) pays from a discretionary monthly pool per KENP page; per-page rate is not known in advance and requires KDP Select exclusivity.",
+    "competitors": [
+      "Amazon Kindle+",
+      "Kobo Plus"
+    ],
+    "sources": [
+      {
+        "title": "KDP Select / Kindle+ royalties",
+        "url": "https://kdp.amazon.com/en_US/help/topic/G201541140"
+      },
+      {
+        "title": "Written Word Media: Kindle+ for authors",
+        "url": "https://www.writtenwordmedia.com/kindle-plus-for-authors/"
+      }
+    ],
+    "evidence_strength": "strong",
+    "severity": "high",
+    "workarounds": "Go wide; accept pool volatility",
+    "saga_solution": "Non-exclusive subscription with published, fixed payout formula",
+    "complexity": "L"
+  },
+  {
+    "id": "E-004",
+    "stakeholder": "Authors",
+    "problem": "Exclusivity (KDP Select) is required for 70% in Brazil, Japan, Mexico, India and for Kindle+ income, locking authors out of other stores.",
+    "competitors": [
+      "Amazon KDP Select"
+    ],
+    "sources": [
+      {
+        "title": "KDP digital pricing page",
+        "url": "https://kdp.amazon.com/en_US/help/topic/G200634500"
+      },
+      {
+        "title": "KDP list price requirements",
+        "url": "https://kdp.amazon.com/en_US/help/topic/G200634560"
+      }
+    ],
+    "evidence_strength": "strong",
+    "severity": "high",
+    "workarounds": "Rotate titles in/out of Select in 90-day terms",
+    "saga_solution": "Never require exclusivity",
+    "complexity": "S"
+  },
+  {
+    "id": "E-005",
+    "stakeholder": "Authors",
+    "problem": "Authors get no buyer emails from retailers, so the reader relationship belongs to the store.",
+    "competitors": [
+      "Amazon",
+      "Apple Books",
+      "Kobo"
+    ],
+    "sources": [
+      {
+        "title": "Written Word Media 2026 mid-year indie author survey",
+        "url": "https://www.writtenwordmedia.com/2026-mid-year-indie-author-survey/"
+      },
+      {
+        "title": "BookFunnel pricing",
+        "url": "https://bookfunnel.com/pricing/"
+      }
+    ],
+    "evidence_strength": "moderate",
+    "severity": "high",
+    "workarounds": "Reader magnets via BookFunnel, newsletters, back-matter links",
+    "saga_solution": "Opt-in, reader-controlled sharing of contact with the author at purchase",
+    "complexity": "M"
+  },
+  {
+    "id": "E-006",
+    "stakeholder": "Authors",
+    "problem": "Discoverability increasingly requires paid ads (Amazon Ads usage rises to 59% in the 'got traction' tier) and AI-generated content floods the market.",
+    "competitors": [
+      "Amazon Ads",
+      "Meta Ads",
+      "BookBub"
+    ],
+    "sources": [
+      {
+        "title": "Written Word Media 2026 mid-year indie author survey",
+        "url": "https://www.writtenwordmedia.com/2026-mid-year-indie-author-survey/"
+      }
+    ],
+    "evidence_strength": "moderate",
+    "severity": "high",
+    "workarounds": "Promo sites, Meta ads, newsletters",
+    "saga_solution": "Club/community-driven discovery and bookstore curation rather than pay-to-rank",
+    "complexity": "L"
+  },
+  {
+    "id": "E-007",
+    "stakeholder": "Authors",
+    "problem": "Going wide via Draft2Digital now costs a $20 activation fee (new accounts) and $12/yr for low earners, plus ~10% of retail.",
+    "competitors": [
+      "Draft2Digital",
+      "PublishDrive",
+      "StreetLib"
+    ],
+    "sources": [
+      {
+        "title": "Draft2Digital FAQ",
+        "url": "https://draft2digital.com/faq/"
+      },
+      {
+        "title": "ALLi: D2D fee changes 2026",
+        "url": "https://selfpublishingadvice.org/what-the-draft2digital-fee-changes-mean-for-you-in-2026/"
+      }
+    ],
+    "evidence_strength": "strong",
+    "severity": "low",
+    "workarounds": "Upload direct to each store",
+    "saga_solution": "Free listing on SAGA; distribution-to-others as optional paid service",
+    "complexity": "M"
+  },
+  {
+    "id": "E-008",
+    "stakeholder": "Authors",
+    "problem": "Direct-sales stacks need several tools (store, payment, delivery app, tax); each charges fees (Payhip 5% free plan, Gumroad 10%+50c, BookFunnel $30-$300/yr).",
+    "competitors": [
+      "Payhip",
+      "Gumroad",
+      "Shopify+BookFunnel"
+    ],
+    "sources": [
+      {
+        "title": "Payhip pricing",
+        "url": "https://payhip.com/pricing"
+      },
+      {
+        "title": "Gumroad pricing",
+        "url": "https://gumroad.com/pricing"
+      },
+      {
+        "title": "BookFunnel pricing",
+        "url": "https://bookfunnel.com/pricing/"
+      }
+    ],
+    "evidence_strength": "strong",
+    "severity": "medium",
+    "workarounds": "Stitch tools together",
+    "saga_solution": "All-in-one author storefront with delivery to any app and tax handled",
+    "complexity": "M"
+  },
+  {
+    "id": "E-009",
+    "stakeholder": "Authors",
+    "problem": "Lemon Squeezy is closed to new sign-ups and shutting down 2027-03-31, stranding creators who chose it as merchant of record.",
+    "competitors": [
+      "Lemon Squeezy",
+      "Paddle",
+      "Gumroad"
+    ],
+    "sources": [
+      {
+        "title": "Lemon Squeezy pricing (shutdown notice)",
+        "url": "https://www.lemonsqueezy.com/pricing"
+      },
+      {
+        "title": "Paddle pricing",
+        "url": "https://www.paddle.com/pricing"
+      }
+    ],
+    "evidence_strength": "strong",
+    "severity": "medium",
+    "workarounds": "Migrate to Paddle/Gumroad/Stripe",
+    "saga_solution": "Stable MoR-backed checkout with exportable customer lists",
+    "complexity": "M"
+  },
+  {
+    "id": "E-010",
+    "stakeholder": "Authors",
+    "problem": "AI-generated content must be disclosed on KDP; AI-assisted need not be, leaving readers unable to distinguish and honest authors competing with floods.",
+    "competitors": [
+      "Amazon KDP"
+    ],
+    "sources": [
+      {
+        "title": "KDP content guidelines (AI)",
+        "url": "https://kdp.amazon.com/en_US/help/topic/G200672390"
+      },
+      {
+        "title": "Written Word Media 2026 mid-year indie author survey",
+        "url": "https://www.writtenwordmedia.com/2026-mid-year-indie-author-survey/"
+      }
+    ],
+    "evidence_strength": "strong",
+    "severity": "medium",
+    "workarounds": "Author branding, human-made labels",
+    "saga_solution": "Visible AI-disclosure labels and provenance metadata in SAGA store",
+    "complexity": "S"
+  },
+  {
+    "id": "E-011",
+    "stakeholder": "Authors",
+    "problem": "Piracy fear drives DRM use, but DRM restricts legitimate readers; Amazon now lets DRM-free KDP books be downloaded as EPUB/PDF since 2026-01-20.",
+    "competitors": [
+      "Amazon KDP",
+      "Bookshop.org"
+    ],
+    "sources": [
+      {
+        "title": "KDP DRM and EPUB/PDF downloads",
+        "url": "https://kdp.amazon.com/en_US/help/topic/GDDXGH9VR22ACM8U"
+      },
+      {
+        "title": "EDRLab Readium LCP",
+        "url": "https://www.edrlab.org/readium-lcp/"
+      }
+    ],
+    "evidence_strength": "strong",
+    "severity": "medium",
+    "workarounds": "Social DRM/watermarks; DMCA takedowns",
+    "saga_solution": "Default watermarking (social DRM) with author-selectable LCP",
+    "complexity": "M"
+  },
+  {
+    "id": "E-012",
+    "stakeholder": "Authors",
+    "problem": "Sales reporting is fragmented across stores with different delays and formats.",
+    "competitors": [
+      "Draft2Digital",
+      "PublishDrive",
+      "ScribeCount"
+    ],
+    "sources": [
+      {
+        "title": "Draft2Digital FAQ",
+        "url": "https://draft2digital.com/faq/"
+      },
+      {
+        "title": "KDP: when will I get paid",
+        "url": "https://kdp.amazon.com/en_US/help/topic/GK2MKZUL6U3SFBPZ"
+      }
+    ],
+    "evidence_strength": "moderate",
+    "severity": "medium",
+    "workarounds": "Third-party aggregators (ScribeCount)",
+    "saga_solution": "Real-time sales dashboard; import other stores' reports",
+    "complexity": "M"
+  },
+  {
+    "id": "E-013",
+    "stakeholder": "Publishers",
+    "problem": "Retailers are dropping ONIX 2.1; Amazon stopped accepting it end of March 2026, forcing ONIX 3.0/3.1 migrations.",
+    "competitors": [
+      "Firebrand",
+      "Ingram CoreSource",
+      "Bookwire"
+    ],
+    "sources": [
+      {
+        "title": "BookNet Canada: Amazon ends ONIX 2.1 March 2026",
+        "url": "https://www.booknetcanada.ca/blog/2025/5/23/amazon-is-ending-support-of-onix-21-march-2026"
+      }
+    ],
+    "evidence_strength": "strong",
+    "severity": "high",
+    "workarounds": "Buy title-management systems",
+    "saga_solution": "Accept ONIX 3.x ingest from day one; also simple web form for small presses",
+    "complexity": "L"
+  },
+  {
+    "id": "E-014",
+    "stakeholder": "Publishers",
+    "problem": "ISBNs cost $125 single / $295 for 10 / $575 for 100 from Bowker in the US.",
+    "competitors": [
+      "Bowker",
+      "Free national agencies"
+    ],
+    "sources": [
+      {
+        "title": "Bowker myidentifiers ISBN prices",
+        "url": "https://www.myidentifiers.com/Get-your-isbn-now"
+      }
+    ],
+    "evidence_strength": "strong",
+    "severity": "low",
+    "workarounds": "Buy 10-packs; use free retailer IDs",
+    "saga_solution": "Do not require ISBN for SAGA-only listings; support ISBN when present",
+    "complexity": "S"
+  },
+  {
+    "id": "E-015",
+    "stakeholder": "Publishers",
+    "problem": "European Accessibility Act applies to ebooks made available from 2025-06-28: accessible EPUB, accessibility metadata (ONIX list 196), accessibility statement.",
+    "competitors": [
+      "Ace by DAISY",
+      "PublishDrive",
+      "Bookwire"
+    ],
+    "sources": [
+      {
+        "title": "PublishDrive EAA guide",
+        "url": "https://help.publishdrive.com/eaa-guide"
+      },
+      {
+        "title": "BookNet Canada: Amazon ends ONIX 2.1 March 2026",
+        "url": "https://www.booknetcanada.ca/blog/2025/5/23/amazon-is-ending-support-of-onix-21-march-2026"
+      }
+    ],
+    "evidence_strength": "strong",
+    "severity": "high",
+    "workarounds": "Manual remediation, Ace checker",
+    "saga_solution": "Built-in accessibility checker at upload and accessible reading system",
+    "complexity": "L"
+  },
+  {
+    "id": "E-016",
+    "stakeholder": "Publishers",
+    "problem": "DRM options: Adobe ACS is legacy; Readium LCP is an ISO standard (ISO/IEC 23078-2:2024) with yearly certification fee and no per-transaction cost.",
+    "competitors": [
+      "Adobe ACS",
+      "Readium LCP",
+      "Social DRM vendors"
+    ],
+    "sources": [
+      {
+        "title": "EDRLab Readium LCP",
+        "url": "https://www.edrlab.org/readium-lcp/"
+      }
+    ],
+    "evidence_strength": "strong",
+    "severity": "high",
+    "workarounds": "Accept Adobe DRM or watermarking",
+    "saga_solution": "Support LCP for publishers who require it; watermarking default",
+    "complexity": "L"
+  },
+  {
+    "id": "E-017",
+    "stakeholder": "Publishers",
+    "problem": "Big-five and most trade catalog cannot be sold without distribution contracts, agency pricing terms and approved DRM.",
+    "competitors": [
+      "Amazon",
+      "Apple",
+      "Kobo",
+      "Bookshop.org"
+    ],
+    "sources": [
+      {
+        "title": "Publishers Weekly: Bookshop.org debuts e-book platform",
+        "url": "https://www.publishersweekly.com/pw/print/20250203/96906-bookshop-org-debuts-its-e-book-platform.html"
+      },
+      {
+        "title": "EDRLab Readium LCP",
+        "url": "https://www.edrlab.org/readium-lcp/"
+      }
+    ],
+    "evidence_strength": "moderate",
+    "severity": "high",
+    "workarounds": "n/a",
+    "saga_solution": "Start with indie/small-press and public-domain catalog; pursue distributor deals later",
+    "complexity": "XL"
+  },
+  {
+    "id": "E-018",
+    "stakeholder": "Publishers",
+    "problem": "Reporting pain: payment and sales reports arrive monthly with long lag; library reports differ again.",
+    "competitors": [
+      "Ingram CoreSource",
+      "Firebrand"
+    ],
+    "sources": [
+      {
+        "title": "KDP: when will I get paid",
+        "url": "https://kdp.amazon.com/en_US/help/topic/GK2MKZUL6U3SFBPZ"
+      },
+      {
+        "title": "Draft2Digital FAQ",
+        "url": "https://draft2digital.com/faq/"
+      }
+    ],
+    "evidence_strength": "weak",
+    "severity": "medium",
+    "workarounds": "Spreadsheets, royalty software",
+    "saga_solution": "Per-title daily reports and API export",
+    "complexity": "M"
+  },
+  {
+    "id": "E-019",
+    "stakeholder": "Indie bookstores",
+    "problem": "Bookshop.org (launched ebooks 2025-01-28) gives stores 30% of sale on affiliate purchases and 10% pool for unattributed sales; but iOS rules forced web-only purchase.",
+    "competitors": [
+      "Bookshop.org",
+      "Libro.fm (audio)"
+    ],
+    "sources": [
+      {
+        "title": "Publishers Weekly: Bookshop.org debuts e-book platform",
+        "url": "https://www.publishersweekly.com/pw/print/20250203/96906-bookshop-org-debuts-its-e-book-platform.html"
+      }
+    ],
+    "evidence_strength": "strong",
+    "severity": "high",
+    "workarounds": "Send customers to Bookshop.org",
+    "saga_solution": "Partner rather than compete: let stores curate shelves and earn affiliate share in SAGA",
+    "complexity": "M"
+  },
+  {
+    "id": "E-020",
+    "stakeholder": "Indie bookstores",
+    "problem": "Bookshop.org ebooks cannot be read on Kindle and indie self-published titles were not available at launch.",
+    "competitors": [
+      "Bookshop.org"
+    ],
+    "sources": [
+      {
+        "title": "Kindlepreneur: Bookshop.org ebook platform",
+        "url": "https://kindlepreneur.com/bookshop-org-ebook-platform/"
+      },
+      {
+        "title": "Publishers Weekly: Bookshop.org debuts e-book platform",
+        "url": "https://www.publishersweekly.com/pw/print/20250203/96906-bookshop-org-debuts-its-e-book-platform.html"
+      }
+    ],
+    "evidence_strength": "moderate",
+    "severity": "medium",
+    "workarounds": "Export EPUB to other apps",
+    "saga_solution": "Indie-author catalog plus DRM-free EPUB export to any reader",
+    "complexity": "M"
+  },
+  {
+    "id": "E-021",
+    "stakeholder": "Indie bookstores",
+    "problem": "Previous indie ebook partners churned: ABA's Hummingbird integration ended 2022-09-30 after an acquisition; Kobo partnership (from 2012) preceded it.",
+    "competitors": [
+      "Hummingbird",
+      "Kobo",
+      "Bookshop.org"
+    ],
+    "sources": [
+      {
+        "title": "ABA: Hummingbird no longer on IndieCommerce",
+        "url": "https://bookweb.org/civicrm/mailing/view?id=6516"
+      },
+      {
+        "title": "Shelf Awareness: ABA-Hummingbird partnership (2018)",
+        "url": "https://www.shelf-awareness.com/theshelf/2018-10-11/aba_hummingbird_digital_media_in_e-book_sales_partnership.html"
+      }
+    ],
+    "evidence_strength": "moderate",
+    "severity": "medium",
+    "workarounds": "Rely on Bookshop.org",
+    "saga_solution": "Durable data portability guarantees for stores (customer lists, libraries survive SAGA changes)",
+    "complexity": "M"
+  },
+  {
+    "id": "E-022",
+    "stakeholder": "Indie bookstores",
+    "problem": "Libro.fm proves stores will promote a digital partner that shares revenue, but its exact share is not public on its site.",
+    "competitors": [
+      "Libro.fm"
+    ],
+    "sources": [
+      {
+        "title": "Libro.fm about",
+        "url": "https://libro.fm/about"
+      }
+    ],
+    "evidence_strength": "weak",
+    "severity": "low",
+    "workarounds": "n/a",
+    "saga_solution": "Transparent published store share",
+    "complexity": "S"
+  },
+  {
+    "id": "E-023",
+    "stakeholder": "Education",
+    "problem": "Instructors pay or pass on per-student fees for social annotation (Perusall $5-$25 per student, institutional licenses).",
+    "competitors": [
+      "Perusall",
+      "Hypothesis",
+      "VitalSource"
+    ],
+    "sources": [
+      {
+        "title": "Perusall pricing",
+        "url": "https://www.perusall.com/pricing"
+      }
+    ],
+    "evidence_strength": "strong",
+    "severity": "medium",
+    "workarounds": "Free Hypothesis, PDFs in LMS",
+    "saga_solution": "Free annotation on owned books; institutional plan for LMS integration",
+    "complexity": "L"
+  },
+  {
+    "id": "E-024",
+    "stakeholder": "Education",
+    "problem": "Automatic textbook billing ('inclusive access') criticised for opt-out billing and access that expires.",
+    "competitors": [
+      "VitalSource",
+      "RedShelf",
+      "Cengage"
+    ],
+    "sources": [
+      {
+        "title": "US PIRG: Automatic textbook billing",
+        "url": "https://pirg.org/edfund/resources/automatic-textbooks-billing-an-offer-students-cant-refuse/"
+      },
+      {
+        "title": "CARL statement on automatic textbook billing",
+        "url": "https://www.carl-abrc.ca/wp-content/uploads/2024/03/CARL_Statement_AutomaticTextbookBillingModels_EN.docx.pdf"
+      }
+    ],
+    "evidence_strength": "moderate",
+    "severity": "high",
+    "workarounds": "Opt-out, used print, OER",
+    "saga_solution": "Owned, non-expiring files and OER-friendly pricing; avoid auto-billing models",
+    "complexity": "L"
+  },
+  {
+    "id": "E-025",
+    "stakeholder": "Education",
+    "problem": "Reading analytics in courseware raise FERPA/privacy concerns; rights transfer to students at 18/postsecondary.",
+    "competitors": [
+      "VitalSource",
+      "Perusall"
+    ],
+    "sources": [
+      {
+        "title": "US ED: What is FERPA",
+        "url": "https://studentprivacy.ed.gov/faq/what-ferpa"
+      }
+    ],
+    "evidence_strength": "moderate",
+    "severity": "high",
+    "workarounds": "Institution DPAs",
+    "saga_solution": "Aggregate-only, opt-in analytics; no per-student reading surveillance sold to third parties",
+    "complexity": "M"
+  },
+  {
+    "id": "E-026",
+    "stakeholder": "Education",
+    "problem": "Annotations are locked in proprietary formats; W3C Web Annotation Data Model (Recommendation, 2017) exists but few readers export it.",
+    "competitors": [
+      "Hypothesis",
+      "Zotero",
+      "Kindle"
+    ],
+    "sources": [
+      {
+        "title": "W3C Web Annotation Data Model",
+        "url": "https://www.w3.org/TR/annotation-model/"
+      }
+    ],
+    "evidence_strength": "strong",
+    "severity": "medium",
+    "workarounds": "Copy-paste, Zotero PDF annotations",
+    "saga_solution": "Store and export highlights as W3C annotations plus BibTeX/RIS/CSL-JSON citations",
+    "complexity": "M"
+  },
+  {
+    "id": "E-027",
+    "stakeholder": "Readers",
+    "problem": "Ebooks bought on most platforms are licenses tied to one app; portability is limited.",
+    "competitors": [
+      "Kindle",
+      "Apple Books",
+      "Kobo"
+    ],
+    "sources": [
+      {
+        "title": "KDP DRM and EPUB/PDF downloads",
+        "url": "https://kdp.amazon.com/en_US/help/topic/GDDXGH9VR22ACM8U"
+      },
+      {
+        "title": "Kindlepreneur: Bookshop.org ebook platform",
+        "url": "https://kindlepreneur.com/bookshop-org-ebook-platform/"
+      }
+    ],
+    "evidence_strength": "moderate",
+    "severity": "high",
+    "workarounds": "Calibre, DRM-free stores",
+    "saga_solution": "DRM-free-by-default library with EPUB download and reader-owned backups",
+    "complexity": "M"
+  },
+  {
+    "id": "E-028",
+    "stakeholder": "Readers",
+    "problem": "Library ebooks have long holds because libraries pay ~$55+ for 2-year single-user licenses vs ~$13 consumer price.",
+    "competitors": [
+      "OverDrive/Libby",
+      "hoopla"
+    ],
+    "sources": [
+      {
+        "title": "Urban Libraries Council: E-Book Pricing Crisis 2026",
+        "url": "https://www.urbanlibraries.org/files/E-Book-Pricing-Crisis_2026.pdf"
+      }
+    ],
+    "evidence_strength": "strong",
+    "severity": "high",
+    "workarounds": "Buy, wait, or use hoopla",
+    "saga_solution": "Do not compete with libraries; offer indie titles to libraries on fair perpetual/metered terms later",
+    "complexity": "L"
+  },
+  {
+    "id": "E-029",
+    "stakeholder": "Marketplace",
+    "problem": "Amazon dominates US ebooks (Amazon-claimed 67% of US digital book sales; estimate, not audited).",
+    "competitors": [
+      "Amazon"
+    ],
+    "sources": [
+      {
+        "title": "Good e-Reader: Amazon dominant in ebook sales (claimed 67%)",
+        "url": "https://goodereader.com/blog/electronic-readers/amazon-is-the-dominant-player-in-ebook-sales"
+      }
+    ],
+    "evidence_strength": "weak",
+    "severity": "high",
+    "workarounds": "n/a",
+    "saga_solution": "Niche positioning (ownership, clubs, indie) rather than head-on competition",
+    "complexity": "XL"
+  },
+  {
+    "id": "E-030",
+    "stakeholder": "Marketplace",
+    "problem": "US ebook market is small and flat: AAP reports $2.2B ebook revenue in 2025 (+3.2%).",
+    "competitors": [
+      "Amazon",
+      "Apple",
+      "Kobo"
+    ],
+    "sources": [
+      {
+        "title": "AAP StatShot annual 2025",
+        "url": "https://publishers.org/news/aap-statshot-annual-report-publishing-revenues-totaled-33-4-billion-for-calendar-year-2025/"
+      }
+    ],
+    "evidence_strength": "strong",
+    "severity": "medium",
+    "workarounds": "n/a",
+    "saga_solution": "Revenue beyond book sales (tools, hardware, institutional)",
+    "complexity": "M"
+  },
+  {
+    "id": "E-031",
+    "stakeholder": "Marketplace",
+    "problem": "iOS in-app purchases cost up to 30%; since the 2025-04-30 Epic order US apps may link out (Kindle added 'Get Book'), but the Ninth Circuit (2025-12-11) allows Apple a yet-to-be-set commission.",
+    "competitors": [
+      "Apple App Store",
+      "Google Play"
+    ],
+    "sources": [
+      {
+        "title": "MacRumors: Kindle app Get Book button (May 2025)",
+        "url": "https://www.macrumors.com/2025/05/06/kindle-app-gets-biggest-ios-change-in-a-decade/"
+      },
+      {
+        "title": "MacRumors: Ninth Circuit modifies Epic injunction (Dec 2025)",
+        "url": "https://www.macrumors.com/2025/12/11/APPLE-APP-STORE-FEES-EXTERNAL-PAYMENT-LINKS/"
+      }
+    ],
+    "evidence_strength": "strong",
+    "severity": "high",
+    "workarounds": "Web-only purchase",
+    "saga_solution": "Web checkout with US external link; budget for a future Apple link fee",
+    "complexity": "M"
+  },
+  {
+    "id": "E-032",
+    "stakeholder": "Marketplace",
+    "problem": "Fixed card fees make cheap ebooks expensive to process: Stripe 2.9%+30c is ~8.9% of a $4.99 sale; MoR 5%+50c is ~15%.",
+    "competitors": [
+      "Stripe",
+      "Paddle",
+      "Gumroad"
+    ],
+    "sources": [
+      {
+        "title": "Stripe pricing",
+        "url": "https://stripe.com/pricing"
+      },
+      {
+        "title": "Paddle pricing",
+        "url": "https://www.paddle.com/pricing"
+      }
+    ],
+    "evidence_strength": "strong",
+    "severity": "high",
+    "workarounds": "Higher prices, bundles",
+    "saga_solution": "Prepaid wallet / cart batching; keep take >= 15% at low price points",
+    "complexity": "M"
+  },
+  {
+    "id": "E-033",
+    "stakeholder": "Marketplace",
+    "problem": "Tax compliance: EU VAT is charged at buyer's country rate on ebooks; UK ebooks zero-rated since 2020-05-01.",
+    "competitors": [
+      "Paddle",
+      "Gumroad",
+      "Stripe Tax"
+    ],
+    "sources": [
+      {
+        "title": "KDP digital pricing page",
+        "url": "https://kdp.amazon.com/en_US/help/topic/G200634500"
+      },
+      {
+        "title": "Stripe pricing",
+        "url": "https://stripe.com/pricing"
+      },
+      {
+        "title": "Gumroad pricing",
+        "url": "https://gumroad.com/pricing"
+      }
+    ],
+    "evidence_strength": "strong",
+    "severity": "medium",
+    "workarounds": "Use an MoR",
+    "saga_solution": "MoR early, Stripe Tax later once volume justifies",
+    "complexity": "M"
+  },
+  {
+    "id": "E-034",
+    "stakeholder": "Authors",
+    "problem": "Google Play pays 70% in 60+ countries regardless of price after accepting new ToS; Apple pays 70% regardless of price with no delivery fee, undercutting KDP's band rules.",
+    "competitors": [
+      "Google Play Books",
+      "Apple Books"
+    ],
+    "sources": [
+      {
+        "title": "Google Play Books revenue split FAQ",
+        "url": "https://support.google.com/books/partner/answer/9331459?hl=en"
+      },
+      {
+        "title": "Apple Books for Authors",
+        "url": "https://authors.apple.com/"
+      }
+    ],
+    "evidence_strength": "strong",
+    "severity": "low",
+    "workarounds": "Go wide",
+    "saga_solution": "Match the 'any price, no delivery fee' norm",
+    "complexity": "S"
+  }
+]

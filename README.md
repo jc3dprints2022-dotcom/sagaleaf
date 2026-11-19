@@ -6,7 +6,8 @@ Published by **Proxima LLC** (Arizona, USA).
 |---|---|
 | `index.html` | Public waitlist landing page |
 | `privacy.html` | Privacy policy (linked in every footer) |
-| `saga-reader.html` | The reader app (unchanged; linked as "Open the reader") |
+| `saga-reader.html` | The reader app, compiled from `app/` (linked as "Open the reader"). Don't hand-edit it; rebuild it |
+| `app/` | Source of the reader app (Vite + React + TypeScript) |
 | `site.config.js` | **The one place** to change product name, device name, publisher, domain, contact email, colours, waitlist endpoint and policy date |
 | `site/` | Shared CSS and the small script that applies the config |
 | `server.js` | Zero-dependency Node server: serves the pages and stores waitlist sign-ups |
@@ -24,6 +25,20 @@ Open http://localhost:8080. Sign-ups are appended to `data/waitlist.jsonl` (one 
 Use another port with `PORT=3000 node server.js`.
 
 Opening `index.html` straight from disk also works for viewing, but the sign-up form needs the server.
+
+## Rebuilding the reader
+
+`saga-reader.html` is a single self-contained file built from `app/`. Needs Node 20 or newer.
+
+```bash
+cd app
+npm ci
+npm test
+npm run build:standalone   # -> app/dist-standalone/saga-reader.html
+npm run publish:site       # copies it to ./saga-reader.html at the repo root
+```
+
+Commit the new root `saga-reader.html`; GitHub Pages serves it at `/saga-reader.html`. Discover's Gutendex/Gutenberg requests go through the CORS proxy set in `app/src/app/gutendex.ts`; the optional sign-in config (`SAGA_AUTH`) is at the top of `app/index.html`; product switches are in `app/src/app/features.ts`.
 
 ## Rename, re-colour, re-point
 

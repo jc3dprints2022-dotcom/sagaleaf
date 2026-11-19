@@ -1,0 +1,660 @@
+{
+ "products": [
+  "Amazon Kindle",
+  "Kobo",
+  "Apple Books",
+  "Google Play Books",
+  "Readwise Reader",
+  "Moon+ Reader",
+  "Calibre",
+  "KOReader",
+  "BookFusion",
+  "PocketBook",
+  "Libby",
+  "Readest",
+  "Thorium",
+  "Xteink X4 (stock/CrossPoint)"
+ ],
+ "features": [
+  {
+   "feature": "EPUB sideload",
+   "values": {
+    "Amazon Kindle": "partial",
+    "Kobo": "yes",
+    "Apple Books": "yes",
+    "Google Play Books": "yes",
+    "Readwise Reader": "yes",
+    "Moon+ Reader": "yes",
+    "Calibre": "yes",
+    "KOReader": "yes",
+    "BookFusion": "yes",
+    "PocketBook": "yes",
+    "Libby": "no",
+    "Readest": "yes",
+    "Thorium": "yes",
+    "Xteink X4 (stock/CrossPoint)": "yes"
+   },
+   "note": "Kindle: EPUB only via Send-to-Kindle server conversion, not USB. Libby: loans only."
+  },
+  {
+   "feature": "PDF",
+   "values": {
+    "Amazon Kindle": "yes",
+    "Kobo": "yes",
+    "Apple Books": "yes",
+    "Google Play Books": "yes",
+    "Readwise Reader": "yes",
+    "Moon+ Reader": "partial",
+    "Calibre": "yes",
+    "KOReader": "yes",
+    "BookFusion": "yes",
+    "PocketBook": "yes",
+    "Libby": "no",
+    "Readest": "yes",
+    "Thorium": "yes",
+    "Xteink X4 (stock/CrossPoint)": "no"
+   },
+   "note": "Moon+ PDF needs Pro (Yahoo review). X4 stock supports TXT/EPUB/images only (Digital Trends)."
+  },
+  {
+   "feature": "TXT",
+   "values": {
+    "Amazon Kindle": "partial",
+    "Kobo": "yes",
+    "Apple Books": "no",
+    "Google Play Books": "no",
+    "Readwise Reader": "unknown",
+    "Moon+ Reader": "yes",
+    "Calibre": "yes",
+    "KOReader": "yes",
+    "BookFusion": "unknown",
+    "PocketBook": "yes",
+    "Libby": "no",
+    "Readest": "yes",
+    "Thorium": "unknown",
+    "Xteink X4 (stock/CrossPoint)": "yes"
+   },
+   "note": "Unknown where not confirmed."
+  },
+  {
+   "feature": "DRM-free export of own files",
+   "values": {
+    "Amazon Kindle": "partial",
+    "Kobo": "partial",
+    "Apple Books": "unknown",
+    "Google Play Books": "partial",
+    "Readwise Reader": "unknown",
+    "Moon+ Reader": "yes",
+    "Calibre": "yes",
+    "KOReader": "yes",
+    "BookFusion": "unknown",
+    "PocketBook": "yes",
+    "Libby": "no",
+    "Readest": "yes",
+    "Thorium": "yes",
+    "Xteink X4 (stock/CrossPoint)": "yes"
+   },
+   "note": "Kindle: web USB download removed Feb 2025; DRM-free KDP titles downloadable as EPUB/PDF from 2026."
+  },
+  {
+   "feature": "Cross-device position sync for sideloaded books",
+   "values": {
+    "Amazon Kindle": "partial",
+    "Kobo": "no",
+    "Apple Books": "yes",
+    "Google Play Books": "yes",
+    "Readwise Reader": "yes",
+    "Moon+ Reader": "yes",
+    "Calibre": "no",
+    "KOReader": "partial",
+    "BookFusion": "yes",
+    "PocketBook": "unknown",
+    "Libby": "no",
+    "Readest": "yes",
+    "Thorium": "no",
+    "Xteink X4 (stock/CrossPoint)": "partial"
+   },
+   "note": "Kindle only for Send-to-Kindle docs; Kobo none (The eBook Reader 2024/2026); KOReader progress-only server; Moon+ via Dropbox/WebDAV; X4 via CrossPoint KOReader sync."
+  },
+  {
+   "feature": "Highlight export (formats)",
+   "values": {
+    "Amazon Kindle": "partial",
+    "Kobo": "partial",
+    "Apple Books": "partial",
+    "Google Play Books": "yes",
+    "Readwise Reader": "yes",
+    "Moon+ Reader": "unknown",
+    "Calibre": "yes",
+    "KOReader": "yes",
+    "BookFusion": "unknown",
+    "PocketBook": "unknown",
+    "Libby": "unknown",
+    "Readest": "unknown",
+    "Thorium": "unknown",
+    "Xteink X4 (stock/CrossPoint)": "unknown"
+   },
+   "note": "Kindle has publisher clipping limits; Play Books to Google Docs; Readwise to Markdown/Notion/Obsidian; KOReader has built-in exporters incl. Readwise."
+  },
+  {
+   "feature": "Annotation sync for sideloaded books",
+   "values": {
+    "Amazon Kindle": "partial",
+    "Kobo": "no",
+    "Apple Books": "yes",
+    "Google Play Books": "yes",
+    "Readwise Reader": "yes",
+    "Moon+ Reader": "yes",
+    "Calibre": "no",
+    "KOReader": "partial",
+    "BookFusion": "yes",
+    "PocketBook": "unknown",
+    "Libby": "no",
+    "Readest": "yes",
+    "Thorium": "no",
+    "Xteink X4 (stock/CrossPoint)": "no"
+   },
+   "note": "KOReader needs plugins (AnnotationSync, Readest server)."
+  },
+  {
+   "feature": "Works fully offline",
+   "values": {
+    "Amazon Kindle": "partial",
+    "Kobo": "yes",
+    "Apple Books": "yes",
+    "Google Play Books": "partial",
+    "Readwise Reader": "partial",
+    "Moon+ Reader": "partial",
+    "Calibre": "yes",
+    "KOReader": "yes",
+    "BookFusion": "partial",
+    "PocketBook": "partial",
+    "Libby": "partial",
+    "Readest": "partial",
+    "Thorium": "yes",
+    "Xteink X4 (stock/CrossPoint)": "yes"
+   },
+   "note": "Kindle sideload-deletion bug after airplane mode; Readwise needs pre-caching; Readest PWA lacks offline."
+  },
+  {
+   "feature": "No account required",
+   "values": {
+    "Amazon Kindle": "no",
+    "Kobo": "partial",
+    "Apple Books": "no",
+    "Google Play Books": "no",
+    "Readwise Reader": "no",
+    "Moon+ Reader": "yes",
+    "Calibre": "yes",
+    "KOReader": "yes",
+    "BookFusion": "no",
+    "PocketBook": "yes",
+    "Libby": "no",
+    "Readest": "partial",
+    "Thorium": "yes",
+    "Xteink X4 (stock/CrossPoint)": "yes"
+   },
+   "note": "Kobo setup can be skipped only with workarounds; Apple Books needs Apple ID for sync; Readest needs account only for sync."
+  },
+  {
+   "feature": "Open source",
+   "values": {
+    "Amazon Kindle": "no",
+    "Kobo": "no",
+    "Apple Books": "no",
+    "Google Play Books": "no",
+    "Readwise Reader": "no",
+    "Moon+ Reader": "no",
+    "Calibre": "yes",
+    "KOReader": "yes",
+    "BookFusion": "no",
+    "PocketBook": "no",
+    "Libby": "no",
+    "Readest": "yes",
+    "Thorium": "yes",
+    "Xteink X4 (stock/CrossPoint)": "partial"
+   },
+   "note": "X4: stock closed, CrossPoint firmware open."
+  },
+  {
+   "feature": "Library lending",
+   "values": {
+    "Amazon Kindle": "partial",
+    "Kobo": "yes",
+    "Apple Books": "no",
+    "Google Play Books": "no",
+    "Readwise Reader": "no",
+    "Moon+ Reader": "no",
+    "Calibre": "no",
+    "KOReader": "no",
+    "BookFusion": "no",
+    "PocketBook": "unknown",
+    "Libby": "yes",
+    "Readest": "no",
+    "Thorium": "partial",
+    "Xteink X4 (stock/CrossPoint)": "no"
+   },
+   "note": "Kindle: Libby delivery US only; Kobo: built-in OverDrive; Thorium: LCP library loans where offered."
+  },
+  {
+   "feature": "Store",
+   "values": {
+    "Amazon Kindle": "yes",
+    "Kobo": "yes",
+    "Apple Books": "yes",
+    "Google Play Books": "yes",
+    "Readwise Reader": "no",
+    "Moon+ Reader": "no",
+    "Calibre": "no",
+    "KOReader": "no",
+    "BookFusion": "unknown",
+    "PocketBook": "yes",
+    "Libby": "no",
+    "Readest": "no",
+    "Thorium": "no",
+    "Xteink X4 (stock/CrossPoint)": "no"
+   },
+   "note": ""
+  },
+  {
+   "feature": "TTS",
+   "values": {
+    "Amazon Kindle": "partial",
+    "Kobo": "no",
+    "Apple Books": "partial",
+    "Google Play Books": "yes",
+    "Readwise Reader": "yes",
+    "Moon+ Reader": "yes",
+    "Calibre": "yes",
+    "KOReader": "unknown",
+    "BookFusion": "yes",
+    "PocketBook": "yes",
+    "Libby": "unknown",
+    "Readest": "yes",
+    "Thorium": "yes",
+    "Xteink X4 (stock/CrossPoint)": "no"
+   },
+   "note": "Kindle: VoiceView/Assistive Reader, Bluetooth needed, reportedly purchased books only; Moon+ TTS is Pro; Kobo lacks general TTS per user comments."
+  },
+  {
+   "feature": "Dyslexia-friendly font",
+   "values": {
+    "Amazon Kindle": "yes",
+    "Kobo": "unknown",
+    "Apple Books": "unknown",
+    "Google Play Books": "unknown",
+    "Readwise Reader": "unknown",
+    "Moon+ Reader": "unknown",
+    "Calibre": "partial",
+    "KOReader": "partial",
+    "BookFusion": "unknown",
+    "PocketBook": "unknown",
+    "Libby": "partial",
+    "Readest": "unknown",
+    "Thorium": "unknown",
+    "Xteink X4 (stock/CrossPoint)": "no"
+   },
+   "note": "Kindle OpenDyslexic official since 2016; OverDrive added dyslexic font option 2015; others via custom fonts."
+  },
+  {
+   "feature": "Custom fonts",
+   "values": {
+    "Amazon Kindle": "yes",
+    "Kobo": "yes",
+    "Apple Books": "unknown",
+    "Google Play Books": "no",
+    "Readwise Reader": "unknown",
+    "Moon+ Reader": "yes",
+    "Calibre": "yes",
+    "KOReader": "yes",
+    "BookFusion": "unknown",
+    "PocketBook": "yes",
+    "Libby": "no",
+    "Readest": "partial",
+    "Thorium": "unknown",
+    "Xteink X4 (stock/CrossPoint)": "partial"
+   },
+   "note": "Readest custom fonts was an open request (#237)."
+  },
+  {
+   "feature": "Collections/tags",
+   "values": {
+    "Amazon Kindle": "yes",
+    "Kobo": "yes",
+    "Apple Books": "yes",
+    "Google Play Books": "yes",
+    "Readwise Reader": "yes",
+    "Moon+ Reader": "yes",
+    "Calibre": "yes",
+    "KOReader": "yes",
+    "BookFusion": "yes",
+    "PocketBook": "yes",
+    "Libby": "yes",
+    "Readest": "unknown",
+    "Thorium": "unknown",
+    "Xteink X4 (stock/CrossPoint)": "no"
+   },
+   "note": ""
+  },
+  {
+   "feature": "Full-text search across library",
+   "values": {
+    "Amazon Kindle": "unknown",
+    "Kobo": "unknown",
+    "Apple Books": "unknown",
+    "Google Play Books": "unknown",
+    "Readwise Reader": "unknown",
+    "Moon+ Reader": "unknown",
+    "Calibre": "yes",
+    "KOReader": "unknown",
+    "BookFusion": "unknown",
+    "PocketBook": "unknown",
+    "Libby": "unknown",
+    "Readest": "unknown",
+    "Thorium": "unknown",
+    "Xteink X4 (stock/CrossPoint)": "unknown"
+   },
+   "note": "Only Calibre confirmed (full-text search). Not verified for others."
+  },
+  {
+   "feature": "Reading stats",
+   "values": {
+    "Amazon Kindle": "unknown",
+    "Kobo": "yes",
+    "Apple Books": "yes",
+    "Google Play Books": "unknown",
+    "Readwise Reader": "unknown",
+    "Moon+ Reader": "unknown",
+    "Calibre": "unknown",
+    "KOReader": "yes",
+    "BookFusion": "unknown",
+    "PocketBook": "unknown",
+    "Libby": "unknown",
+    "Readest": "unknown",
+    "Thorium": "unknown",
+    "Xteink X4 (stock/CrossPoint)": "no"
+   },
+   "note": "KOReader statistics plugin; Kobo shows reading stats; Apple Books has reading goals."
+  },
+  {
+   "feature": "Ads/upsell in reading UI (yes = bad)",
+   "values": {
+    "Amazon Kindle": "yes",
+    "Kobo": "no",
+    "Apple Books": "partial",
+    "Google Play Books": "partial",
+    "Readwise Reader": "partial",
+    "Moon+ Reader": "no",
+    "Calibre": "no",
+    "KOReader": "no",
+    "BookFusion": "unknown",
+    "PocketBook": "unknown",
+    "Libby": "no",
+    "Readest": "unknown",
+    "Thorium": "unknown",
+    "Xteink X4 (stock/CrossPoint)": "no"
+   },
+   "note": "Kindle lockscreen ads unless paid + recommendation-heavy home; Moon+ free has ads; Kobo shows no lockscreen ads (Laptop Mag)."
+  },
+  {
+   "feature": "Telemetry on reading behaviour (yes = bad)",
+   "values": {
+    "Amazon Kindle": "yes",
+    "Kobo": "partial",
+    "Apple Books": "unknown",
+    "Google Play Books": "unknown",
+    "Readwise Reader": "unknown",
+    "Moon+ Reader": "unknown",
+    "Calibre": "unknown",
+    "KOReader": "no",
+    "BookFusion": "unknown",
+    "PocketBook": "unknown",
+    "Libby": "unknown",
+    "Readest": "unknown",
+    "Thorium": "unknown",
+    "Xteink X4 (stock/CrossPoint)": "unknown"
+   },
+   "note": "Kindle per Nullsweep traffic analysis; Kobo telemetry noted by an LWN commenter (weak)."
+  },
+  {
+   "feature": "Price: core reading free",
+   "values": {
+    "Amazon Kindle": "yes",
+    "Kobo": "yes",
+    "Apple Books": "yes",
+    "Google Play Books": "yes",
+    "Readwise Reader": "no",
+    "Moon+ Reader": "partial",
+    "Calibre": "yes",
+    "KOReader": "yes",
+    "BookFusion": "partial",
+    "PocketBook": "partial",
+    "Libby": "partial",
+    "Readest": "yes",
+    "Thorium": "yes",
+    "Xteink X4 (stock/CrossPoint)": "partial"
+   },
+   "note": "Kindle/Kobo apps free, devices paid; Readwise ~$10/mo; Moon+ Pro one-off; Readest paid plans from $5/mo; BookFusion subscription for larger uploads; X4 ~$69 device."
+  },
+  {
+   "feature": "Web reader",
+   "values": {
+    "Amazon Kindle": "yes",
+    "Kobo": "no",
+    "Apple Books": "no",
+    "Google Play Books": "yes",
+    "Readwise Reader": "yes",
+    "Moon+ Reader": "no",
+    "Calibre": "partial",
+    "KOReader": "no",
+    "BookFusion": "yes",
+    "PocketBook": "unknown",
+    "Libby": "yes",
+    "Readest": "yes",
+    "Thorium": "no",
+    "Xteink X4 (stock/CrossPoint)": "no"
+   },
+   "note": "Calibre content server includes a browser viewer."
+  },
+  {
+   "feature": "Android",
+   "values": {
+    "Amazon Kindle": "yes",
+    "Kobo": "yes",
+    "Apple Books": "no",
+    "Google Play Books": "yes",
+    "Readwise Reader": "yes",
+    "Moon+ Reader": "yes",
+    "Calibre": "no",
+    "KOReader": "yes",
+    "BookFusion": "yes",
+    "PocketBook": "yes",
+    "Libby": "yes",
+    "Readest": "yes",
+    "Thorium": "no",
+    "Xteink X4 (stock/CrossPoint)": "no"
+   },
+   "note": ""
+  },
+  {
+   "feature": "iOS",
+   "values": {
+    "Amazon Kindle": "yes",
+    "Kobo": "yes",
+    "Apple Books": "yes",
+    "Google Play Books": "yes",
+    "Readwise Reader": "yes",
+    "Moon+ Reader": "no",
+    "Calibre": "no",
+    "KOReader": "no",
+    "BookFusion": "yes",
+    "PocketBook": "yes",
+    "Libby": "yes",
+    "Readest": "yes",
+    "Thorium": "no",
+    "Xteink X4 (stock/CrossPoint)": "no"
+   },
+   "note": ""
+  },
+  {
+   "feature": "Desktop",
+   "values": {
+    "Amazon Kindle": "yes",
+    "Kobo": "partial",
+    "Apple Books": "partial",
+    "Google Play Books": "yes",
+    "Readwise Reader": "yes",
+    "Moon+ Reader": "no",
+    "Calibre": "yes",
+    "KOReader": "partial",
+    "BookFusion": "yes",
+    "PocketBook": "unknown",
+    "Libby": "partial",
+    "Readest": "yes",
+    "Thorium": "yes",
+    "Xteink X4 (stock/CrossPoint)": "no"
+   },
+   "note": "Apple Books Mac only; KOReader desktop builds mainly for development."
+  },
+  {
+   "feature": "E-ink device support",
+   "values": {
+    "Amazon Kindle": "yes",
+    "Kobo": "yes",
+    "Apple Books": "no",
+    "Google Play Books": "partial",
+    "Readwise Reader": "partial",
+    "Moon+ Reader": "partial",
+    "Calibre": "partial",
+    "KOReader": "yes",
+    "BookFusion": "partial",
+    "PocketBook": "yes",
+    "Libby": "partial",
+    "Readest": "unknown",
+    "Thorium": "no",
+    "Xteink X4 (stock/CrossPoint)": "yes"
+   },
+   "note": "Android-based e-ink (Boox) can run Android apps."
+  },
+  {
+   "feature": "OPDS",
+   "values": {
+    "Amazon Kindle": "no",
+    "Kobo": "no",
+    "Apple Books": "no",
+    "Google Play Books": "no",
+    "Readwise Reader": "unknown",
+    "Moon+ Reader": "yes",
+    "Calibre": "yes",
+    "KOReader": "yes",
+    "BookFusion": "unknown",
+    "PocketBook": "unknown",
+    "Libby": "no",
+    "Readest": "unknown",
+    "Thorium": "yes",
+    "Xteink X4 (stock/CrossPoint)": "unknown"
+   },
+   "note": "Moon+ OPDS per FAQ."
+  },
+  {
+   "feature": "Calibre integration",
+   "values": {
+    "Amazon Kindle": "partial",
+    "Kobo": "yes",
+    "Apple Books": "no",
+    "Google Play Books": "no",
+    "Readwise Reader": "no",
+    "Moon+ Reader": "partial",
+    "Calibre": "yes",
+    "KOReader": "yes",
+    "BookFusion": "yes",
+    "PocketBook": "yes",
+    "Libby": "no",
+    "Readest": "unknown",
+    "Thorium": "unknown",
+    "Xteink X4 (stock/CrossPoint)": "partial"
+   },
+   "note": "BookFusion Calibre plugin; CrossPoint supports Calibre wireless."
+  },
+  {
+   "feature": "PDF reflow",
+   "values": {
+    "Amazon Kindle": "partial",
+    "Kobo": "no",
+    "Apple Books": "no",
+    "Google Play Books": "unknown",
+    "Readwise Reader": "unknown",
+    "Moon+ Reader": "unknown",
+    "Calibre": "partial",
+    "KOReader": "yes",
+    "BookFusion": "unknown",
+    "PocketBook": "unknown",
+    "Libby": "no",
+    "Readest": "unknown",
+    "Thorium": "unknown",
+    "Xteink X4 (stock/CrossPoint)": "no"
+   },
+   "note": "KOReader reflow is a key power-user draw."
+  },
+  {
+   "feature": "Footnote popups",
+   "values": {
+    "Amazon Kindle": "partial",
+    "Kobo": "unknown",
+    "Apple Books": "yes",
+    "Google Play Books": "unknown",
+    "Readwise Reader": "unknown",
+    "Moon+ Reader": "unknown",
+    "Calibre": "unknown",
+    "KOReader": "yes",
+    "BookFusion": "unknown",
+    "PocketBook": "unknown",
+    "Libby": "unknown",
+    "Readest": "unknown",
+    "Thorium": "unknown",
+    "Xteink X4 (stock/CrossPoint)": "unknown"
+   },
+   "note": "Kindle pop-ups show only first paragraph (user reports)."
+  },
+  {
+   "feature": "Vertical scroll mode",
+   "values": {
+    "Amazon Kindle": "unknown",
+    "Kobo": "unknown",
+    "Apple Books": "yes",
+    "Google Play Books": "unknown",
+    "Readwise Reader": "yes",
+    "Moon+ Reader": "yes",
+    "Calibre": "unknown",
+    "KOReader": "yes",
+    "BookFusion": "unknown",
+    "PocketBook": "unknown",
+    "Libby": "unknown",
+    "Readest": "unknown",
+    "Thorium": "unknown",
+    "Xteink X4 (stock/CrossPoint)": "unknown"
+   },
+   "note": ""
+  },
+  {
+   "feature": "Page-turn animation options",
+   "values": {
+    "Amazon Kindle": "unknown",
+    "Kobo": "unknown",
+    "Apple Books": "yes",
+    "Google Play Books": "unknown",
+    "Readwise Reader": "unknown",
+    "Moon+ Reader": "yes",
+    "Calibre": "unknown",
+    "KOReader": "unknown",
+    "BookFusion": "unknown",
+    "PocketBook": "unknown",
+    "Libby": "unknown",
+    "Readest": "unknown",
+    "Thorium": "unknown",
+    "Xteink X4 (stock/CrossPoint)": "unknown"
+   },
+   "note": "Apple restored curl option in iOS 16.4 after backlash."
+  }
+ ]
+}

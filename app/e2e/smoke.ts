@@ -1,0 +1,23 @@
+import { chromium } from 'playwright-core'
+const APP = process.env.APP ?? 'http://127.0.0.1:5173'
+const browser = await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox'] })
+const ctx = await browser.newContext({ viewport: { width: 1360, height: 860 }, deviceScaleFactor: 1 })
+const page = await ctx.newPage()
+const errs: string[] = []
+page.on('console', m => { if (m.type() === 'error' || m.type() === 'warning') errs.push(`${m.type()}: ${m.text().slice(0, 300)}`) })
+page.on('pageerror', e => errs.push('pageerror: ' + e.message))
+await page.goto(APP); await page.waitForTimeout(2500)
+await page.screenshot({ path: 'screenshots/_smoke-empty.png' })
+await page.getByRole('button', { name: /Add classic books/ }).click()
+await page.waitForSelector('text=Added 5 public-domain books', { timeout: 60000 }).catch(() => errs.push('no toast'))
+await page.waitForTimeout(800)
+await page.screenshot({ path: 'screenshots/_smoke-home.png' })
+await page.goto(APP + '/#/library'); await page.waitForTimeout(1200)
+await page.screenshot({ path: 'screenshots/_smoke-library.png' })
+await page.getByRole('link', { name: /Pride and Prejudice/ }).first().click(); await page.waitForTimeout(800)
+await page.screenshot({ path: 'screenshots/_smoke-book.png' })
+await page.getByRole('link', { name: /Start reading/ }).click()
+await page.waitForTimeout(4000)
+await page.screenshot({ path: 'screenshots/_smoke-reader.png' })
+console.log(errs.join('\n') || 'no console errors')
+await browser.close()

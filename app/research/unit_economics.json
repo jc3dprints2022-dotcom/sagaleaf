@@ -1,0 +1,337 @@
+{
+  "assumptions": {
+    "file_size_mb": {
+      "value": 2.0,
+      "source": "Speculation: typical text-only novel EPUB ~1-3 MB; assumption only"
+    },
+    "kdp_delivery_usd_per_mb": {
+      "value": 0.15,
+      "source": "https://kdp.amazon.com/en_US/help/topic/G200634500",
+      "as_of": "page last updated 2026-04-21"
+    },
+    "kdp_70_band_usd": {
+      "value": [
+        2.99,
+        12.99
+      ],
+      "source": "https://kdp.amazon.com/en_US/help/topic/G200634560",
+      "as_of": "ceiling raised from 9.99 effective 2026-07-07"
+    },
+    "kdp_70_rate": {
+      "value": 0.7,
+      "source": "https://kdp.amazon.com/en_US/help/topic/G200644210"
+    },
+    "kdp_35_rate": {
+      "value": 0.35,
+      "source": "https://kdp.amazon.com/en_US/help/topic/G200644210"
+    },
+    "kobo_rate_at_or_above_2_99": {
+      "value": 0.7,
+      "source": "https://kobowritinglife.zendesk.com/hc/en-us/articles/360058976032",
+      "as_of": "fetched 2026-11-16"
+    },
+    "apple_rate": {
+      "value": 0.7,
+      "source": "https://authors.apple.com/",
+      "as_of": "fetched 2026-11-16"
+    },
+    "d2d_cut_of_retail": {
+      "value": 0.1,
+      "source": "https://draft2digital.com/faq/",
+      "as_of": "fetched 2026-11-16; plus $20 one-time activation (new accounts) and $12/yr if <$100/yr royalties"
+    },
+    "stripe_pct": {
+      "value": 0.029,
+      "source": "https://stripe.com/pricing",
+      "as_of": "fetched 2026-11-17; +1.5% intl cards, +1% FX"
+    },
+    "stripe_fixed": {
+      "value": 0.3,
+      "source": "https://stripe.com/pricing"
+    },
+    "mor_pct": {
+      "value": 0.05,
+      "source": "https://www.paddle.com/pricing (Paddle 5%+50c); Lemon Squeezy same but closing to new sign-ups, shutdown 2027-03-31 per https://www.lemonsqueezy.com/pricing"
+    },
+    "mor_fixed": {
+      "value": 0.5,
+      "source": "https://www.paddle.com/pricing"
+    },
+    "gumroad_direct": {
+      "value": [
+        0.1,
+        0.5
+      ],
+      "source": "https://gumroad.com/pricing",
+      "note": "MoR, tax handled since 2025-01-01; 30% on Discover sales"
+    },
+    "payhip_free_pct": {
+      "value": 0.05,
+      "source": "https://payhip.com/pricing",
+      "note": "plus Stripe/PayPal fees"
+    },
+    "wallet_topup_usd": {
+      "value": 20.0,
+      "source": "Speculation: hypothetical SAGA prepaid wallet to amortize fixed card fee"
+    }
+  },
+  "rows": [
+    {
+      "channel": "KDP 70%",
+      "list_price": 4.99,
+      "platform_cut_pct": 34.2,
+      "delivery_or_processing_fee": 0.3,
+      "author_net": 3.28,
+      "platform_net": 1.71,
+      "notes": "author = 0.70*(P - delivery); delivery = $0.15/MB * 2 MB; platform_net = Amazon gross margin before its own costs"
+    },
+    {
+      "channel": "KDP 35%",
+      "list_price": 4.99,
+      "platform_cut_pct": 65,
+      "delivery_or_processing_fee": 0.0,
+      "author_net": 1.75,
+      "platform_net": 3.24,
+      "notes": "author = 0.35*P; no delivery fee"
+    },
+    {
+      "channel": "Kobo Writing Life",
+      "list_price": 4.99,
+      "platform_cut_pct": 30,
+      "delivery_or_processing_fee": 0.0,
+      "author_net": 3.49,
+      "platform_net": 1.5,
+      "notes": "author = 0.70*P (P >= $2.99)"
+    },
+    {
+      "channel": "Draft2Digital -> Apple/Kobo",
+      "list_price": 4.99,
+      "platform_cut_pct": 40,
+      "delivery_or_processing_fee": 0.0,
+      "author_net": 2.99,
+      "platform_net": 2.0,
+      "notes": "author = 0.70*P (retailer) - 0.10*P (D2D); platform_net = retailer 30% + D2D 10% combined. D2D-to-Amazon not modeled (rate unverified). Ignores $20 activation / $12 yr fees"
+    },
+    {
+      "channel": "Direct via Stripe (author's own store)",
+      "list_price": 4.99,
+      "platform_cut_pct": 8.9,
+      "delivery_or_processing_fee": 0.44,
+      "author_net": 4.55,
+      "platform_net": 0.0,
+      "notes": "author = P - (0.029*P + 0.30); author handles tax registration, delivery (e.g. BookFunnel $30-$300/yr), support"
+    },
+    {
+      "channel": "Direct via MoR (Paddle-type)",
+      "list_price": 4.99,
+      "platform_cut_pct": 15.0,
+      "delivery_or_processing_fee": 0.75,
+      "author_net": 4.24,
+      "platform_net": 0.0,
+      "notes": "author = P - (0.05*P + 0.50); MoR handles global VAT/sales tax"
+    },
+    {
+      "channel": "Gumroad direct",
+      "list_price": 4.99,
+      "platform_cut_pct": 20.0,
+      "delivery_or_processing_fee": 1.0,
+      "author_net": 3.99,
+      "platform_net": 1.0,
+      "notes": "author = P - (0.10*P + 0.50); Gumroad is MoR; platform_net shown gross (Gumroad pays its own processing)"
+    },
+    {
+      "channel": "SAGA 10% take, Stripe",
+      "list_price": 4.99,
+      "platform_cut_pct": 10.0,
+      "delivery_or_processing_fee": 0.44,
+      "author_net": 4.49,
+      "platform_net": 0.05,
+      "notes": "author = (1-0.1)*P; SAGA = 0.1*P - (0.029*P + 0.30); SAGA absorbs processing; tax compliance is SAGA's cost (not modeled)"
+    },
+    {
+      "channel": "SAGA 10% take, MoR",
+      "list_price": 4.99,
+      "platform_cut_pct": 10.0,
+      "delivery_or_processing_fee": 0.75,
+      "author_net": 4.49,
+      "platform_net": -0.25,
+      "notes": "author = (1-0.1)*P; SAGA = 0.1*P - (0.05*P + 0.50)"
+    },
+    {
+      "channel": "SAGA 15% take, Stripe",
+      "list_price": 4.99,
+      "platform_cut_pct": 15.0,
+      "delivery_or_processing_fee": 0.44,
+      "author_net": 4.24,
+      "platform_net": 0.3,
+      "notes": "author = (1-0.15)*P; SAGA = 0.15*P - (0.029*P + 0.30); SAGA absorbs processing; tax compliance is SAGA's cost (not modeled)"
+    },
+    {
+      "channel": "SAGA 15% take, MoR",
+      "list_price": 4.99,
+      "platform_cut_pct": 15.0,
+      "delivery_or_processing_fee": 0.75,
+      "author_net": 4.24,
+      "platform_net": -0.0,
+      "notes": "author = (1-0.15)*P; SAGA = 0.15*P - (0.05*P + 0.50)"
+    },
+    {
+      "channel": "SAGA 20% take, Stripe",
+      "list_price": 4.99,
+      "platform_cut_pct": 20.0,
+      "delivery_or_processing_fee": 0.44,
+      "author_net": 3.99,
+      "platform_net": 0.55,
+      "notes": "author = (1-0.2)*P; SAGA = 0.2*P - (0.029*P + 0.30); SAGA absorbs processing; tax compliance is SAGA's cost (not modeled)"
+    },
+    {
+      "channel": "SAGA 20% take, MoR",
+      "list_price": 4.99,
+      "platform_cut_pct": 20.0,
+      "delivery_or_processing_fee": 0.75,
+      "author_net": 3.99,
+      "platform_net": 0.25,
+      "notes": "author = (1-0.2)*P; SAGA = 0.2*P - (0.05*P + 0.50)"
+    },
+    {
+      "channel": "SAGA 15% take, Stripe + $20 prepaid wallet (Speculation)",
+      "list_price": 4.99,
+      "platform_cut_pct": 15.0,
+      "delivery_or_processing_fee": 0.22,
+      "author_net": 4.24,
+      "platform_net": 0.53,
+      "notes": "per-book processing = (0.029*20 + 0.30) * P/20 (fee on top-up allocated pro rata); ignores breakage/refund liability and money-transmitter/stored-value legal questions"
+    },
+    {
+      "channel": "KDP 70%",
+      "list_price": 9.99,
+      "platform_cut_pct": 32.1,
+      "delivery_or_processing_fee": 0.3,
+      "author_net": 6.78,
+      "platform_net": 3.21,
+      "notes": "author = 0.70*(P - delivery); delivery = $0.15/MB * 2 MB; platform_net = Amazon gross margin before its own costs"
+    },
+    {
+      "channel": "KDP 35%",
+      "list_price": 9.99,
+      "platform_cut_pct": 65,
+      "delivery_or_processing_fee": 0.0,
+      "author_net": 3.5,
+      "platform_net": 6.49,
+      "notes": "author = 0.35*P; no delivery fee"
+    },
+    {
+      "channel": "Kobo Writing Life",
+      "list_price": 9.99,
+      "platform_cut_pct": 30,
+      "delivery_or_processing_fee": 0.0,
+      "author_net": 6.99,
+      "platform_net": 3.0,
+      "notes": "author = 0.70*P (P >= $2.99)"
+    },
+    {
+      "channel": "Draft2Digital -> Apple/Kobo",
+      "list_price": 9.99,
+      "platform_cut_pct": 40,
+      "delivery_or_processing_fee": 0.0,
+      "author_net": 5.99,
+      "platform_net": 4.0,
+      "notes": "author = 0.70*P (retailer) - 0.10*P (D2D); platform_net = retailer 30% + D2D 10% combined. D2D-to-Amazon not modeled (rate unverified). Ignores $20 activation / $12 yr fees"
+    },
+    {
+      "channel": "Direct via Stripe (author's own store)",
+      "list_price": 9.99,
+      "platform_cut_pct": 5.9,
+      "delivery_or_processing_fee": 0.59,
+      "author_net": 9.4,
+      "platform_net": 0.0,
+      "notes": "author = P - (0.029*P + 0.30); author handles tax registration, delivery (e.g. BookFunnel $30-$300/yr), support"
+    },
+    {
+      "channel": "Direct via MoR (Paddle-type)",
+      "list_price": 9.99,
+      "platform_cut_pct": 10.0,
+      "delivery_or_processing_fee": 1.0,
+      "author_net": 8.99,
+      "platform_net": 0.0,
+      "notes": "author = P - (0.05*P + 0.50); MoR handles global VAT/sales tax"
+    },
+    {
+      "channel": "Gumroad direct",
+      "list_price": 9.99,
+      "platform_cut_pct": 15.0,
+      "delivery_or_processing_fee": 1.5,
+      "author_net": 8.49,
+      "platform_net": 1.5,
+      "notes": "author = P - (0.10*P + 0.50); Gumroad is MoR; platform_net shown gross (Gumroad pays its own processing)"
+    },
+    {
+      "channel": "SAGA 10% take, Stripe",
+      "list_price": 9.99,
+      "platform_cut_pct": 10.0,
+      "delivery_or_processing_fee": 0.59,
+      "author_net": 8.99,
+      "platform_net": 0.41,
+      "notes": "author = (1-0.1)*P; SAGA = 0.1*P - (0.029*P + 0.30); SAGA absorbs processing; tax compliance is SAGA's cost (not modeled)"
+    },
+    {
+      "channel": "SAGA 10% take, MoR",
+      "list_price": 9.99,
+      "platform_cut_pct": 10.0,
+      "delivery_or_processing_fee": 1.0,
+      "author_net": 8.99,
+      "platform_net": -0.0,
+      "notes": "author = (1-0.1)*P; SAGA = 0.1*P - (0.05*P + 0.50)"
+    },
+    {
+      "channel": "SAGA 15% take, Stripe",
+      "list_price": 9.99,
+      "platform_cut_pct": 15.0,
+      "delivery_or_processing_fee": 0.59,
+      "author_net": 8.49,
+      "platform_net": 0.91,
+      "notes": "author = (1-0.15)*P; SAGA = 0.15*P - (0.029*P + 0.30); SAGA absorbs processing; tax compliance is SAGA's cost (not modeled)"
+    },
+    {
+      "channel": "SAGA 15% take, MoR",
+      "list_price": 9.99,
+      "platform_cut_pct": 15.0,
+      "delivery_or_processing_fee": 1.0,
+      "author_net": 8.49,
+      "platform_net": 0.5,
+      "notes": "author = (1-0.15)*P; SAGA = 0.15*P - (0.05*P + 0.50)"
+    },
+    {
+      "channel": "SAGA 20% take, Stripe",
+      "list_price": 9.99,
+      "platform_cut_pct": 20.0,
+      "delivery_or_processing_fee": 0.59,
+      "author_net": 7.99,
+      "platform_net": 1.41,
+      "notes": "author = (1-0.2)*P; SAGA = 0.2*P - (0.029*P + 0.30); SAGA absorbs processing; tax compliance is SAGA's cost (not modeled)"
+    },
+    {
+      "channel": "SAGA 20% take, MoR",
+      "list_price": 9.99,
+      "platform_cut_pct": 20.0,
+      "delivery_or_processing_fee": 1.0,
+      "author_net": 7.99,
+      "platform_net": 1.0,
+      "notes": "author = (1-0.2)*P; SAGA = 0.2*P - (0.05*P + 0.50)"
+    },
+    {
+      "channel": "SAGA 15% take, Stripe + $20 prepaid wallet (Speculation)",
+      "list_price": 9.99,
+      "platform_cut_pct": 15.0,
+      "delivery_or_processing_fee": 0.44,
+      "author_net": 8.49,
+      "platform_net": 1.06,
+      "notes": "per-book processing = (0.029*20 + 0.30) * P/20 (fee on top-up allocated pro rata); ignores breakage/refund liability and money-transmitter/stored-value legal questions"
+    }
+  ],
+  "notes": [
+    "US buyer; list price excludes US sales tax. EU/UK prices are VAT-inclusive, so author share is computed on price net of VAT (UK ebooks 0% VAT since 2020-05-01 per KDP page G200634500).",
+    "platform_net for retailers is their gross margin, not profit.",
+    "Generated by research/scripts/unit_economics.py on 2026-11-17."
+  ]
+}

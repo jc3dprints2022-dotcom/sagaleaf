@@ -1,0 +1,157 @@
+{
+  "at": "2026-11-18T18:51:22.240Z",
+  "results": [
+    {
+      "step": "Import an EPUB through the file picker",
+      "ok": true,
+      "ms": 276,
+      "detail": "imported in 255 ms"
+    },
+    {
+      "step": "Import a PDF and a TXT; re-importing the same file is detected as a duplicate",
+      "ok": true,
+      "ms": 2055
+    },
+    {
+      "step": "Open the book and render the first chapter",
+      "ok": true,
+      "ms": 1459,
+      "detail": "first page visible 725 ms after tapping Start reading"
+    },
+    {
+      "step": "Read: turn pages with the keyboard and see progress move",
+      "ok": true,
+      "ms": 3704,
+      "detail": "0% → 3%, saved at section 5"
+    },
+    {
+      "step": "Highlight a passage with the selection menu",
+      "ok": true,
+      "ms": 974,
+      "detail": "“is just what a young man ought to be,” said she, “…”"
+    },
+    {
+      "step": "Add a note to the highlight",
+      "ok": true,
+      "ms": 654
+    },
+    {
+      "step": "Reading settings: night theme, larger type, highlight stays anchored",
+      "ok": true,
+      "ms": 2392
+    },
+    {
+      "step": "Search inside the book and jump to a result",
+      "ok": true,
+      "ms": 1234,
+      "detail": "73 matches"
+    },
+    {
+      "step": "Table of contents navigation",
+      "ok": true,
+      "ms": 155
+    },
+    {
+      "step": "Close the app and reopen: library, highlight and position survive",
+      "ok": true,
+      "ms": 1090,
+      "detail": "home ready 526 ms after launch, showing the saved sentence"
+    },
+    {
+      "step": "Resume: Continue reading opens at the same sentence",
+      "ok": true,
+      "ms": 1275,
+      "detail": "text on screen 667 ms after tapping Continue"
+    },
+    {
+      "step": "Discover and pair the simulated Leaf with its on-screen code",
+      "ok": true,
+      "ms": 590
+    },
+    {
+      "step": "The book being read is converted and sent to the Leaf automatically",
+      "ok": true,
+      "ms": 893,
+      "detail": "transfer finished 813 ms after pairing"
+    },
+    {
+      "step": "The Leaf opens at the phone’s position; read 10 pages and highlight on the Leaf",
+      "ok": true,
+      "ms": 1417,
+      "detail": "Leaf now at 3.3%, highlighted “and the liberty of a manor, it was doubt…”"
+    },
+    {
+      "step": "Sync back: app shows the Leaf’s place and offers to jump there",
+      "ok": true,
+      "ms": 2093,
+      "detail": "sync 217 ms; resumed at 3%; highlights now on both sides"
+    },
+    {
+      "step": "Continue reading in the app after the Leaf",
+      "ok": true,
+      "ms": 2067,
+      "detail": "now 3.9%"
+    },
+    {
+      "step": "Highlights and notes screen",
+      "ok": true,
+      "ms": 118
+    },
+    {
+      "step": "Library-wide full-text search",
+      "ok": true,
+      "ms": 772
+    },
+    {
+      "step": "Collections: create and add a book",
+      "ok": true,
+      "ms": 1025
+    },
+    {
+      "step": "Settings and backup export",
+      "ok": true,
+      "ms": 214,
+      "detail": "backup 1016 KB"
+    },
+    {
+      "step": "Devices overview with sync off and one Leaf",
+      "ok": true,
+      "ms": 579
+    },
+    {
+      "step": "Discover: popular free books from Project Gutenberg; search and topics",
+      "ok": true,
+      "ms": 863
+    },
+    {
+      "step": "Get a free book, open it, and it goes to the SAGA Leaf",
+      "ok": true,
+      "ms": 2780,
+      "detail": "Discover book is on the simulated SAGA Leaf"
+    },
+    {
+      "step": "Author and Publisher are hidden (FEATURES.authorPortal is off)",
+      "ok": true,
+      "ms": 30
+    },
+    {
+      "step": "Phone-size layout: home and reader",
+      "ok": true,
+      "ms": 3392
+    },
+    {
+      "step": "Dark appearance",
+      "ok": true,
+      "ms": 2663
+    }
+  ],
+  "metrics": {
+    "importMs": 255,
+    "openMs": 725,
+    "homeAfterRestartMs": 526,
+    "resumeMs": 667,
+    "leafTransferMs": 813,
+    "leafSyncMs": 217
+  },
+  "consoleErrors": []
+}

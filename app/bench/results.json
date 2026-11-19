@@ -1,0 +1,61 @@
+{
+  "at": "2026-11-17T16:30:29.259Z",
+  "env": "node v22.23.4, fake-indexeddb (in-memory), 2 CPU",
+  "bulkImport": {
+    "books": 1000,
+    "added": 970,
+    "duplicatesDetected": 20,
+    "failed": 10,
+    "expectedFailures": 10,
+    "unexpectedFailures": 0,
+    "totalSeconds": 7.3,
+    "perBookMs": {
+      "p50": 4.8,
+      "p95": 13.1,
+      "max": 29.9
+    },
+    "booksPerSecond": 136.7
+  },
+  "fullTextSearchAcrossLibrary": {
+    "books": 970,
+    "queries": 5,
+    "ms": {
+      "p50": 208.2,
+      "max": 225.5
+    },
+    "note": "Scans the local text index; includes a no-match query, which reads every book."
+  },
+  "library10k": {
+    "books": 10000,
+    "loadSortFilterMs": {
+      "p50": 95.2,
+      "max": 124
+    },
+    "searchIndexBuildMs": 79,
+    "metadataSearchMs": {
+      "p50": 3.9,
+      "max": 6.8
+    },
+    "note": "Metadata-only rows; covers load lazily per visible tile."
+  },
+  "syncStress": {
+    "devices": 3,
+    "rounds": 60,
+    "annotationsCreated": 164,
+    "injectedFailureRate": 0.3,
+    "syncRoundsThatHitAFailure": 96,
+    "annotationsMissingOnAnyDevice": 0,
+    "devicesDisagreeingAfterConvergence": 0,
+    "noteVersionsWritten": 329,
+    "noteVersionsLost": 0,
+    "note": "A note version counts as lost only if no later edit was made on top of it and it is neither the final note nor a kept conflict."
+  },
+  "leafTransferStress": {
+    "bookBytes": 1239130,
+    "injectedDrops": 12,
+    "syncAttempts": 13,
+    "completed": true,
+    "checksumMatches": true,
+    "totalMs": 302
+  }
+}
