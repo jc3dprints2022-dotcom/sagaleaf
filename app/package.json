@@ -15,9 +15,17 @@
     "bench": "tsx bench/run.ts",
     "typecheck": "tsc --noEmit",
     "build:standalone": "vite build -c vite.standalone.config.ts && node -e \"require('fs').copyFileSync('dist-standalone/index.html','dist-standalone/saga-reader.html')\"",
-    "publish:site": "node scripts/publish.mjs"
+    "publish:site": "node scripts/publish.mjs",
+    "build:native": "vite build -c vite.standalone.config.ts --mode native",
+    "android:sync": "npm run build:native && cap sync android",
+    "android:open": "cap open android",
+    "android:assets": "node scripts/android-assets.mjs",
+    "test:native": "npm run build:native && tsx e2e/native.ts"
   },
   "dependencies": {
+    "@capacitor/android": "^8.6.2",
+    "@capacitor/core": "^8.6.2",
+    "@capacitor/splash-screen": "^8.0.2",
     "@fontsource-variable/fraunces": "^5.3.0",
     "@fontsource-variable/hanken-grotesk": "^5.3.0",
     "@fontsource-variable/literata": "^5.3.0",
@@ -33,6 +41,7 @@
     "react-dom": "^19.3.1"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.6.2",
     "@resvg/resvg-js": "^2.6.2",
     "@supabase/supabase-js": "^2.119.1",
     "@types/busboy": "^1.5.5",

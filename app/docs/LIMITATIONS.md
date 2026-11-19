@@ -73,8 +73,10 @@ Status labels:
 
 ## Platforms
 
-Only the web app/PWA exists. Desktop (Tauri) and mobile (Capacitor) shells are planned on
-the same codebase. Only Chrome has been tested.
+The web app/PWA and an Android app (Capacitor, same codebase; see ANDROID.md) exist. The
+Android app builds and its web bundle is tested in Chrome, but it hasn't been run on a device
+or emulator yet, and sign-in is hidden in it until the auth redirect returns to the app.
+Desktop (Tauri) and iOS are planned. Only Chrome has been tested.
 
 ## Discover and accounts
 

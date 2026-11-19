@@ -12,6 +12,7 @@
 import { useEffect, useState } from 'react'
 import type { SupabaseClient, Session } from '@supabase/supabase-js'
 import { store } from './state'
+import { FEATURES } from './features'
 import { CloudSync, KeyMismatch, KEY_ROW, type CloudApi, type CloudRow } from '../core/sync/cloud'
 import { deriveKeys, newLibrarySecret } from '../core/sync/crypto'
 
@@ -32,7 +33,9 @@ export interface AccountState {
   pending: string | null          // a message for the sign-in form (link sent, errors)
 }
 
-const configured = !!(CONFIG?.supabaseUrl?.trim() && CONFIG?.supabaseAnonKey?.trim())
+// In the native shell sign-in stays hidden until its redirects work there (FEATURES.nativeSignIn).
+const nativeShell = import.meta.env.VITE_NATIVE === '1' || !!(globalThis as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor?.isNativePlatform?.()
+const configured = !!(CONFIG?.supabaseUrl?.trim() && CONFIG?.supabaseAnonKey?.trim()) && (!nativeShell || FEATURES.nativeSignIn)
 const onWeb = typeof location !== 'undefined' && /^https?:$/.test(location.protocol)
 let state: AccountState = {
   availability: !configured ? 'off' : !onWeb ? 'needs-web' : 'idle',

@@ -7,6 +7,7 @@ import { parseTxt, chapterXhtml } from './txt'
 import { parsePdf, renderPdfCover } from './pdf'
 import { sha256, sortKey, tintOf, workKey, yieldToUi, norm } from './util'
 import type { TextRow } from './db'
+import { PRODUCT } from '../app/product'
 
 export type ImportStatus = 'added' | 'duplicate' | 'restored' | 'failed'
 export interface ImportResult { name: string; status: ImportStatus; bookId?: string; title?: string; error?: string; possibleDuplicateOf?: string[]; ms?: number }
@@ -20,9 +21,9 @@ export function detectFormat(name: string, b: Uint8Array): Format | { error: str
     return 'epub'
   }
   if (/\.(mobi|azw3?|kfx|prc)$/.test(lower)) return { error: 'Kindle formats aren’t supported yet. If the book is DRM-free, convert it to EPUB with Calibre.' }
-  if (/\.(acsm)$/.test(lower)) return { error: 'This is a download ticket for a DRM-protected book, not the book itself. SAGA can’t open DRM-protected books.' }
+  if (/\.(acsm)$/.test(lower)) return { error: `This is a download ticket for a DRM-protected book, not the book itself. ${PRODUCT.shortName} can’t open DRM-protected books.` }
   if (/\.(txt|text|md)$/.test(lower) || isProbablyText(b)) return 'txt'
-  return { error: 'SAGA can open EPUB, PDF and plain-text files. This file isn’t one of those.' }
+  return { error: `${PRODUCT.shortName} can open EPUB, PDF and plain-text files. This file isn’t one of those.` }
 }
 function isProbablyText(b: Uint8Array) {
   const n = Math.min(b.length, 4096); let bad = 0
@@ -30,7 +31,7 @@ function isProbablyText(b: Uint8Array) {
   return n > 0 && bad / n < 0.01
 }
 
-export const DRM_MESSAGE = 'This book is DRM-protected. SAGA doesn’t remove DRM, so it can’t be opened.'
+export const DRM_MESSAGE = `This book is DRM-protected. ${PRODUCT.shortName} doesn’t remove DRM, so it can’t be opened.`
 
 /** PDFs locked with Adobe DRM (ADEPT/"EBX") or Adobe LiveCycle policy server.
  *  Detection only: SAGA refuses them, it never tries to open them. */
@@ -83,7 +84,7 @@ export async function importBytes(store: Store, name: string, bytes: Uint8Array,
     return { name, status: 'failed', error: friendly(e) }
   }
   if (!texts.some(t => t.text.trim())) {
-    if (fmt === 'pdf') return { name, status: 'failed', error: 'This PDF has no selectable text (it’s probably scanned images). SAGA can’t read it yet.' }
+    if (fmt === 'pdf') return { name, status: 'failed', error: `This PDF has no selectable text (it’s probably scanned images). ${PRODUCT.shortName} can’t read it yet.` }
     return { name, status: 'failed', error: 'No readable text was found in this file.' }
   }
 
@@ -242,7 +243,7 @@ export async function exportLibrary(store: Store, opts: { includeFiles?: boolean
   files['library.json'] = strToU8(JSON.stringify(manifest, null, 1))
   files['annotations.md'] = strToU8(annotationsMarkdown(books, annotations as Annotation[]))
   files['annotations.jsonld'] = strToU8(JSON.stringify(webAnnotations(books, annotations as Annotation[]), null, 1))
-  files['README.txt'] = strToU8('SAGA Reader library export.\n\nbooks/ holds your original files, unchanged.\nannotations.md is a readable copy of your highlights and notes.\nannotations.jsonld uses the W3C Web Annotation model so other tools can import it.\nlibrary.json holds everything SAGA needs to restore this library.\n')
+  files['README.txt'] = strToU8(`${PRODUCT.name} library export.\n\nbooks/ holds your original files, unchanged.\nannotations.md is a readable copy of your highlights and notes.\nannotations.jsonld uses the W3C Web Annotation model so other tools can import it.\nlibrary.json holds everything ${PRODUCT.shortName} needs to restore this library.\n`)
   if (opts.includeFiles !== false) {
     for (const b of books) {
       if (b.fileState !== 'local') continue
@@ -255,7 +256,7 @@ export async function exportLibrary(store: Store, opts: { includeFiles?: boolean
 
 export async function importBackup(store: Store, zip: Uint8Array, onProgress?: (d: number, t: number) => void) {
   const files = unzipSync(zip)
-  if (!files['library.json']) throw new Error('This isn’t a SAGA library export (library.json is missing).')
+  if (!files['library.json']) throw new Error(`This isn’t a ${PRODUCT.shortName} library export (library.json is missing).`)
   const m = JSON.parse(strFromU8(files['library.json']))
   let books = 0, annotations = 0
   const list = m.books as (Book & { file: string | null })[]

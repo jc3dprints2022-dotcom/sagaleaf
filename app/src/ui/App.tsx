@@ -15,6 +15,7 @@ import { Catalog, CatalogItemView } from './screens/Catalog'
 import { ImportScreen } from './screens/Import'
 const Reader = lazy(() => import('./reader/Reader'))
 import { FEATURES } from '../app/features'
+import { PRODUCT } from '../app/product'
 const Author = FEATURES.authorPortal ? lazy(() => import('./screens/Author')) : null
 const Publisher = FEATURES.authorPortal ? lazy(() => import('./screens/Publisher')) : null
 
@@ -72,14 +73,14 @@ export function App() {
       case 'author': case 'author-sub': if (Author) return <Author id={route.params.id} />; break
       case 'publisher': if (Publisher) return <Publisher />; break
     }
-    return <div className="empty"><h2>Page not found</h2><p>That address doesn’t lead anywhere in SAGA Reader.</p><a className="btn" href="#/">Go home</a></div>
+    return <div className="empty"><h2>Page not found</h2><p>That address doesn’t lead anywhere in {PRODUCT.name}.</p><a className="btn" href="#/">Go home</a></div>
   })()
   const active = (n: string) => route.name === n || (n === 'library' && (route.name === 'book' || route.name === 'import')) || (n === 'collections' && route.name === 'collection') || (n === 'devices' && route.name === 'device') || (n === 'catalog' && route.name === 'catalog-item') || (n === 'author' && route.name === 'author-sub')
 
   return (
     <div className="shell">
       <aside className="rail" aria-label="Main">
-        <a href="#/" className="wordmark" aria-label="SAGA Reader home"><Wordmark /><b>SAGA Reader</b></a>
+        <a href="#/" className="wordmark" aria-label={`${PRODUCT.name} home`}><Wordmark /><b>{PRODUCT.name}</b></a>
         <nav className="nav">
           {NAV.map(n => (
             <a key={n.name} href={href(n.path)} aria-current={active(n.name) ? 'page' : undefined}><n.icon />{n.label}{n.name === 'library' && count ? <span className="count">{count}</span> : null}</a>

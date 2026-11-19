@@ -3,6 +3,7 @@
 // Reading here moves the device's own position; SAGA Reader picks it up on sync.
 import { useCallback, useEffect, useState } from 'react'
 import { localLeaf } from '../../app/localLeaf'
+import { PRODUCT } from '../../app/product'
 
 type Screen = Awaited<ReturnType<Awaited<ReturnType<typeof localLeaf>>['screenState']>> & Record<string, unknown>
 
@@ -46,7 +47,7 @@ export function LeafScreen({ showLog = true }: { showLog?: boolean }) {
     body = <>
       <h4 className="lsim-h"><span>Library</span><span>{st.battery != null ? `${st.battery}%` : ''}</span></h4>
       {books.length ? books.map(b => <button key={b.id} className="lsim-book" onClick={() => act('open', b.id)}><b>{b.title}</b><small>{b.author}, {Math.round((b.progress || 0) * 100)}%</small></button>)
-        : <p className="lsim-ui lsim-dim">No books yet. Send one from SAGA Reader.</p>}
+        : <p className="lsim-ui lsim-dim">No books yet. Send one from {PRODUCT.name}.</p>}
     </>
   }
 
@@ -63,7 +64,7 @@ export function LeafScreen({ showLog = true }: { showLog?: boolean }) {
       </div>
       {showLog && <div className="lsim-side">
         <span className="pill">Simulator, not hardware</span>
-        <p className="small muted">This SAGA Leaf runs inside this page, using the same device model as the protocol tests. Read and highlight here, then press Sync now in SAGA Reader.</p>
+        <p className="small muted">This SAGA Leaf runs inside this page, using the same device model as the protocol tests. Read and highlight here, then press Sync now in {PRODUCT.name}.</p>
         {!!st?.log?.length && <pre className="lsim-log">{(st.log as string[]).join('\n')}</pre>}
       </div>}
     </div>

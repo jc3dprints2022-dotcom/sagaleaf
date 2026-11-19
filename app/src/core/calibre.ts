@@ -15,6 +15,7 @@ import type { Store } from './store'
 import type { Book } from './types'
 import { importBytes, type ImportResult } from './library'
 import { yieldToUi } from './util'
+import { PRODUCT } from '../app/product'
 
 export interface TreeFile { path: string; read(): Promise<Uint8Array> }
 
@@ -115,7 +116,7 @@ async function importOne(store: Store, b: CalibreBook): Promise<CalibreResult> {
   const other = b.files.filter(f => !BOOK_EXT.test(f.path))
   if (!usable.length) {
     res.reasons.push(other.length
-      ? `Only ${[...new Set(other.map(f => f.path.split('.').pop()!.toUpperCase()))].join(', ')} here. SAGA opens EPUB, PDF and TXT; if the book is DRM-free, convert it to EPUB in Calibre first.`
+      ? `Only ${[...new Set(other.map(f => f.path.split('.').pop()!.toUpperCase()))].join(', ')} here. ${PRODUCT.shortName} opens EPUB, PDF and TXT; if the book is DRM-free, convert it to EPUB in Calibre first.`
       : 'No book file in this folder.')
     return res
   }

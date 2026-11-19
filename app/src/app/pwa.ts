@@ -8,7 +8,8 @@ import { STANDALONE, toast } from './state'
 /** Content hash of this build, stamped in by pwa/plugin.ts. The worker reports the same id. */
 export const BUILD = (import.meta.env.VITE_SAGA_BUILD as string | undefined) ?? 'dev'
 
-const isNativeShell = () => !!(globalThis as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor?.isNativePlatform?.()
+/** Native shell: the native build (VITE_NATIVE), or any build loaded inside Capacitor's WebView. */
+const isNativeShell = () => import.meta.env.VITE_NATIVE === '1' || !!(globalThis as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor?.isNativePlatform?.()
 const secure = () => location.protocol === 'https:' || ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname)
 
 export function registerServiceWorker() {

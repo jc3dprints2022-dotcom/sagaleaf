@@ -2,6 +2,7 @@
 // Rendering is done by foliate-js; this module only reads the package so that
 // import, search, sync and the publishing validator work without a renderer.
 import { unzipSync, strFromU8 } from 'fflate'
+import { PRODUCT } from '../app/product'
 
 export interface Issue { level: 'error' | 'warning' | 'info'; code: string; message: string }
 export interface SectionRef { href: string; path: string; title: string; linear: boolean; size: number }
@@ -54,7 +55,7 @@ export function parseEpub(bytes: Uint8Array): ParsedEpub {
     const enc = strFromU8(meta['META-INF/encryption.xml'])
     for (const m of enc.matchAll(/EncryptionMethod[^>]*Algorithm\s*=\s*"([^"]+)"/g)) if (!FONT_OBFUSCATION.includes(m[1])) drm = true
   }
-  if (drm) add('error', 'drm', 'This file is protected by DRM. SAGA does not remove DRM and cannot open it.')
+  if (drm) add('error', 'drm', `This file is protected by DRM. ${PRODUCT.shortName} does not remove DRM and cannot open it.`)
 
   const container = meta['META-INF/container.xml']
   if (!container) throw new Error('This file is not a valid EPUB (META-INF/container.xml is missing).')

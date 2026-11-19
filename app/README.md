@@ -89,6 +89,8 @@ send for review; SAGA Publisher, approve; Discover, get the book.
 | `npx tsx e2e/import.ts` | Calibre, Kindle, Gutenberg and Standard Ebooks import against the published PWA files, then offline reading (network mocked; 7 steps) |
 | `npx tsx e2e/standalone.ts` | Opens that file from `file://` and runs the journey, Discover included (17 steps) |
 | `npx tsx e2e/accounts.ts` | Serves the file at its web address and tests sign-in and encrypted notes sync across two devices (14 steps) |
+| `npm run android:sync` | Builds the Android web bundle (`dist-native/`) and syncs it into `android/`; then `cd android && ./gradlew assembleDebug` or `bundleRelease` (see [docs/ANDROID.md](docs/ANDROID.md)) |
+| `npm run test:native` | The Android bundle in a phone-sized browser with no network: import, highlight, relaunch, open-with (7 steps) |
 | `npm run typecheck` | TypeScript, strict |
 
 Environment: `VITE_PLATFORM_URL` points the app at another platform server.
@@ -123,6 +125,7 @@ public/samples/     Public-domain test books (Standard Ebooks, CC0) and generate
 - [Test results](docs/TEST_RESULTS.md): what ran, real numbers, what is simulated
 - [Limitations](docs/LIMITATIONS.md): built, tested, simulated, planned, speculative
 - [Roadmap](docs/ROADMAP.md): prioritized path to public release
+- [Android app](docs/ANDROID.md): Capacitor build, renaming, signing, Play Console steps, Data safety notes
 - [Design system](docs/DESIGN.md)
 - [Research report](docs/RESEARCH.md), [product requirements](docs/PRODUCT_REQUIREMENTS.md), [ideas evaluated](docs/IDEAS.md), [business model](docs/BUSINESS_MODEL.md)
 - [Competitive benchmark workbook](docs/SAGA-competitive-benchmark.xlsx)

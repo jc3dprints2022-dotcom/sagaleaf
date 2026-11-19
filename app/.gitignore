@@ -5,3 +5,5 @@ dev-dist/
 server/.data/
 sim/.leaf-data/
 *.log
+dist-native/
+screenshots/

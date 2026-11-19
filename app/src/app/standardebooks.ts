@@ -19,6 +19,7 @@ import { importBytes } from '../core/library'
 import { isZip } from '../core/epub'
 import { store } from './state'
 import { fetchBook, cachedBook, getBook, DownloadBlocked, withProxy, type GBook } from './gutendex'
+import { PRODUCT } from './product'
 
 export const SE_ORIGIN = 'https://standardebooks.org'
 export const SE_NEW_RELEASES = SE_ORIGIN + '/feeds/atom/new-releases'
@@ -108,7 +109,7 @@ export async function importFromUrl(input: string): Promise<{ bookId: string; ti
       b = { id: p.id, title: `Project Gutenberg eBook ${p.id}`, authors: [], subjects: [], bookshelves: [], languages: [], copyright: false, media_type: 'Text', download_count: 0, formats: { 'application/epub+zip': `https://www.gutenberg.org/ebooks/${p.id}.epub3.images` } }
     }
   }
-  if (b.copyright) throw new Error('Project Gutenberg marks this book as still in copyright in the USA, so SAGA doesn’t download it.')
+  if (b.copyright) throw new Error(`Project Gutenberg marks this book as still in copyright in the USA, so ${PRODUCT.shortName} doesn’t download it.`)
   return getBook(b)
 }
 
