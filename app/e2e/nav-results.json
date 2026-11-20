@@ -1,0 +1,59 @@
+{
+  "at": "2026-11-20T00:47:18.999Z",
+  "results": [
+    {
+      "step": "Desktop 1280px: the rail shows exactly Home, Library, Discover, Settings",
+      "ok": true
+    },
+    {
+      "step": "Phone 390px: the tab bar shows exactly Home, Library, Discover, Settings",
+      "ok": true
+    },
+    {
+      "step": "Old addresses still resolve: search, notes, collections, devices, import",
+      "ok": true
+    },
+    {
+      "step": "Library segments: Books | Collections | Highlights, search per segment, Add opens the pop-up",
+      "ok": true
+    },
+    {
+      "step": "Add pop-up: a book (EPUB) is added",
+      "ok": true,
+      "detail": "Added “Fixture Tale”Read now"
+    },
+    {
+      "step": "Add pop-up: a Calibre library zip is recognised",
+      "ok": true,
+      "detail": "Calibre: 1 book addedOpen Library"
+    },
+    {
+      "step": "Add pop-up: Kindle My Clippings.txt is recognised",
+      "ok": true,
+      "detail": "Kindle: 4 waiting for you to choose a bookReview"
+    },
+    {
+      "step": "Add pop-up: a SAGA backup zip is restored",
+      "ok": true,
+      "detail": "Restored 1 book and 1 highlightOpen Library"
+    },
+    {
+      "step": "Add pop-up: Paste a link takes the new sources and direct files, no jargon in the pop-up",
+      "ok": true
+    },
+    {
+      "step": "Discover has a link icon beside the search box that opens the same pop-up on the link field",
+      "ok": true
+    },
+    {
+      "step": "Home: Continue reading, Recommended, Recent highlights (no “Recently added”)",
+      "ok": true
+    },
+    {
+      "step": "Settings has Account & sync, Devices, Reading, Appearance, Your library, Storage, About, Privacy",
+      "ok": true,
+      "detail": "Account & sync · Devices · Reading · Appearance · Your library · Storage · About"
+    }
+  ],
+  "errors": []
+}

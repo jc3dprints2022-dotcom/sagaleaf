@@ -10,7 +10,7 @@ part is the `android/` project plus `capacitor.config.ts`, `identity.json` and
 | Build | `npm run build:standalone` → `dist-standalone/` | `npm run build:native` → `dist-native/` |
 | Offline | service worker (`sw.js`) + manifest | everything is in the APK; **no service worker, no manifest** |
 | Origin | `https://saga.proxima-3d.com` | `https://localhost` (Capacitor's default `androidScheme: 'https'`) |
-| Sign-in | optional (email link, Google) | hidden for now (`FEATURES.nativeSignIn`, see below) |
+| Sign-in | optional (Google, or an emailed link) | optional, same options (`FEATURES.nativeSignIn: true`, see below) |
 
 The service worker can't register in the app: the native build is compiled with
 `VITE_NATIVE=1`, and `registerServiceWorker()` also refuses inside any Capacitor WebView
@@ -67,33 +67,46 @@ Known gaps:
 - SAGA Leaf pairing over the local network uses `http://`. An `https://localhost` page
   can't call that (mixed content). A native HTTP path (CapacitorHttp) is a follow-up.
 - Discover's Standard Ebooks downloads are fetched directly with `?source=download`. They
-  work only while that server sends CORS headers that allow the app's origin. The Gutenberg
-  proxy already allows `https://localhost`.
+  work only while that server sends CORS headers that allow the app's origin. Wikisource and
+  Internet Archive downloads go through the proxy, which must allow those hosts (see the PR for
+  the allow-list change). The Gutenberg proxy already allows `https://localhost`.
 
-## Sign-in in the app (follow-up)
+## Sign-in in the app
 
-Sign-in is optional on the web and stays that way. In the app it's **hidden**
-(`FEATURES.nativeSignIn: false` in `src/app/features.ts`). The Account section isn't shown,
-and the app never contacts Supabase. This avoids a broken button: Google refuses OAuth inside
-an embedded WebView (`disallowed_useragent`), and a magic link opens the browser, not the
-app. Both need a redirect that comes back into the app.
+Sign-in is optional on the web and in the app: reading, highlights and import work fully
+offline with no account. Settings > Account & sync has **Continue with Google** (primary) and
+**Email me a link**. Signing in turns sync on by itself, with no code or passphrase: the
+account's own rows (`saga_sync`, one per book: title, author, cover thumbnail, where to get
+the file again, highlights, notes, bookmarks, reading positions) are readable only by that
+user (Supabase auth + row-level security, HTTPS). Book files are never uploaded; a book with a
+source (Discover or a pasted link) downloads again on the other device, an uploaded file shows
+as "On your other device" with an **Add file** action.
 
-To turn it on:
+How it works in the app (`src/app/account.ts`):
 
-1. Add `@capacitor/app` and `@capacitor/browser`.
-2. Pick a return URL. Either a custom scheme (`llc.proxima.readerleaf://auth`, with an
-   intent filter on `MainActivity`), or an Android App Link on `saga.proxima-3d.com`. The
-   App Link needs `/.well-known/assetlinks.json` on the site.
-3. Supabase dashboard → Authentication → URL Configuration → add that URL to the Redirect
-   URLs.
-4. In `src/app/account.ts`, when native: use that URL as `redirectTo` /
-   `emailRedirectTo`, open the Google URL with `Browser.open` (`skipBrowserRedirect: true`),
-   and on `App.addListener('appUrlOpen')` call `exchangeCodeForSession(code)`, then close
-   the browser.
-5. Before shipping it on Play: add **account deletion** in the app and on the web (Play
-   requires both for apps that create accounts). Update `privacy.html`, which today says
-   Proxima runs no sync service. Update the Data safety answers (below).
-6. Set `nativeSignIn: true`.
+1. `@capacitor/browser` opens the Google URL in the system browser (Google refuses embedded
+   WebViews): `signInWithOAuth({ provider: 'google', options: { redirectTo, skipBrowserRedirect: true } })`.
+2. The return URL is `llc.proxima.readerleaf://auth-callback`. `MainActivity` has an intent
+   filter for it (VIEW, DEFAULT, BROWSABLE, scheme `llc.proxima.readerleaf`, host
+   `auth-callback`). The same URL is the `emailRedirectTo` of the emailed link.
+3. `@capacitor/app` delivers it as `appUrlOpen` (or `getLaunchUrl` on a cold start); the page
+   calls `exchangeCodeForSession(code)` (PKCE) and `Browser.close()`.
+4. `@supabase/supabase-js` is bundled in the native build (the web build loads it from a CDN).
+
+**Supabase dashboard** (Authentication, URL Configuration, Redirect URLs): add
+`llc.proxima.readerleaf://auth-callback`. The web redirect (`https://saga.proxima-3d.com/saga-reader.html`)
+stays.
+
+**Account deletion** (required by Play for apps that create accounts): Settings > Account &
+sync > "Delete account and synced data" deletes the user's `saga_sync` rows and calls the
+`delete-account` Edge Function (`supabase/functions/delete-account/index.ts`), which deletes the
+auth user with the service role. Deploy it with `supabase functions deploy delete-account`.
+Without it the rows are still deleted and the user signed out. The table, its row-level
+security policies (including DELETE) are in `supabase/saga_sync.sql`.
+
+Not tested on a device: real Google sign-in through the system browser and the intent filter
+on Android. The unit tests (`tests/discover.test.ts`) and `e2e/native.ts` cover the app-return
+half with a mocked Supabase.
 
 ## Build
 
@@ -186,11 +199,10 @@ Declare what this build actually sends off the device. The local library (book f
 highlights, notes, bookmarks, reading positions, collections) stays on the phone, in app
 storage, and is deleted on uninstall. Proxima never receives it.
 
-**This build (`nativeSignIn: false`)**
+**Without signing in** (what the app does until the user chooses to sign in)
 
-- Does the app collect or share any required user data types? **No.**
-  - No account and no sign-in. No analytics, ads, crash reporting or other SDKs. The only
-    permission is `INTERNET`.
+- Does the app collect or share any *required* user data types? **No** (everything below is optional).
+  - No analytics, ads, crash reporting or other SDKs. The only permission is `INTERNET`.
   - Discover (optional, only when the user browses free books) sends catalogue searches to
     Gutendex, through Proxima's Supabase proxy, and downloads books from Project Gutenberg
     and Standard Ebooks. These are ordinary HTTPS requests with no identifiers. Play counts
@@ -202,17 +214,19 @@ storage, and is deleted on uninstall. Proxima never receives it.
   own Google backup. That's the user's backup, not collection by Proxima. If you'd rather
   keep the library out of it, add backup rules.
 
-**When `nativeSignIn` is turned on**, declare (all **optional**, none shared, encrypted in
-transit, deletable on request):
+**With sign-in (`nativeSignIn: true`, this build)**, declare (all **optional**, none shared,
+encrypted in transit, deletable on request):
 
 | Category → type | Why | Notes |
 |---|---|---|
-| Personal info → Email address | Account management | Only if the user signs in (email link or Google). |
+| Personal info → Email address | Account management | Only if the user signs in (Google or email link). |
 | Personal info → User IDs | Account management, App functionality | The Supabase account ID that sync rows are stored under. |
-| App activity → Other user-generated content | App functionality | Highlights, notes, bookmarks, reading positions, **only if the user turns on sync**. Encrypted on the device with the library code; Proxima can't read the content. Book files are never uploaded. |
+| App info and performance → none | | No analytics or crash reporting. |
+| App activity → Other user-generated content | App functionality | Book list (title, author, cover thumbnail, source), highlights, notes, bookmarks, reading positions, synced automatically while signed in. Stored per account behind row-level security; **not end-to-end encrypted**, so Proxima's service can technically read it. Book files are never uploaded. |
+| Web browsing / search history | Not declared | Discover sends search terms and, for Recommended on Home, the authors in the library to Proxima's read-only proxy and to the book sources. Check that the proxy doesn't log them; if it does, declare "App activity → In-app search history". |
 
-Answer "Users can request that data be deleted: yes". That needs the account deletion path
-from the sign-in follow-up.
+Answer "Users can request that data be deleted: yes" (Delete account and synced data in the app).
+"Is all of the user data collected by your app encrypted in transit?": yes.
 
 ## Tests
 

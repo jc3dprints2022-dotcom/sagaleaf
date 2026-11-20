@@ -1,10 +1,14 @@
 import { store, useLive, href, go } from '../../app/state'
-import { importDropped } from '../../app/importers'
-import { loadBooks, addSamples, pickFiles, loadAnnotations, type BookView } from '../../app/data'
-import { Cover, ProgressBar, hlCss, pct, chapterLabel } from '../components'
+import { loadBooks, addSamples, loadAnnotations, type BookView } from '../../app/data'
+import { importUi } from './ImportModal'
+import { Carousel, prefetchCovers } from '../discoverParts'
+import { rowCards, rememberCards } from '../../app/discover'
+import { swr, peekSync } from '../../app/swr'
+import type { DiscoverCard } from '../../app/card'
+import { Cover, hlCss, pct, chapterLabel } from '../components'
 import { Icon } from '../icons'
 import { ago } from '../../core/util'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { PRODUCT } from '../../app/product'
 
 const FONT_STACK: Record<string, string> = {
@@ -32,25 +36,21 @@ export function Home() {
   const reading = (books ?? []).filter(b => b.progress > 0.002 && b.progress < 0.995 && b.status !== 'finished').sort((a, b) => b.lastAt - a.lastAt)
   const current = reading[0]
   const passage = useLive(async () => (current ? passageFor(current) : null), [current?.id, current?.position?.at], ['positions'])
-  const recent = (books ?? []).slice().sort((a, b) => b.addedAt - a.addedAt).slice(0, 12)
   const notes = useLive(async () => (await loadAnnotations()).filter(a => !a.deleted && a.kind !== 'bookmark').sort((a, b) => b.updatedAt - a.updatedAt).slice(0, 4), [], ['annotations'])
-  const leaves = useLive(async () => (await store.db.peers.toArray()).filter(p => p.kind === 'leaf'), [], ['peers'])
   const [busy, setBusy] = useState(false)
+  useEffect(() => { const t = setTimeout(() => { void import('../reader/Reader') }, 1500); return () => clearTimeout(t) }, [])   // the reader is ready before it's needed
 
   if (!books) return null
   if (!books.length) return (
     <>
       <h1 className="page-title">Your library starts here</h1>
-      <p className="page-sub">{PRODUCT.name} keeps your books, highlights and notes on your own devices. Nothing is uploaded unless you turn on sync.</p>
       <div className="empty">
         <h2>Add your first book</h2>
-        <p>Drop EPUB, PDF or text files anywhere on this page, or choose them from your computer. DRM-free files only.</p>
         <div className="row" style={{ justifyContent: 'center' }}>
-          <button className="btn primary" onClick={async () => importDropped(await pickFiles())}><Icon.plus />Choose files</button>
+          <button className="btn primary" onClick={() => importUi.open()}><Icon.plus />Add books</button>
           <button className="btn" disabled={busy} onClick={async () => { setBusy(true); await addSamples(); setBusy(false) }}>{busy ? 'Adding…' : 'Add classic books'}</button>
+          <a className="btn" href={href('catalog')}>Browse Discover</a>
         </div>
-        <p className="small muted" style={{ marginTop: 18 }}>The classics are public-domain editions (Standard Ebooks and Project Gutenberg).</p>
-        <p className="small muted">Coming from Calibre or Kindle? <a href={href('import')}>Import your library or highlights</a>.</p>
       </div>
     </>
   )
@@ -82,36 +82,16 @@ export function Home() {
         </section>
       )}
 
-      <h2 className="section-title">Recently added <a href={href('library')}>All books</a></h2>
-      <div className="hscroll">
-        {recent.map(b => (
-          <a key={b.id} className="book-tile" href={href(`book/${b.id}`)}>
-            <Cover book={b} showFormat />
-            <div className="meta"><h3>{b.title}</h3><p>{b.author}</p>{b.progress > 0.002 && <ProgressBar value={b.progress} />}</div>
-          </a>
-        ))}
-      </div>
-
-      {!!leaves?.length && (
-        <>
-          <h2 className="section-title">Your SAGA Leaf <a href={href('devices')}>Devices</a></h2>
-          <div className="list">{leaves.map(l => (
-            <a key={l.id} className="list-row" href={href(`device/${l.id}`)} style={{ textDecoration: 'none', color: 'inherit' }}>
-              <span className={`dot ${l.lastError ? 'off' : 'copper'}`} />
-              <div style={{ flex: 1 }}><h3>{l.name}</h3><p className="small muted" style={{ margin: 0 }}>{Object.keys(l.leaf?.map ?? {}).length} books on the device{l.leaf?.battery?.available ? `, battery ${l.leaf.battery.percent}%` : ''}, {l.lastError ? 'not reachable right now' : `synced ${ago(l.lastSyncAt)}`}</p></div>
-            </a>
-          ))}</div>
-        </>
-      )}
+      <RecommendedRow books={books} />
 
       {!!notes?.length && (
         <>
-          <h2 className="section-title">Recent highlights <a href={href('notes')}>All notes</a></h2>
+          <h2 className="section-title">Recent highlights <a href={href('library?seg=highlights')}>All highlights</a></h2>
           <div className="grid-2">
             {notes.map(a => {
               const b = books.find(x => x.id === a.bookId)
               return (
-                <a key={a.id} className="quote-card" href={href(`read/${a.bookId}?ann=${a.id}`)} onClick={e => { if (!b) { e.preventDefault(); go('notes') } }} style={{ '--hl': hlCss(a.color) } as React.CSSProperties}>
+                <a key={a.id} className="quote-card" href={href(`read/${a.bookId}?ann=${a.id}`)} onClick={e => { if (!b) { e.preventDefault(); go('library?seg=highlights') } }} style={{ '--hl': hlCss(a.color) } as React.CSSProperties}>
                   <blockquote>{a.exact.length > 260 ? a.exact.slice(0, 260) + '…' : a.exact}</blockquote>
                   {a.note && <p className="note">{a.note}</p>}
                   <p className="small muted" style={{ margin: 0 }}>{b?.title ?? 'Removed book'}</p>
@@ -123,4 +103,22 @@ export function Home() {
       )}
     </>
   )
+}
+
+/** A Discover row built from the authors and subjects in the library (Popular while it is empty or too small to tell). */
+function RecommendedRow({ books }: { books: BookView[] }) {
+  const sig = books.length + ':' + books.map(b => b.author).join('|').length
+  const warm = peekSync<DiscoverCard[]>(`row:v1:recommended:${sig}`)?.value ?? null
+  const [cards, setCards] = useState<DiscoverCard[] | null>(warm)
+  const [loading, setLoading] = useState(!warm)
+  useEffect(() => {
+    let live = true
+    swr<DiscoverCard[]>(`row:v1:recommended:${sig}`, () => rowCards('recommended', books), { ttl: 3600_000, onCached: v => { if (live) { setCards(v); setLoading(false) } } })
+      .then(v => { if (live) { setCards(v); prefetchCovers(v, 8); void rememberCards(v) } })
+      .catch(() => { if (live) setCards(c => c ?? []) })
+      .finally(() => { if (live) setLoading(false) })
+    return () => { live = false }
+  }, [sig])  // eslint-disable-line react-hooks/exhaustive-deps
+  if (!loading && !cards?.length) return null
+  return <Carousel id="home-recommended" title="Recommended" cards={cards} loading={loading} seeAll={href('catalog?row=recommended')} />
 }

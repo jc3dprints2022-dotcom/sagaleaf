@@ -6,7 +6,7 @@ import { chromium, type BrowserContext, type Page, type Frame } from 'playwright
 import { mkdtempSync, writeFileSync, mkdirSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { mockGutendex } from './mocks'
+import { mockAllSources } from './mocks'
 
 const APP = process.env.APP ?? 'http://127.0.0.1:5173'
 const LEAF = process.env.LEAF ?? 'http://127.0.0.1:8790'
@@ -21,7 +21,7 @@ const errors: string[] = []
 async function launch(viewport = { width: 1360, height: 860 }) {
   ctx = await chromium.launchPersistentContext(profile, { executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox'], viewport, deviceScaleFactor: 1 })
   page = ctx.pages()[0] ?? await ctx.newPage()
-  await mockGutendex(ctx)
+  await mockAllSources(ctx)
   page.on('pageerror', e => errors.push('pageerror: ' + e.message))
   // 192.168.4.1 is the real Leaf hotspot address that discovery probes; firmware 1.0.0 sends no CORS headers (documented)
   page.on('console', m => { if (m.type() === 'error' && !/favicon|ERR_CONNECTION_REFUSED|Failed to load resource|192\.168\.4\.1|sagaleaf\.local/.test(m.text())) errors.push('console: ' + m.text().slice(0, 240)) })
@@ -41,6 +41,12 @@ async function bookFrame(): Promise<Frame> {
   }
   throw new Error('book content never rendered')
 }
+/** Library's Add → pop-up → Upload a file → the picker. Returns once the file chooser is open. */
+async function pickViaPopup(files: string[]) {
+  await page.getByRole('button', { name: /^Add( books)?$/ }).first().click()
+  const [c] = await Promise.all([page.waitForEvent('filechooser'), page.getByRole('button', { name: /Upload a file/ }).click()])
+  await c.setFiles(files)
+}
 const pct = async () => Number((await page.locator('.r-mini').textContent())?.replace('%', '') ?? NaN)
 async function myPos() { return dbg<{ fraction: number; snippet: string; section: number }>(`const p = (await store.db.positions.toArray()).find(p => p.deviceId === store.deviceId); return p`) }
 
@@ -54,17 +60,17 @@ let bookId = ''
 await step('Import an EPUB through the file picker', async () => {
   await page.goto(APP + '/#/library')
   const t0 = Date.now()
-  const [chooser] = await Promise.all([page.waitForEvent('filechooser'), page.getByRole('button', { name: 'Add books' }).click()])
-  await chooser.setFiles(['public/samples/pride-and-prejudice.epub'])
+  await pickViaPopup(['public/samples/pride-and-prejudice.epub'])
   await page.waitForSelector('text=Added “Pride and Prejudice”')
+  await page.getByRole('button', { name: 'Done' }).click()
   metrics.importMs = Date.now() - t0
   bookId = await dbg<string>(`return (await store.db.books.toArray())[0].id`)
   return `imported in ${metrics.importMs} ms`
 })
 await step('Import a PDF and a TXT; re-importing the same file is detected as a duplicate', async () => {
-  const [c1] = await Promise.all([page.waitForEvent('filechooser'), page.getByRole('button', { name: 'Add books' }).click()])
-  await c1.setFiles(['public/samples/frankenstein-letters.pdf', 'public/samples/sherlock-holmes-sample.txt', 'public/samples/pride-and-prejudice.epub'])
+  await pickViaPopup(['public/samples/frankenstein-letters.pdf', 'public/samples/sherlock-holmes-sample.txt', 'public/samples/pride-and-prejudice.epub'])
   await page.waitForSelector('text=/2 added, 1 already in your library/')
+  await page.getByRole('button', { name: 'Done' }).click()
   const n = await dbg<number>(`return (await store.db.books.toArray()).length`)
   if (n !== 3) throw new Error(`expected 3 books, got ${n}`)
   await page.waitForTimeout(600); await shot('02-library')
@@ -276,10 +282,10 @@ await step('Devices overview with sync off and one Leaf', async () => { await pa
 let subUrl = ''
 await step('Discover: popular free books from Project Gutenberg; search and topics', async () => {
   await page.goto(APP + '/#/catalog'); await page.waitForSelector('.book-tile img'); await shot('25-discover')
-  await page.getByRole('button', { name: 'Adventure', exact: true }).click(); await page.waitForSelector('#g-h:has-text("Adventure")')
-  await page.getByRole('button', { name: 'Popular', exact: true }).click()
-  await page.fill('input[type=search]', 'doyle'); await page.waitForFunction(() => [...document.querySelectorAll('.book-tile h3')].map(e => e.textContent).join('|') === 'The Adventures of Sherlock Holmes')
-  await page.locator('.book-tile').first().click(); await page.waitForSelector('text=Detective and mystery stories, English'); await shot('26-discover-item')
+  await page.getByRole('button', { name: 'Adventure', exact: true }).click(); await page.waitForSelector('#grid-h:has-text("Adventure")')
+  await page.getByRole('button', { name: 'Adventure', exact: true }).click()
+  await page.fill('.d-search input[type=search]', 'doyle'); await page.waitForFunction(() => [...document.querySelectorAll('[data-testid=discover-grid] .book-tile h3')].map(e => e.textContent).join('|') === 'The Adventures of Sherlock Holmes')
+  await page.locator('[data-testid=discover-grid] .book-tile').first().click(); await page.waitForSelector('text=Detective and mystery stories, English'); await shot('26-discover-item')
 })
 await step('Get a free book, open it, and it goes to the SAGA Leaf', async () => {
   await page.goto(APP + '/#/catalog/pg-1342'); await page.getByRole('button', { name: 'Get book' }).click(); await page.waitForSelector('text=/Pride and Prejudice” is in your library/')

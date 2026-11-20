@@ -44,6 +44,16 @@
                 <data android:mimeType="application/pdf" />
             </intent-filter>
 
+            <!-- Sign-in: the system browser returns here after Google (or an emailed link) through
+                 llc.proxima.readerleaf://auth-callback?code=…; @capacitor/app delivers it to the page
+                 (appUrlOpen), which exchanges the code for a session. Add this URL to the Supabase Redirect URLs. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="llc.proxima.readerleaf" android:host="auth-callback" />
+            </intent-filter>
+
         </activity>
 
         <provider

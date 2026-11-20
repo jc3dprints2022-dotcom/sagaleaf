@@ -1,74 +1,74 @@
 {
-  "at": "2026-11-18T18:54:15.605Z",
-  "file": "/home/claude/saga/dist-standalone/saga-reader.html",
+  "at": "2026-11-20T00:48:24.466Z",
+  "file": "/home/user/sagaleaf/app/dist-standalone/saga-reader.html",
   "results": [
     {
       "step": "Opens from disk with no server",
       "ok": true,
-      "ms": 513,
-      "detail": "6.2 MB single file, file:///home/claude/saga/dist-standalone/saga-reader.html…"
+      "ms": 350,
+      "detail": "6.2 MB single file, file:///home/user/sagaleaf/app/dist-standalone/saga-reader.h…"
     },
     {
       "step": "Add the built-in classic books",
       "ok": true,
-      "ms": 1932,
+      "ms": 1813,
       "detail": "3 EPUB/TXT + 1 PDF embedded in the file"
     },
     {
       "step": "Read and highlight a passage",
       "ok": true,
-      "ms": 4310,
+      "ms": 4210,
       "detail": "“are not in a way to know…” at 1.2%"
     },
     {
       "step": "Quit and reopen: highlight and place survive (IndexedDB on file://)",
       "ok": true,
-      "ms": 2318
+      "ms": 1799
     },
     {
       "step": "PDF renders with its worker (no main-thread fallback)",
       "ok": true,
-      "ms": 830,
+      "ms": 777,
       "detail": "45 selectable text spans"
     },
     {
       "step": "Pair the in-page simulated Leaf using the code on its screen",
       "ok": true,
-      "ms": 2715,
-      "detail": "code 816954; book sent"
+      "ms": 2643,
+      "detail": "code 235864; book sent"
     },
     {
       "step": "Read and highlight on the simulated Leaf, then sync",
       "ok": true,
-      "ms": 2129,
+      "ms": 2004,
       "detail": "Leaf at 2%"
     },
     {
       "step": "Back in the reader: jump to the Leaf’s place; Leaf highlight arrived",
       "ok": true,
-      "ms": 1825,
+      "ms": 1807,
       "detail": "resumed at 2%"
     },
     {
       "step": "Names and hidden portals: only SAGA Reader / SAGA Leaf; no Author or Publisher anywhere",
       "ok": true,
-      "ms": 3993
+      "ms": 3843
     },
     {
       "step": "Discover: popular free books from Project Gutenberg, with covers",
       "ok": true,
-      "ms": 194,
-      "detail": "8 books after “Show more”"
+      "ms": 100,
+      "detail": "6 books in the Popular row"
     },
     {
       "step": "Discover: topic filter and search",
       "ok": true,
-      "ms": 946
+      "ms": 3484
     },
     {
       "step": "Get book: EPUB downloads and imports; works as a normal library book",
       "ok": true,
-      "ms": 705
+      "ms": 656
     },
     {
       "step": "Get book: falls back to plain text when there is no EPUB",
@@ -78,52 +78,71 @@
     {
       "step": "Get book: when the browser blocks the download, opens it in a new tab with a note",
       "ok": true,
-      "ms": 300
+      "ms": 232
     },
     {
       "step": "Discover offline: clear message, last popular list still shown",
       "ok": true,
-      "ms": 174,
+      "ms": 94,
       "detail": "6 books from the cached Popular page"
     },
     {
       "step": "Settings: account is optional; from a file, sign-in explains it needs the web address",
       "ok": true,
-      "ms": 136
+      "ms": 92
     },
     {
       "step": "Network: only Gutendex/Gutenberg on Discover; nothing else, no Supabase",
       "ok": true,
       "ms": 0,
-      "detail": "25 requests, all to Gutendex/Gutenberg during Discover"
+      "detail": "44 requests, all to Gutendex/Gutenberg during Discover"
     }
   ],
   "consoleErrors": [],
   "network": [
-    "discover|https://gutendex.com/books/?copyright=false&sort=popular",
-    "discover|https://www.gutenberg.org/cache/epub/1342/pg1342.cover.medium.jpg",
-    "discover|https://www.gutenberg.org/cache/epub/84/pg84.cover.medium.jpg",
-    "discover|https://www.gutenberg.org/cache/epub/1661/pg1661.cover.medium.jpg",
+    "library|https://uxlvtbqmhcheklazboxr.supabase.co/functions/v1/gutenberg-proxy?url=https%3A%2F%2Fgutendex.com%2Fbooks%2F%3Fcopyright%3Dfalse%26search%3DShelley",
+    "library|https://uxlvtbqmhcheklazboxr.supabase.co/functions/v1/gutenberg-proxy?url=https%3A%2F%2Fgutendex.com%2Fbooks%2F%3Fcopyright%3Dfalse%26search%3DDoyle",
+    "library|https://uxlvtbqmhcheklazboxr.supabase.co/functions/v1/gutenberg-proxy?url=https%3A%2F%2Fgutendex.com%2Fbooks%2F%3Fcopyright%3Dfalse%26search%3DAusten",
+    "library|https://uxlvtbqmhcheklazboxr.supabase.co/functions/v1/gutenberg-proxy?url=https%3A%2F%2Fgutendex.com%2Fbooks%2F%3Fcopyright%3Dfalse%26topic%3DFiction%26sort%3Dpopular",
+    "library|https://uxlvtbqmhcheklazboxr.supabase.co/functions/v1/gutenberg-proxy?url=https%3A%2F%2Fgutendex.com%2Fbooks%2F%3Fcopyright%3Dfalse%26topic%3DScience%2BFiction%26sort%3Dpopular",
+    "library|https://uxlvtbqmhcheklazboxr.supabase.co/functions/v1/gutenberg-proxy?url=https%3A%2F%2Fgutendex.com%2Fbooks%2F%3Fcopyright%3Dfalse%26sort%3Dpopular",
+    "library|https://www.gutenberg.org/cache/epub/2701/pg2701.cover.medium.jpg",
+    "library|https://www.gutenberg.org/cache/epub/11/pg11.cover.medium.jpg",
+    "library|https://www.gutenberg.org/cache/epub/345/pg345.cover.medium.jpg",
+    "library|https://www.gutenberg.org/cache/epub/2701/pg2701.cover.medium.jpg",
+    "library|https://www.gutenberg.org/cache/epub/11/pg11.cover.medium.jpg",
+    "library|https://www.gutenberg.org/cache/epub/345/pg345.cover.medium.jpg",
     "discover|https://www.gutenberg.org/cache/epub/2701/pg2701.cover.medium.jpg",
     "discover|https://www.gutenberg.org/cache/epub/11/pg11.cover.medium.jpg",
     "discover|https://www.gutenberg.org/cache/epub/345/pg345.cover.medium.jpg",
-    "discover|https://gutendex.com/books/?copyright=false&sort=popular",
-    "discover|https://gutendex.com/books/?copyright=false&sort=popular&page=2",
-    "discover|https://www.gutenberg.org/cache/epub/1497/pg1497.cover.medium.jpg",
-    "discover|https://www.gutenberg.org/cache/epub/2009/pg2009.cover.medium.jpg",
-    "discover|https://gutendex.com/books/?copyright=false&topic=Mystery&sort=popular",
-    "discover|https://gutendex.com/books/?copyright=false&sort=popular",
-    "discover|https://gutendex.com/books/?copyright=false&search=shelley",
-    "discover|https://gutendex.com/books/1342",
-    "discover|https://www.gutenberg.org/ebooks/1342.epub3.images",
-    "discover|https://gutendex.com/books/1661",
-    "discover|https://www.gutenberg.org/ebooks/1661.epub3.images",
-    "discover|https://www.gutenberg.org/ebooks/1661.epub.noimages",
-    "discover|https://www.gutenberg.org/ebooks/1661.txt.utf-8",
-    "discover|https://gutendex.com/books/84",
-    "discover|https://www.gutenberg.org/ebooks/84.epub3.images",
-    "discover|https://www.gutenberg.org/ebooks/84.epub.noimages",
-    "discover|https://www.gutenberg.org/ebooks/84.txt.utf-8",
+    "discover|https://uxlvtbqmhcheklazboxr.supabase.co/functions/v1/gutenberg-proxy?url=https%3A%2F%2Fstandardebooks.org%2Ffeeds%2Fatom%2Fnew-releases",
+    "discover|https://en.wikisource.org/w/api.php?action=query&format=json&formatversion=2&origin=*&prop=pageimages%7Cextracts&piprop=thumbnail&pithumbsize=240&exintro=1&explaintext=1&exchars=220&exlimit=max&generator=categorymembers&gcmtitle=Category%3AValidated_texts&gcmtype=page&gcmlimit=20",
+    "discover|https://www.gutenberg.org/cache/epub/1342/pg1342.cover.medium.jpg",
+    "discover|https://www.gutenberg.org/cache/epub/84/pg84.cover.medium.jpg",
+    "discover|https://www.gutenberg.org/cache/epub/1661/pg1661.cover.medium.jpg",
+    "discover|https://uxlvtbqmhcheklazboxr.supabase.co/functions/v1/gutenberg-proxy?url=https%3A%2F%2Fgutendex.com%2Fbooks%2F%3Fcopyright%3Dfalse%26sort%3Dpopular%26page%3D2",
+    "discover|https://uxlvtbqmhcheklazboxr.supabase.co/functions/v1/gutenberg-proxy?url=https%3A%2F%2Fstandardebooks.org%2Ffeeds%2Fatom%2Fnew-releases",
+    "discover|https://en.wikisource.org/w/api.php?action=query&format=json&formatversion=2&origin=*&prop=pageimages%7Cextracts&piprop=thumbnail&pithumbsize=240&exintro=1&explaintext=1&exchars=220&exlimit=max&generator=categorymembers&gcmtitle=Category%3AValidated_texts&gcmtype=page&gcmlimit=20",
+    "discover|https://uxlvtbqmhcheklazboxr.supabase.co/functions/v1/gutenberg-proxy?url=https%3A%2F%2Fstandardebooks.org%2Ffeeds%2Fatom%2Fnew-releases",
+    "discover|https://uxlvtbqmhcheklazboxr.supabase.co/functions/v1/gutenberg-proxy?url=https%3A%2F%2Fgutendex.com%2Fbooks%2F%3Fcopyright%3Dfalse%26topic%3DMystery%26sort%3Dpopular",
+    "discover|https://en.wikisource.org/w/api.php?action=query&format=json&formatversion=2&origin=*&prop=pageimages%7Cextracts&piprop=thumbnail&pithumbsize=240&exintro=1&explaintext=1&exchars=220&exlimit=max&generator=search&gsrnamespace=0&gsrlimit=20&gsrsearch=Mystery+incategory%3A%22Validated+texts%7CProofread+texts%22",
+    "discover|https://openlibrary.org/search.json?q=subject%3A%22mystery%22&ebook_access=public&fields=key%2Ctitle%2Cauthor_name%2Cfirst_publish_year%2Ccover_i%2Cia%2Csubject&limit=20&page=1",
+    "discover|https://uxlvtbqmhcheklazboxr.supabase.co/functions/v1/gutenberg-proxy?url=https%3A%2F%2Fstandardebooks.org%2Ffeeds%2Fatom%2Fnew-releases",
+    "discover|https://en.wikisource.org/w/api.php?action=query&format=json&formatversion=2&origin=*&prop=pageimages%7Cextracts&piprop=thumbnail&pithumbsize=240&exintro=1&explaintext=1&exchars=220&exlimit=max&generator=categorymembers&gcmtitle=Category%3AValidated_texts&gcmtype=page&gcmlimit=20",
+    "discover|https://uxlvtbqmhcheklazboxr.supabase.co/functions/v1/gutenberg-proxy?url=https%3A%2F%2Fstandardebooks.org%2Ffeeds%2Fatom%2Fnew-releases",
+    "discover|https://uxlvtbqmhcheklazboxr.supabase.co/functions/v1/gutenberg-proxy?url=https%3A%2F%2Fgutendex.com%2Fbooks%2F%3Fcopyright%3Dfalse%26search%3Dshelley",
+    "discover|https://en.wikisource.org/w/api.php?action=query&format=json&formatversion=2&origin=*&prop=pageimages%7Cextracts&piprop=thumbnail&pithumbsize=240&exintro=1&explaintext=1&exchars=220&exlimit=max&generator=search&gsrnamespace=0&gsrlimit=20&gsrsearch=shelley+incategory%3A%22Validated+texts%7CProofread+texts%22",
+    "discover|https://openlibrary.org/search.json?q=shelley&ebook_access=public&fields=key%2Ctitle%2Cauthor_name%2Cfirst_publish_year%2Ccover_i%2Cia%2Csubject&limit=20&page=1",
+    "discover|https://uxlvtbqmhcheklazboxr.supabase.co/functions/v1/gutenberg-proxy?url=https%3A%2F%2Fgutendex.com%2Fbooks%2F1342",
+    "discover|https://uxlvtbqmhcheklazboxr.supabase.co/functions/v1/gutenberg-proxy?url=https%3A%2F%2Fwww.gutenberg.org%2Febooks%2F1342.epub3.images",
+    "discover|https://uxlvtbqmhcheklazboxr.supabase.co/functions/v1/gutenberg-proxy?url=https%3A%2F%2Fgutendex.com%2Fbooks%2F1661",
+    "discover|https://uxlvtbqmhcheklazboxr.supabase.co/functions/v1/gutenberg-proxy?url=https%3A%2F%2Fwww.gutenberg.org%2Febooks%2F1661.epub3.images",
+    "discover|https://uxlvtbqmhcheklazboxr.supabase.co/functions/v1/gutenberg-proxy?url=https%3A%2F%2Fwww.gutenberg.org%2Febooks%2F1661.epub.noimages",
+    "discover|https://uxlvtbqmhcheklazboxr.supabase.co/functions/v1/gutenberg-proxy?url=https%3A%2F%2Fwww.gutenberg.org%2Febooks%2F1661.txt.utf-8",
+    "discover|https://uxlvtbqmhcheklazboxr.supabase.co/functions/v1/gutenberg-proxy?url=https%3A%2F%2Fgutendex.com%2Fbooks%2F84",
+    "discover|https://uxlvtbqmhcheklazboxr.supabase.co/functions/v1/gutenberg-proxy?url=https%3A%2F%2Fwww.gutenberg.org%2Febooks%2F84.epub3.images",
+    "discover|https://uxlvtbqmhcheklazboxr.supabase.co/functions/v1/gutenberg-proxy?url=https%3A%2F%2Fwww.gutenberg.org%2Febooks%2F84.epub.noimages",
+    "discover|https://uxlvtbqmhcheklazboxr.supabase.co/functions/v1/gutenberg-proxy?url=https%3A%2F%2Fwww.gutenberg.org%2Febooks%2F84.txt.utf-8",
     "discover|https://www.gutenberg.org/ebooks/84.epub3.images"
   ]
 }

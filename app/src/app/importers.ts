@@ -1,11 +1,12 @@
 // App-side glue for library import: folder picking, Kindle highlight files and
 // routing dropped files to the right importer. Everything runs in the page and
 // writes to IndexedDB; there is no server-side book store.
-import { store, toast, go } from './state'
-import { importWithFeedback } from './data'
+import { store, toast } from './state'
 import { importCalibre, filesFromZip, zipLooksLikeCalibre, type TreeFile, type CalibreResult } from '../core/calibre'
 import { parseKindleExport, importClippings, autoAttachPending, type ClippingImportResult } from '../core/kindle'
 import { isZip } from '../core/epub'
+import { importFiles, importBackup } from '../core/library'
+import { unzipSync, strFromU8 } from 'fflate'
 import { PRODUCT } from './product'
 
 // ---------------------------------------------------------------- folders
@@ -90,31 +91,73 @@ export async function isKindleExport(f: File) {
   return /class\s*=\s*["']?(bookTitle|notebookFor)/.test(head)
 }
 
-/** Drop and file-picker import: books go to the library as before; Kindle
- *  exports go to highlights; a zipped Calibre library goes to the Calibre importer. */
-export async function importDropped(files: File[]) {
-  const books: File[] = []
-  for (const f of files) {
-    try {
-      if (await isKindleExport(f)) {
-        const r = await importKindleFile(f)
-        toast(`Kindle: ${kindleSummary(r)}`, r.pending ? { label: 'Review', run: () => go('notes') } : undefined, 7000)
-        continue
-      }
-      if (/\.zip$/i.test(f.name)) {
-        const bytes = new Uint8Array(await f.arrayBuffer())
-        if (isZip(bytes) && zipLooksLikeCalibre(bytes)) {
-          const res = await runCalibreImport(filesFromZip(bytes))
-          toast(calibreSummary(res), undefined, 7000)
-          continue
-        }
-      }
-    } catch (e) { toast(`${f.name}: ${(e as Error).message}`, undefined, 7000); continue }
-    books.push(f)
+export type ImportKind = 'book' | 'calibre' | 'kindle' | 'backup'
+/** What a chosen file is, by looking inside it: a SAGA backup (library.json), a zipped Calibre library (metadata.opf),
+ *  Kindle My Clippings.txt or a notebook export, or otherwise a book. */
+export async function detectImport(f: File): Promise<ImportKind> {
+  if (await isKindleExport(f)) return 'kindle'
+  if (/\.zip$/i.test(f.name)) {
+    const bytes = new Uint8Array(await f.arrayBuffer())
+    if (isZip(bytes)) {
+      if (isSagaBackup(bytes)) return 'backup'
+      if (zipLooksLikeCalibre(bytes)) return 'calibre'
+    }
   }
-  if (books.length) await importWithFeedback(books)
+  return 'book'
+}
+function isSagaBackup(zip: Uint8Array) {
+  try { const m = JSON.parse(strFromU8(unzipSync(zip, { filter: e => e.name === 'library.json' })['library.json'] ?? new Uint8Array())); return m?.format === 'saga-library' } catch { return false }
 }
 
+export interface ImportOutcome { line: string; action?: { label: string; href: string } }
+/** Routes each file to the importer for what it is, and answers with one line (plus a link when there is somewhere to go). */
+export async function importAny(files: File[], onProgress?: (done: number, total: number) => void): Promise<ImportOutcome> {
+  const books: File[] = [], lines: string[] = []
+  let action: ImportOutcome['action']
+  let done = 0
+  for (const f of files) {
+    try {
+      const kind = await detectImport(f)
+      if (kind === 'kindle') { const r = await importKindleFile(f); lines.push(`Kindle: ${kindleSummary(r)}`); action = { label: r.pending ? 'Review' : 'View highlights', href: '#/library?seg=highlights' } }
+      else if (kind === 'backup') { const r = await importBackup(store, new Uint8Array(await f.arrayBuffer())); lines.push(`Restored ${r.books} book${r.books === 1 ? '' : 's'} and ${r.annotations} highlight${r.annotations === 1 ? '' : 's'}`); action = { label: 'Open Library', href: '#/library' } }
+      else if (kind === 'calibre') { const res = await runCalibreImport(filesFromZip(new Uint8Array(await f.arrayBuffer()))); lines.push(calibreSummary(res)); action = { label: 'Open Library', href: '#/library' } }
+      else books.push(f)
+    } catch (e) { lines.push(`${f.name}: ${(e as Error).message}`) }
+    onProgress?.(++done, files.length)
+  }
+  if (books.length) {
+    const results = await importFiles(store, books)
+    const added = results.filter(r => r.status === 'added' || r.status === 'restored'), dup = results.filter(r => r.status === 'duplicate'), failed = results.filter(r => r.status === 'failed')
+    const attached = added.length ? await autoAttachPending(store).catch(() => 0) : 0
+    if (results.length === 1) {
+      const r = results[0]
+      if (r.status === 'failed') lines.push(`${r.name}: ${r.error}`)
+      else if (r.status === 'duplicate') { lines.push(`“${r.title}” is already in your library`); action = { label: 'Open', href: `#/book/${r.bookId}` } }
+      else { lines.push(`Added “${r.title}”`); action = { label: 'Read now', href: `#/read/${r.bookId}` } }
+    } else lines.push([added.length && `${added.length} added`, dup.length && `${dup.length} already in your library`, failed.length && `${failed.length} couldn’t be read`].filter(Boolean).join(', '))
+    if (attached) lines.push(`${attached} Kindle highlight${attached === 1 ? '' : 's'} added to the new book${added.length === 1 ? '' : 's'}`)
+  }
+  return { line: lines.join('. '), action }
+}
+
+/** A chosen folder: a Calibre library when it has metadata.opf files, otherwise just the books in it. */
+export async function importTree(files: TreeFile[], onProgress?: (done: number, total: number) => void): Promise<ImportOutcome> {
+  if (files.some(f => /(^|\/)metadata\.opf$/i.test(f.path))) {
+    const res = await runCalibreImport(files, (d, t) => onProgress?.(d, t))
+    return { line: calibreSummary(res), action: { label: 'Open Library', href: '#/library' } }
+  }
+  const list = files.filter(f => /\.(epub|pdf|txt)$/i.test(f.path))
+  if (!list.length) return { line: 'No books found in that folder.' }
+  const file = await Promise.all(list.map(async f => new File([await f.read() as BlobPart], f.path.split('/').pop()!)))
+  return importAny(file, onProgress)
+}
+
+/** Drop and file-picker import: one toast with the result. */
+export async function importDropped(files: File[]) {
+  const r = await importAny(files)
+  toast(r.line || 'Nothing to import', r.action ? { label: r.action.label, run: () => { location.hash = r.action!.href } } : undefined, 7000)
+  return r
+}
 export function calibreSummary(res: CalibreResult[]) {
   const added = res.filter(r => r.status === 'added').length, dup = res.filter(r => r.status === 'duplicate').length, skipped = res.filter(r => r.status === 'skipped').length
   return `Calibre: ${[`${added} book${added === 1 ? '' : 's'} added`, dup && `${dup} already in your library`, skipped && `${skipped} skipped`].filter(Boolean).join(', ')}`

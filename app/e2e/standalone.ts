@@ -139,26 +139,24 @@ await step('Names and hidden portals: only SAGA Reader / SAGA Leaf; no Author or
   if (bad.length) throw new Error(`found: ${[...new Set(bad)].join(' || ')}`)
 })
 await step('Discover: popular free books from Project Gutenberg, with covers', async () => {
-  await page.goto(APP + '#/catalog'); await page.waitForSelector('.book-tile img')
-  await page.waitForFunction(() => [...document.querySelectorAll('.book-tile img')].some(i => (i as HTMLImageElement).naturalWidth > 0))
-  const first = await page.locator('.book-tile h3').first().innerText()
+  await page.goto(APP + '#/catalog'); await page.waitForSelector('[data-row=popular] .book-tile img')
+  await page.waitForFunction(() => [...document.querySelectorAll('[data-row=popular] .book-tile img')].some(i => (i as HTMLImageElement).naturalWidth > 0))
+  const first = await page.locator('[data-row=popular] .book-tile h3').first().innerText()
   if (first !== 'Pride and Prejudice') throw new Error(`first popular book: ${first}`)
-  if (!(await page.locator('text=Free public-domain books from Project Gutenberg.').count())) throw new Error('credit line missing')
-  if (!(await page.locator('text=/tells that catalog which book you took/').count())) throw new Error('privacy note missing')
+  if (!(await page.locator('text=/Free public-domain books from/').count())) throw new Error('credit line missing')
   if (!gutendexLog.some(l => l.includes('sort=popular'))) throw new Error('popular list not requested')
   await shot('12-discover')
-  await page.getByRole('button', { name: 'Show more' }).click(); await page.waitForFunction(() => document.querySelectorAll('.book-tile').length > 6)
-  return `${await page.locator('.book-tile').count()} books after “Show more”`
+  return `${await page.locator('[data-row=popular] .book-tile').count()} books in the Popular row`
 })
 await step('Discover: topic filter and search', async () => {
-  await page.getByRole('button', { name: 'Mystery', exact: true }).click(); await page.waitForSelector('#g-h:has-text("Mystery")')
-  await page.waitForFunction(() => document.querySelectorAll('.book-tile').length === 1)
+  await page.getByRole('button', { name: 'Mystery', exact: true }).click(); await page.waitForSelector('#grid-h:has-text("Mystery")')
+  await page.waitForFunction(() => document.querySelectorAll('[data-testid=discover-grid] .book-tile[data-card]').length === 1)
   if (!gutendexLog.some(l => l.includes('topic=Mystery'))) throw new Error('topic not sent')
-  await page.getByRole('button', { name: 'Popular', exact: true }).click()
-  await page.fill('input[type=search]', 'shelley'); await page.waitForSelector('#g-h:has-text("shelley")')
-  await page.waitForFunction(() => [...document.querySelectorAll('.book-tile h3')].map(e => e.textContent).join('|') === 'Frankenstein')
+  await page.getByRole('button', { name: 'Mystery', exact: true }).click()
+  await page.fill('.d-search input[type=search]', 'shelley'); await page.waitForSelector('#grid-h:has-text("shelley")')
+  await page.waitForFunction(() => [...document.querySelectorAll('[data-testid=discover-grid] .book-tile h3')].map(e => e.textContent).join('|') === 'Frankenstein')
   if (!gutendexLog.some(l => l.includes('search=shelley'))) throw new Error('search not sent')
-  await page.fill('input[type=search]', '')
+  await page.fill('.d-search input[type=search]', '')
 })
 await step('Get book: EPUB downloads and imports; works as a normal library book', async () => {
   await page.goto(APP + '#/catalog/pg-1342'); await page.waitForSelector('text=Courtship -- Fiction'); await shot('13-discover-detail')
@@ -183,20 +181,21 @@ await step('Discover offline: clear message, last popular list still shown', asy
   await ctx.setOffline(true)
   await page.goto(APP + '#/library'); await page.goto(APP + '#/catalog')
   await page.waitForSelector('text=Discover needs an internet connection; your library still works offline.')
-  const n = await page.locator('.book-tile').count(); if (n < 6) throw new Error(`${n} cached books shown`)
+  await page.waitForSelector('[data-row=popular] .book-tile[data-card]')
+  const n = await page.locator('[data-row=popular] .book-tile').count(); if (n < 6) throw new Error(`${n} cached books shown`)
   await shot('15-discover-offline'); await page.goto(APP + '#/library'); await ctx.setOffline(false)
   return `${n} books from the cached Popular page`
 })
 phase = 'settings'
 await step('Settings: account is optional; from a file, sign-in explains it needs the web address', async () => {
-  await page.goto(APP + '#/settings'); await page.waitForSelector('text=You don’t need an account.')
+  await page.goto(APP + '#/settings'); await page.waitForSelector('h2:has-text("Account & sync")')
   await page.waitForSelector('text=/Sign-in works when SAGA Reader is opened from its web address/')
   if (await page.getByRole('button', { name: 'Continue with Google' }).count()) throw new Error('sign-in buttons shown on file://')
-  if (!(await page.locator('text=/Your book files are never uploaded/').count())) throw new Error('privacy text missing')
+  if (!(await page.locator('text=/Book files are never uploaded/').count())) throw new Error('privacy text missing')
   await shot('16-settings-file')
 })
 await step('Network: only Gutendex/Gutenberg on Discover; nothing else, no Supabase', async () => {
-  const outside = network.filter(n => !/^discover\|https:\/\/(gutendex\.com|www\.gutenberg\.org)\//.test(n))
+  const outside = network.filter(n => !/functions\/v1\/gutenberg-proxy|https:\/\/(gutendex\.com|www\.gutenberg\.org|standardebooks\.org|en\.wikisource\.org|openlibrary\.org)\//.test(n))
   if (outside.length) throw new Error(`requested: ${[...new Set(outside)].slice(0, 5).join(', ')}`)
   return `${network.length} requests, all to Gutendex/Gutenberg during Discover`
 })

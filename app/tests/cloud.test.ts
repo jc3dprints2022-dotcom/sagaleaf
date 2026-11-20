@@ -1,9 +1,10 @@
-// Account sync (Supabase saga_sync rows): convergence, conflict safety, encryption.
+// Account sync (Supabase saga_sync rows): convergence, conflict safety, book entries, legacy rows. No code or key: the account is the key.
 import './node-dom'
 import { describe, it, expect } from 'vitest'
 import { freshStore } from './helpers'
-import { CloudSync, KeyMismatch, KEY_ROW, type CloudApi, type CloudRow } from '../src/core/sync/cloud'
-import { newLibrarySecret, deriveKeys } from '../src/core/sync/crypto'
+import { CloudSync, KEY_ROW, type CloudApi, type CloudRow } from '../src/core/sync/cloud'
+import { importBytes } from '../src/core/library'
+import { sample } from './helpers'
 import type { Annotation, Position } from '../src/core/types'
 
 /** In-memory stand-in for the user's rows (what RLS would show one signed-in user). */
@@ -21,11 +22,9 @@ function fakeTable() {
 const ann = (bookId: string, extra: Partial<Annotation> = {}): Partial<Annotation> => ({ bookId, kind: 'highlight', color: 'amber', exact: 'It is a truth universally acknowledged', prefix: '', suffix: '', start: 0, end: 38, section: 1, note: '', tags: [], createdAt: Date.now(), updatedAt: Date.now(), ...extra })
 
 async function twoDevices() {
-  const secret = newLibrarySecret()
-  const keys = await deriveKeys(secret)
   const t = fakeTable()
   const a = await freshStore(undefined, 'Phone'), b = await freshStore(undefined, 'Laptop')
-  return { t, a, b, ca: new CloudSync(a, t.api, keys), cb: new CloudSync(b, t.api, keys), secret }
+  return { t, a, b, ca: new CloudSync(a, t.api), cb: new CloudSync(b, t.api) }
 }
 
 describe('account sync', () => {
@@ -46,12 +45,46 @@ describe('account sync', () => {
     expect(await cb.sync()).toMatchObject({ pushed: 0 })
   })
 
-  it('stores only ciphertext', async () => {
-    const { t, a, ca, secret } = await twoDevices()
-    await a.put<Annotation>('annotation', 'p', ann('bk', { note: 'my private thought about Darcy' }))
+  it('needs no code: a second device with the same account just receives everything', async () => {
+    const { t, a, b, ca, cb } = await twoDevices()
+    await a.put<Annotation>('annotation', 'p', ann('bk', { note: 'my thought about Darcy' }))
     await ca.sync()
-    const raw = JSON.stringify([...t.rows.values()])
-    expect(raw).not.toContain('Darcy'); expect(raw).not.toContain('truth universally'); expect(raw).not.toContain(secret)
+    expect(JSON.stringify([...t.rows.values()])).toContain('Darcy')   // readable by the account holder only: RLS, not a key
+    await cb.sync()
+    expect((await b.db.annotations.get('p'))!.note).toBe('my thought about Darcy')
+  })
+
+  it('syncs book entries: a book with a source arrives as a remote book with its source, an uploaded one with a cover', async () => {
+    const { a, b, ca, cb } = await twoDevices()
+    const r = await importBytes(a, 'p.epub', sample('pride-and-prejudice.epub'), { source: 'catalog', catalogId: 'pg-1342' })
+    const up = await importBytes(a, 'f.epub', sample('frankenstein.epub'))
+    await ca.sync()
+    const got: string[][] = []
+    cb.onRemoteBooks = ids => got.push(ids)
+    const res = await cb.sync()
+    expect(res.added.sort()).toEqual([r.bookId, up.bookId].sort())
+    const rb = (await b.db.books.get(r.bookId!))!
+    expect(rb).toMatchObject({ fileState: 'remote', catalogId: 'pg-1342', title: 'Pride and Prejudice', source: 'catalog' })
+    expect(got).toHaveLength(1)
+    const ub = (await b.db.books.get(up.bookId!))!
+    expect(ub.fileState).toBe('remote'); expect(ub.catalogId).toBeUndefined()
+    // no file was uploaded
+    expect(JSON.stringify([...(await a.db.books.toArray())].length)).toBeTruthy()
+    expect(await b.db.files.count()).toBe(0)
+    // idempotent
+    expect((await cb.sync()).added).toEqual([])
+  })
+
+  it('ignores rows written by the encrypted version and replaces them on the next push', async () => {
+    const { t, a, b, ca, cb } = await twoDevices()
+    t.rows.set(KEY_ROW, { book_id: KEY_ROW, data: { v: 1, alg: 'AES-GCM-256', lib: 'x', box: 'zz' } as never, updated_at: new Date().toISOString() })
+    t.rows.set('bk', { book_id: 'bk', data: { v: 1, alg: 'AES-GCM-256', lib: 'x', box: 'zz' } as never, updated_at: new Date().toISOString() })
+    await a.put<Annotation>('annotation', 'n1', ann('bk', { note: 'fresh' }))
+    const r = await ca.sync()
+    expect(r.unreadable).toBe(1)
+    expect((t.rows.get('bk')!.data as { v: number }).v).toBe(2)
+    await cb.sync()
+    expect((await b.db.annotations.get('n1'))!.note).toBe('fresh')
   })
 
   it('a row upload carries both devices’ changes (no device overwrites another)', async () => {
@@ -93,14 +126,5 @@ describe('account sync', () => {
     await b.put<Annotation>('annotation', 'd', { note: 'added a note offline' })
     await ca.sync(); await cb.sync(); await ca.sync()
     for (const s of [a, b]) { const d = (await s.db.annotations.get('d'))!; expect(d.deleted).toBeFalsy(); expect(d.note).toBe('added a note offline') }
-  })
-
-  it('refuses a different library code instead of mixing libraries', async () => {
-    const { t, ca } = await twoDevices()
-    expect(await ca.verifyKey()).toBe('created')
-    expect(await ca.verifyKey()).toBe('matched')
-    const other = new CloudSync(await freshStore(), t.api, await deriveKeys(newLibrarySecret()))
-    await expect(other.verifyKey()).rejects.toBeInstanceOf(KeyMismatch)
-    expect(t.rows.has(KEY_ROW)).toBe(true)
   })
 })

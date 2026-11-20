@@ -1,15 +1,21 @@
-// Discover. Free public-domain books from Project Gutenberg (via Gutendex),
-// plus, when FEATURES.authorPortal is on, books published through SAGA Author.
-import { useCallback, useEffect, useState } from 'react'
-import { store, href, go, toast, platform, DEMO_USERS } from '../../app/state'
+// Discover: one page over Standard Ebooks, Project Gutenberg, Wikisource and the Internet Archive's scans
+// (app/discover.ts). Carousels on a phone, rows plus a grid on a desktop, infinite scroll on every grid.
+// When FEATURES.authorPortal is on it also lists books published through SAGA Author.
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { store, href, go, toast, platform, DEMO_USERS, useRoute, useLive } from '../../app/state'
 import { FEATURES } from '../../app/features'
 import { PlatformImg } from '../components'
 import { importBytes } from '../../core/library'
 import { Icon } from '../icons'
 import { tintOf, fmtBytes } from '../../core/util'
-import { UrlImport } from './Import'
-import { cachedSE, fetchSENewReleases, cachedSEBook, getStandardEbook, seCatalogId, seSegmentsOf, unslug, SE_ORIGIN, type SEBook } from '../../app/standardebooks'
-import { TOPICS, listUrl, fetchPage, cachedPopular, cachePopular, cachedBook, fetchBook, getBook, DownloadBlocked, authorsOf, personName, coverOf, shortTitle, catalogIdOf, gutenbergPage, type GBook } from '../../app/gutendex'
+import { importUi } from './ImportModal'
+import { loadBooks } from '../../app/data'
+import { CardTile, Carousel, DCover, Skeletons, prefetchCovers, useMobile } from '../discoverParts'
+import { SOURCE_LABEL, type DiscoverCard } from '../../app/card'
+import { TOPICS, SORTS, createFeed, rowCards, rowFeed, rowTitle, rememberCards, cardById, getByCatalogId, openLabel, OpenOnSource, catalogHref, emptyQuery, type Feed, type Query, type RowId, type Sort } from '../../app/discover'
+import { swr, peekSync } from '../../app/swr'
+import { cachedSEBook, getStandardEbook, seCatalogId, seSegmentsOf, unslug, SE_ORIGIN, type SEBook } from '../../app/standardebooks'
+import { cachedBook, fetchBook, getBook, DownloadBlocked, authorsOf, personName, coverOf, shortTitle, catalogIdOf, gutenbergPage, type GBook } from '../../app/gutendex'
 import { PRODUCT } from '../../app/product'
 
 export interface CatalogItem { id: string; title: string; author: string; description: string; language: string; subjects: string[]; price: number; license: string; words: number; hasCover: boolean; fileSize: number; publishedAt: number; series?: string }
@@ -21,77 +27,196 @@ function CatCover({ item, width }: { item: CatalogItem; width?: number | string 
   return <div className="cover gen" style={{ width, '--gen-bg': `hsl(${h} 28% 34%)`, '--gen-ink': `hsl(${h} 30% 94%)` } as React.CSSProperties}><span className="t">{item.title}</span><span className="rule" /><span className="a">{item.author}</span></div>
 }
 
-const PRIVACY_NOTE = 'Getting a book from Discover tells that catalog which book you took, as a store would. Nothing about your reading is shared.'
-
 function useOnline() {
   const [on, setOn] = useState(() => typeof navigator === 'undefined' ? true : navigator.onLine)
   useEffect(() => { const up = () => setOn(true), down = () => setOn(false); addEventListener('online', up); addEventListener('offline', down); return () => { removeEventListener('online', up); removeEventListener('offline', down) } }, [])
   return on
 }
+const replaceHash = (h: string) => { location.replace(h) }
+const discoverHref = (p: { q?: string; topic?: string; sort?: string; row?: string }) => {
+  const u = new URLSearchParams()
+  for (const [k, v] of Object.entries(p)) if (v && !(k === 'sort' && v === 'popular')) u.set(k, v)
+  const s = u.toString()
+  return '#/catalog' + (s ? '?' + s : '')
+}
 
 export function Catalog() {
-  const [q, setQ] = useState('')
-  const [debounced, setDebounced] = useState('')
-  const [topic, setTopic] = useState('')
-  const [source, setSource] = useState<'pg' | 'se'>(() => (localStorage.getItem('saga.discover.source') === 'se' ? 'se' : 'pg'))
-  useEffect(() => { try { localStorage.setItem('saga.discover.source', source) } catch { /* private mode */ } }, [source])
-  useEffect(() => { const t = setTimeout(() => setDebounced(q), 450); return () => clearTimeout(t) }, [q])
+  const route = useRoute()
+  const mobile = useMobile()
+  const online = useOnline()
+  const topic = route.query.get('topic') ?? '', sort = (route.query.get('sort') as Sort | null) ?? 'popular', row = route.query.get('row') as RowId | null
+  const urlQ = route.query.get('q') ?? ''
+  const [q, setQ] = useState(urlQ)
+  useEffect(() => { setQ(urlQ) }, [urlQ])
+  useEffect(() => { if (q === urlQ) return; const t = setTimeout(() => { const now = new URLSearchParams(location.hash.split('?')[1] ?? ''); replaceHash(discoverHref({ q: q.trim(), topic: now.get('topic') ?? '', sort: now.get('sort') ?? 'popular' })) }, 450); return () => clearTimeout(t) }, [q])  // eslint-disable-line react-hooks/exhaustive-deps
+  const searching = !!(urlQ.trim() || topic)
+  const library = useLive(loadBooks, [], ['books'])
+  const query: Query = useMemo(() => ({ q: urlQ.trim(), topic, sort }), [urlQ, topic, sort])
+  const heading = row ? rowTitle(row) : searching ? `${urlQ.trim() ? `Results for “${urlQ.trim()}”` : topic}${urlQ.trim() && topic ? ` in ${topic}` : ''}` : 'Popular'
+
   return (
     <>
       <h1 className="page-title">Discover</h1>
-      <p className="page-sub">Free public-domain books from Project Gutenberg and Standard Ebooks. Each one is a DRM-free file you keep, the same as anything you import.</p>
-      <div className="row wrap" style={{ gap: 6, marginBottom: 18 }} role="group" aria-label="Source">
-        <button className="chip" aria-pressed={source === 'pg'} onClick={() => setSource('pg')}>Project Gutenberg</button>
-        <button className="chip" aria-pressed={source === 'se'} onClick={() => setSource('se')}>Standard Ebooks</button>
+      <div className="d-search">
+        <label className="search-input"><span className="sr-only">Search free books</span><Icon.search /><input className="input" type="search" value={q} onChange={e => setQ(e.target.value)} placeholder="Search titles and authors" /></label>
+        <button className="icon-btn" onClick={() => importUi.open({ link: true })} aria-label="Have a link? Add a book from a link" title="Have a link?"><Icon.link /></button>
       </div>
-      {source === 'pg' ? <>
-        <label className="search-input" style={{ display: 'block', maxWidth: 520, marginBottom: 14 }}><span className="sr-only">Search free books</span><Icon.search /><input className="input" type="search" value={q} onChange={e => setQ(e.target.value)} placeholder="Search titles and authors" /></label>
-        <div className="row wrap" style={{ gap: 6, marginBottom: 22 }} role="group" aria-label="Topics">
-          <button className="chip" aria-pressed={!topic} onClick={() => setTopic('')}>Popular</button>
-          {TOPICS.map(t => <button key={t} className="chip" aria-pressed={topic === t} onClick={() => setTopic(topic === t ? '' : t)}>{t}</button>)}
-        </div>
-        {FEATURES.authorPortal && <AuthorCatalogSection q={debounced} />}
-        <GutenbergList search={debounced} topic={topic} />
-      </> : <StandardEbooksList />}
-      <section aria-labelledby="paste-h" style={{ marginTop: 34 }}>
-        <h2 className="section-title" id="paste-h">Have a link?</h2>
-        <UrlImport />
-      </section>
-      <p className="small muted" style={{ marginTop: 30 }}>Free public-domain books from <a href="https://www.gutenberg.org" target="_blank" rel="noreferrer">Project Gutenberg</a> and <a href={SE_ORIGIN} target="_blank" rel="noreferrer">Standard Ebooks</a>. {PRIVACY_NOTE}</p>
+      <div className="chip-row" role="group" aria-label="Topics">
+        {TOPICS.map(t => <button key={t} className="chip" aria-pressed={topic === t} onClick={() => replaceHash(discoverHref({ q: urlQ.trim(), topic: topic === t ? '' : t, sort }))}>{t}</button>)}
+      </div>
+      {!online && <div className="banner warn" role="status">Discover needs an internet connection; your library still works offline. Lists you have seen before still show.</div>}
+      {FEATURES.authorPortal && !row && !searching && <AuthorCatalogSection q="" />}
+
+      {row ? <>
+        <div className="d-grid-head"><a href={discoverHref({})} className="btn quiet small" style={{ marginLeft: -10 }}><Icon.back />Discover</a><h2 className="section-title" id="grid-h">{heading}</h2></div>
+        <FeedGrid key={row} makeFeed={() => rowFeed(row, library ?? [])} ready={row !== 'recommended' || !!library} />
+      </> : searching ? <>
+        <div className="d-grid-head"><h2 className="section-title" id="grid-h">{heading}</h2>
+          <select className="input" style={{ width: 'auto' }} value={sort} aria-label="Sort by" onChange={e => replaceHash(discoverHref({ q: urlQ.trim(), topic, sort: e.target.value }))}>{SORTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}</select></div>
+        <FeedGrid key={JSON.stringify(query)} makeFeed={() => createFeed(query)} empty="No free books match. Try an author’s surname, fewer words, or another topic." />
+      </> : <>
+        <Rows library={library} />
+        {!mobile && <>
+          <div className="d-grid-head"><h2 className="section-title" id="grid-h">Browse all</h2>
+            <select className="input" style={{ width: 'auto' }} value={sort} aria-label="Sort by" onChange={e => replaceHash(discoverHref({ sort: e.target.value }))}>{SORTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}</select></div>
+          <FeedGrid key={'all-' + sort} makeFeed={() => createFeed({ ...emptyQuery, sort })} />
+        </>}
+      </>}
+      <p className="small muted" style={{ marginTop: 30 }}>Free public-domain books from <a href={SE_ORIGIN} target="_blank" rel="noreferrer">Standard Ebooks</a>, <a href="https://www.gutenberg.org" target="_blank" rel="noreferrer">Project Gutenberg</a>, <a href="https://en.wikisource.org" target="_blank" rel="noreferrer">Wikisource</a> and the <a href="https://archive.org" target="_blank" rel="noreferrer">Internet Archive</a>.</p>
     </>
   )
 }
 
-// ---------- Standard Ebooks (public new-releases feed; downloads fetched directly, CORS allowed)
-function SECover({ b, width }: { b: SEBook; width?: number | string }) {
-  const [broken, setBroken] = useState(false)
-  if (b.cover && !broken) return <div className="cover" style={{ width }}><img src={b.cover} alt="" loading="lazy" onError={() => setBroken(true)} /></div>
-  const h = tintOf(b.title + b.author)
-  return <div className="cover gen" style={{ width, '--gen-bg': `hsl(${h} 28% 34%)`, '--gen-ink': `hsl(${h} 30% 94%)` } as React.CSSProperties}><span className="t">{b.title}</span><span className="rule" /><span className="a">{b.author}</span></div>
+// ---------- rows (carousels): Recommended, Popular, New from Standard Ebooks, then one per topic. Each loads when it nears the screen.
+const ROWS: RowId[] = ['recommended', 'popular', 'standard-new', ...TOPICS.map(t => `topic:${t}` as RowId)]
+function Rows({ library }: { library: { title: string; author: string; subjects?: string[]; catalogId?: string }[] | undefined }) {
+  return <>{ROWS.map((id, i) => <LazyRow key={id} id={id} index={i} library={library} />)}</>
+}
+function LazyRow({ id, index, library }: { id: RowId; index: number; library: { title: string; author: string; subjects?: string[]; catalogId?: string }[] | undefined }) {
+  const host = useRef<HTMLDivElement>(null)
+  const [near, setNear] = useState(index < 2)
+  const sig = id === 'recommended' ? (library ?? []).map(b => b.author).sort().join('|').length + ':' + (library?.length ?? 0) : ''
+  const warm = peekSync<DiscoverCard[]>(`row:v1:${id}:${sig}`)?.value ?? null   // a returning visit paints at once
+  const [cards, setCards] = useState<DiscoverCard[] | null>(warm)
+  const [loading, setLoading] = useState(!warm)
+  useEffect(() => {
+    if (near) return
+    const el = host.current; if (!el) return
+    const io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { setNear(true); io.disconnect() } }, { rootMargin: '150px 0px' })
+    io.observe(el); return () => io.disconnect()
+  }, [near])
+  useEffect(() => {
+    if (!near || (id === 'recommended' && !library)) return
+    let live = true
+    setLoading(true)
+    // the Standard Ebooks feed waits until the first row has painted, so the first request goes out alone
+    let timer: ReturnType<typeof setTimeout> | undefined
+    const go = () => swr<DiscoverCard[]>(`row:v1:${id}:${sig}`, () => rowCards(id, library ?? []), {
+      ttl: id === 'recommended' ? 3600_000 : undefined,
+      onCached: v => { if (live) { setCards(v); prefetchCovers(v, index < 2 ? 10 : 0) } },
+      onFresh: v => { if (live) setCards(v) },
+    }).then(v => { if (live) { setCards(v); void rememberCards(v); if (index < 2) prefetchCovers(v) } })
+      .catch(() => { if (live) setCards(c => c ?? []) })
+      .finally(() => { if (live) setLoading(false) })
+    if (id === 'standard-new' && !warm) timer = setTimeout(go, 500); else go()
+    return () => { live = false; clearTimeout(timer) }
+  }, [near, id, sig, !!library])  // eslint-disable-line react-hooks/exhaustive-deps
+  return <div ref={host}><Carousel id={id} title={rowTitle(id)} cards={cards} loading={loading || !near} seeAll={discoverHref({ row: id })} priority={index < 2} empty={id === 'standard-new' ? 'Standard Ebooks’ new releases couldn’t be loaded right now.' : undefined} /></div>
 }
 
-function StandardEbooksList() {
-  const online = useOnline()
-  const cached = cachedSE()
-  const [books, setBooks] = useState<SEBook[] | null>(cached?.books ?? null)
-  const [state, setState] = useState<'loading' | 'ready' | 'offline' | 'error'>('loading')
+// ---------- grid with infinite scroll: an IntersectionObserver sentinel, the next page prefetched as soon as this one renders
+function FeedGrid({ makeFeed, empty, ready = true }: { makeFeed: () => Feed; empty?: string; ready?: boolean }) {
+  const feed = useMemo(() => (ready ? makeFeed() : null), [ready])  // eslint-disable-line react-hooks/exhaustive-deps
+  const [cards, setCards] = useState<DiscoverCard[]>([])
+  const [state, setState] = useState<'loading' | 'idle' | 'done' | 'error'>('loading')
+  const busy = useRef(false)
+  const sentinel = useRef<HTMLDivElement>(null)
+  const load = useCallback(async () => {
+    if (!feed || busy.current) return
+    busy.current = true; setState('loading')
+    try {
+      const b = await feed.loadMore()
+      setCards(c => { const have = new Set(c.map(x => x.id)); return [...c, ...b.filter(x => !have.has(x.id))] })
+      void rememberCards(b); prefetchCovers(b, 10)
+      setState(feed.done ? 'done' : 'idle')
+    } catch { setState('error') } finally { busy.current = false }
+  }, [feed])
+  useEffect(() => { void load() }, [load])
+  useEffect(() => { if (state === 'idle') feed?.prefetch() }, [cards, state, feed])
   useEffect(() => {
-    let live = true
-    if (!online) { setState('offline'); return }
-    setState('loading')
-    fetchSENewReleases().then(b => { if (live) { setBooks(b); setState('ready') } }).catch(() => { if (live) setState(navigator.onLine ? 'error' : 'offline') })
-    return () => { live = false }
-  }, [online])
+    const el = sentinel.current
+    if (!el || state !== 'idle') return
+    const io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) void load() }, { rootMargin: '900px 0px' })
+    io.observe(el); return () => io.disconnect()
+  }, [state, cards.length, load])
+  if (!feed) return <div className="shelf" aria-busy="true"><Skeletons n={12} /></div>
   return (
-    <section aria-labelledby="se-h" aria-busy={state === 'loading'}>
-      <h2 className="section-title" id="se-h">New from Standard Ebooks</h2>
-      <p className="small muted" style={{ marginTop: -6 }}>Carefully produced editions of public-domain books. Standard Ebooks’ full catalogue feed needs a membership, so this lists their public new-releases feed; for any other title, open it on <a href={`${SE_ORIGIN}/ebooks`} target="_blank" rel="noreferrer">standardebooks.org</a> and paste its link below.</p>
-      {state === 'offline' && <div className="banner warn" role="status">Discover needs an internet connection; your library still works offline.{cached ? ` Showing the list from ${new Date(cached.at).toLocaleDateString()}.` : ''}</div>}
-      {state === 'error' && <div className="banner warn" role="status">Standard Ebooks’ feed couldn’t be loaded in this browser. Browse <a href={`${SE_ORIGIN}/ebooks`} target="_blank" rel="noreferrer">standardebooks.org</a> and paste a book’s link below; the download itself works directly.</div>}
-      {state === 'loading' && !books?.length && <p className="muted">Loading books…</p>}
-      {!!books?.length && <div className="shelf">{books.map(b => <a key={b.pageUrl} className="book-tile" href={href(`catalog/${seCatalogId(b.segments)}`)}><SECover b={b} /><div className="meta"><h3>{b.title}</h3><p>{b.author}</p></div></a>)}</div>}
+    <section aria-labelledby="grid-h" aria-busy={state === 'loading'}>
+      {state === 'error' && <div className="banner warn" role="status"><span>{feed.failed || !cards.length ? 'Discover couldn’t load books right now. Your library works as usual.' : 'More books couldn’t be loaded.'}</span><button className="btn small" onClick={() => { setState('idle'); void load() }}>Try again</button></div>}
+      {state === 'done' && !cards.length && <div className="empty"><h2>No free books match</h2><p>{empty ?? 'Nothing here right now.'}</p></div>}
+      <div className="shelf" data-testid="discover-grid">
+        {cards.map((c, i) => <CardTile key={c.id} card={c} priority={i < 8} />)}
+        {state === 'loading' && <Skeletons n={cards.length ? 6 : 12} />}
+      </div>
+      {state === 'idle' && <div ref={sentinel} className="sentinel" data-sentinel />}
+      {state === 'done' && !!cards.length && <p className="end-note">That’s everything for now.</p>}
     </section>
   )
+}
+
+// ---------- Wikisource and Internet Archive item page
+function CardItemView({ id }: { id: string }) {
+  const online = useOnline()
+  const [c, setC] = useState<(DiscoverCard & { iaIds?: string[] }) | null>(null)
+  const [owned, setOwned] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [blocked, setBlocked] = useState<{ url: string; label: string } | null>(null)
+  useEffect(() => { void cardById(id).then(setC) }, [id])
+  useEffect(() => { store.db.books.where('catalogId').equals(id).first().then(x => setOwned(x && !x.deleted ? x.id : null)) }, [id, busy])
+  if (!c) return <p className="muted">Loading…</p>
+  async function get() {
+    if (!navigator.onLine) { toast('Getting a book needs an internet connection.'); return }
+    setBusy(true); setBlocked(null)
+    try {
+      const r = await getByCatalogId(id, c!)
+      toast(`“${r.title}” is in your library`, { label: 'Read now', run: () => go(`read/${r.bookId}`) })
+      setOwned(r.bookId)
+    } catch (e) {
+      if (e instanceof OpenOnSource) setBlocked({ url: e.url, label: openLabel(c!) })
+      else if (e instanceof DownloadBlocked) setBlocked({ url: e.url, label: openLabel(c!) })
+      else toast((e as Error).message, undefined, 7000)
+    } finally { setBusy(false) }
+  }
+  return (
+    <>
+      <a href={href('catalog')} className="btn quiet small" style={{ marginLeft: -10, marginBottom: 18 }}><Icon.back />Discover</a>
+      <div className="detail">
+        <DCover card={c} width="100%" priority />
+        <div>
+          <h1>{c.title}</h1>
+          <p className="by">{c.author}</p>
+          <div className="row wrap">
+            {owned ? <a className="btn primary" href={href(`read/${owned}`)}>Read</a> : <button className="btn primary" disabled={busy || !online} onClick={get}><Icon.download />{busy ? 'Getting book…' : 'Get book'}</button>}
+            {owned && <span className="pill ok"><Icon.check width={14} />In your library</span>}
+          </div>
+          {blocked && <div className="banner" style={{ marginTop: 16, maxWidth: 620 }} role="status"><span>This one can’t be downloaded from here yet. <a href={blocked.url} target="_blank" rel="noreferrer">{blocked.label}</a> to read or save it, then add the file from your Library.</span></div>}
+          {c.summary && <p className="desc" style={{ marginTop: 22 }}>{c.summary}</p>}
+          <dl className="facts" style={{ marginTop: 22 }}>
+            {c.year ? <><dt>First published</dt><dd>{c.year}</dd></> : null}
+            {!!c.subjects.length && <><dt>Subjects</dt><dd>{c.subjects.join('; ')}</dd></>}
+            {c.scanned && <><dt>Quality</dt><dd>Scanned from a print copy; the text is machine-read and may contain errors.</dd></>}
+            <dt>Source</dt><dd><a href={c.pageUrl} target="_blank" rel="noreferrer">{SOURCE_LABEL[c.source]}</a></dd>
+          </dl>
+        </div>
+      </div>
+    </>
+  )
+}
+
+
+// ---------- Standard Ebooks item page (the book lives at standardebooks.org; downloads fetched directly, CORS allowed)
+function SECover({ b, width }: { b: SEBook; width?: number | string }) {
+  return <DCover card={{ id: seCatalogId(b.segments), title: b.title, author: b.author, cover: b.cover }} width={width} />
 }
 
 function SEItemView({ id }: { id: string }) {
@@ -128,10 +253,9 @@ function SEItemView({ id }: { id: string }) {
           {blocked && <div className="banner" style={{ marginTop: 16, maxWidth: 620 }} role="status"><span>Your browser didn’t let {PRODUCT.name} download this file directly. <a href={blocked} target="_blank" rel="noreferrer">Download it from Standard Ebooks</a>, then add it with <b>Add books</b> in your Library or drop it onto this window.</span></div>}
           {b.summary && <p className="desc" style={{ marginTop: 22 }}>{b.summary}</p>}
           <dl className="facts" style={{ marginTop: 22 }}>
-            <dt>Rights</dt><dd>Public domain in the USA; Standard Ebooks releases its own work on the edition under CC0. If you live elsewhere, check your country’s copyright rules.</dd>
-            <dt>Source</dt><dd><a href={b.pageUrl} target="_blank" rel="noreferrer">This book on Standard Ebooks</a>. The EPUB is downloaded straight from standardebooks.org.</dd>
+            <dt>Rights</dt><dd>Public domain in the USA; the Standard Ebooks edition is CC0.</dd>
+            <dt>Source</dt><dd><a href={b.pageUrl} target="_blank" rel="noreferrer">Standard Ebooks</a></dd>
           </dl>
-          <p className="small muted">{PRIVACY_NOTE}</p>
         </div>
       </div>
     </>
@@ -144,46 +268,6 @@ function GCover({ b, width }: { b: GBook; width?: number | string }) {
   if (src && !broken) return <div className="cover" style={{ width }}><img src={src} alt="" loading="lazy" onError={() => setBroken(true)} /></div>
   const h = tintOf(b.title + b.id)
   return <div className="cover gen" style={{ width, '--gen-bg': `hsl(${h} 28% 34%)`, '--gen-ink': `hsl(${h} 30% 94%)` } as React.CSSProperties}><span className="t">{shortTitle(b.title)}</span><span className="rule" /><span className="a">{authorsOf(b)}</span></div>
-}
-
-function GutenbergList({ search, topic }: { search: string; topic: string }) {
-  const online = useOnline()
-  const popular = !search.trim() && !topic
-  const [books, setBooks] = useState<GBook[] | null>(() => (popular ? cachedPopular()?.page.results ?? null : null))
-  const [next, setNext] = useState<string | null>(null)
-  const [state, setState] = useState<'loading' | 'ready' | 'offline' | 'error' | 'more'>('loading')
-  const [stale, setStale] = useState<number | null>(null)
-  useEffect(() => {
-    let live = true
-    const cached = popular ? cachedPopular() : null
-    setBooks(cached?.page.results ?? (popular ? null : null)); setNext(null); setStale(null)
-    if (!online) { setState('offline'); if (cached) setStale(cached.at); return }
-    setState('loading')
-    fetchPage(listUrl({ search, topic })).then(p => {
-      if (!live) return
-      if (popular) cachePopular(p)
-      setBooks(p.results); setNext(p.next); setState('ready')
-    }).catch(() => { if (!live) return; setState(navigator.onLine ? 'error' : 'offline'); if (cached) setStale(cached.at) })
-    return () => { live = false }
-  }, [search, topic, online, popular])
-  const more = useCallback(async () => {
-    if (!next) return
-    setState('more')
-    try { const p = await fetchPage(next); setBooks(b => [...(b ?? []), ...p.results]); setNext(p.next); setState('ready') } catch { setState(navigator.onLine ? 'error' : 'offline') }
-  }, [next])
-
-  const heading = search.trim() ? `Results for “${search.trim()}”${topic ? ` in ${topic}` : ''}` : topic || 'Popular'
-  return (
-    <section aria-labelledby="g-h" aria-busy={state === 'loading'}>
-      <h2 className="section-title" id="g-h">{heading}</h2>
-      {state === 'offline' && <div className="banner warn" role="status">Discover needs an internet connection; your library still works offline.{stale ? ` Showing the popular list from ${new Date(stale).toLocaleDateString()}.` : ''}</div>}
-      {state === 'error' && <div className="banner warn" role="status">Project Gutenberg’s catalog didn’t answer. Try again in a moment; your library works as usual.{stale ? ' Showing the last popular list.' : ''}</div>}
-      {state === 'loading' && !books?.length && <p className="muted">Loading books…</p>}
-      {state === 'ready' && books && !books.length && <div className="empty"><h2>No free books match</h2><p>Try an author’s surname, fewer words, or another topic.</p></div>}
-      {!!books?.length && <div className="shelf">{books.map(b => <a key={b.id} className="book-tile" href={href(`catalog/pg-${b.id}`)}><GCover b={b} /><div className="meta"><h3>{shortTitle(b.title)}</h3><p>{authorsOf(b)}</p></div></a>)}</div>}
-      {next && (state === 'ready' || state === 'more') && <div style={{ marginTop: 22 }}><button className="btn" disabled={state === 'more'} onClick={more}>{state === 'more' ? 'Loading…' : 'Show more'}</button></div>}
-    </section>
-  )
 }
 
 function GutenbergItemView({ id }: { id: number }) {
@@ -233,10 +317,9 @@ function GutenbergItemView({ id }: { id: number }) {
             {!!b.bookshelves.length && <><dt>Shelves</dt><dd>{b.bookshelves.map(s => s.replace(/^Category:\s*/, '')).join(', ')}</dd></>}
             {!!b.translators?.length && <><dt>Translated by</dt><dd>{b.translators.map(personName).join(', ')}</dd></>}
             <dt>Language</dt><dd>{b.languages.join(', ')}</dd>
-            <dt>Rights</dt><dd>Public domain in the USA. If you live elsewhere, check your country’s copyright rules.</dd>
-            <dt>Source</dt><dd><a href={gutenbergPage(b.id)} target="_blank" rel="noreferrer">Project Gutenberg eBook #{b.id}</a>, digitised by volunteers. {b.download_count ? `Downloaded ${b.download_count.toLocaleString()} times in the last 30 days.` : ''}</dd>
+            <dt>Rights</dt><dd>Public domain in the USA</dd>
+            <dt>Source</dt><dd><a href={gutenbergPage(b.id)} target="_blank" rel="noreferrer">Project Gutenberg eBook #{b.id}</a></dd>
           </dl>
-          <p className="small muted">{PRIVACY_NOTE}</p>
         </div>
       </div>
     </>
@@ -257,7 +340,8 @@ function AuthorCatalogSection({ q }: { q: string }) {
 
 export function CatalogItemView({ id }: { id: string }) {
   if (/^pg-\d+$/.test(id)) return <GutenbergItemView id={Number(id.slice(3))} />
-  if (/^se~[a-z0-9-]+(~[a-z0-9-]+)+$/.test(id)) return <SEItemView id={id} />
+  if (/^se~[a-z0-9-]+(~[a-z0-9_-]+)+$/.test(id)) return <SEItemView id={id} />
+  if (/^(ws|ia)~./.test(id)) return <CardItemView id={id} />
   if (FEATURES.authorPortal) return <PlatformItemView id={id} />
   return <div className="empty"><h2>Not in Discover</h2><a className="btn" href={href('catalog')}>Discover</a></div>
 }

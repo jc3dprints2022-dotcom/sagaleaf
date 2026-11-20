@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { Book } from '../core/types'
-import { store, useLive, useToasts, useSyncStatus, usePlatformImage } from '../app/state'
+import { store, useLive, useToasts, usePlatformImage } from '../app/state'
 import { useAccount } from '../app/account'
 import { Icon } from './icons'
 import { ago } from '../core/util'
@@ -36,7 +36,7 @@ export function Cover({ book, width, showFormat }: { book: Pick<Book, 'id' | 'ti
     {showFormat && book.format !== 'epub' && <span className="fmt">{book.format.toUpperCase()}</span>}
     {book.fileState === 'remote' && <span className="cloud" title="On your other devices; downloads when you open it"><Icon.cloud /></span>}
   </>)
-  if (url) return <div className="cover" style={{ width }}><img src={url} alt="" loading="lazy" />{badges}</div>
+  if (url) return <div className="cover" style={{ width }}><img src={url} alt="" loading="lazy" decoding="async" />{badges}</div>
   return (
     <div className="cover gen" style={style} aria-hidden="true" lang="en">
       <span className="t">{book.title}</span><span className="rule" /><span className="a">{book.author}</span>{badges}
@@ -83,30 +83,23 @@ export function Seg<T extends string>({ value, options, onChange, label }: { val
   return <div className="seg" role="group" aria-label={label}>{options.map(o => <button key={o.value} aria-pressed={o.value === value} onClick={() => onChange(o.value)}>{o.label}</button>)}</div>
 }
 
-/** Sync state in plain words. Technical detail lives on the Devices screen. */
+/** Sync state in plain words. */
 export function SyncStatusLine() {
-  const s = useSyncStatus()
   const account = useAccount()
   const peers = useLive(() => store.db.peers.toArray(), [], ['peers'])
   const [, tick] = useState(0)
   useEffect(() => { const t = setInterval(() => tick(x => x + 1), 30_000); return () => clearInterval(t) }, [])
   if (!peers) return null
-  const relay = peers.some(p => p.kind === 'relay')
   const leaves = peers.filter(p => p.kind === 'leaf')
   let dot = 'off', text = 'Only on this device'
-  if (relay || leaves.length) {
-    if (s.state === 'syncing') { dot = 'busy'; text = s.progress?.label ?? 'Syncing…' }
-    else if (s.state === 'offline') { dot = 'off'; text = s.pending ? `Offline. ${s.pending} change${s.pending > 1 ? 's' : ''} will sync later` : 'Offline. Reading works as usual' }
-    else if (s.state === 'error') { dot = 'err'; text = 'Can’t reach sync right now' }
-    else { dot = 'ok'; text = s.lastSyncAt ? `Up to date, ${ago(s.lastSyncAt)}` : 'Up to date' }
-  } else if (account.sync.on) {
+  if (account.email) {
     const ph = account.sync.phase
-    if (ph === 'syncing' || ph === 'starting') { dot = 'busy'; text = 'Syncing notes…' }
-    else if (ph === 'error' || ph === 'needs-code') { dot = 'err'; text = ph === 'needs-code' ? 'Sync needs your library code' : (typeof navigator !== 'undefined' && !navigator.onLine ? 'Offline. Notes sync later' : 'Notes sync paused') }
-    else { dot = 'ok'; text = account.sync.last ? `Notes synced, ${ago(account.sync.last)}` : 'Notes synced' }
+    if (ph === 'syncing' || ph === 'starting') { dot = 'busy'; text = 'Syncing…' }
+    else if (ph === 'error') { dot = 'err'; text = typeof navigator !== 'undefined' && !navigator.onLine ? 'Offline. Syncs later' : 'Sync paused' }
+    else { dot = 'ok'; text = account.sync.last ? `Synced, ${ago(account.sync.last)}` : 'Signed in' }
   }
   return (
-    <a href={!relay && !leaves.length && account.sync.on ? '#/settings' : '#/devices'} className="row small" style={{ gap: 10, padding: '8px 10px', borderRadius: 8, color: 'var(--ink-2)', textDecoration: 'none' }}>
+    <a href="#/settings" className="row small" style={{ gap: 10, padding: '8px 10px', borderRadius: 8, color: 'var(--ink-2)', textDecoration: 'none' }}>
       <span className={`dot ${dot}`} /><span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{text}</span>
       {leaves.length > 0 && <span className="dot copper" title={`${leaves.length} SAGA Leaf paired`} />}
     </a>

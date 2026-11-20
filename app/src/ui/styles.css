@@ -69,6 +69,7 @@ a { color: var(--accent); }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 /* ---------- shell ---------- */
+.shell[hidden] { display: none; }
 .shell { display: grid; grid-template-columns: var(--rail) 1fr; min-height: 100%; }
 .rail { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; padding: calc(22px + env(safe-area-inset-top)) 14px 16px; border-right: 1px solid var(--rule); background: var(--paper); }
 .wordmark { display: flex; align-items: center; gap: 10px; padding: 2px 10px 22px; text-decoration: none; color: var(--ink); }
@@ -303,3 +304,44 @@ table.data td.r, table.data th.r { text-align: right; }
 .lsim-btns button:focus-visible { outline: 2px solid #fff; }
 .lsim-side { flex: 1; min-width: 200px; }
 .lsim-log { font: 11px/1.5 ui-monospace, monospace; white-space: pre-wrap; background: var(--surface-2, #0000000d); padding: 10px; border-radius: 8px; max-height: 220px; overflow: auto; }
+
+/* ---- Library header, segments, Add pop-up */
+.lib-head { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 20px; }
+.lib-head .search-input { flex: 1 1 260px; }
+.import-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+.import-choice { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; text-align: left; padding: 18px; border-radius: var(--radius-l); border: 1.5px solid var(--rule); background: var(--sheet); color: var(--ink); cursor: pointer; font: inherit; }
+.import-choice:hover:not(:disabled) { border-color: var(--accent); }
+.import-choice span { color: var(--muted); font-size: 13px; }
+.import-choice svg { color: var(--accent); }
+@media (max-width: 480px) { .import-choices { grid-template-columns: 1fr; } }
+.linklike { border: 0; background: none; padding: 0; color: var(--accent); text-decoration: underline; cursor: pointer; font: inherit; }
+
+/* ---- Discover: rows, carousels, grids, infinite scroll */
+.d-row { margin-bottom: 26px; min-height: 120px; }
+.see-all { margin-left: auto; font: 500 13px var(--ui); color: var(--accent); text-decoration: none; }
+.carousel { display: grid; grid-auto-flow: column; grid-auto-columns: 132px; gap: 18px; overflow-x: auto; overscroll-behavior-x: contain; padding: 2px 2px 10px; scroll-snap-type: x proximity; scroll-padding-inline: 2px; -webkit-overflow-scrolling: touch; }
+.carousel > * { scroll-snap-align: start; min-width: 0; }
+@media (max-width: 719px) { .carousel { grid-auto-columns: 112px; gap: 14px; scroll-snap-type: x mandatory; scrollbar-width: none; margin-inline: -16px; padding-inline: 16px; scroll-padding-inline: 16px; } .carousel::-webkit-scrollbar { display: none; } }
+.book-tile .meta .src { font-size: 11px; color: var(--muted); }
+.skel .cover, .skel h3, .skel p { background: var(--well); border-radius: 4px; color: transparent; animation: skel 1.2s ease-in-out infinite alternate; }
+.skel .cover { box-shadow: none; }
+.skel .cover::before { display: none; }
+@keyframes skel { from { opacity: .55; } to { opacity: 1; } }
+.sentinel { height: 1px; }
+.end-note { text-align: center; color: var(--muted); font-size: 13px; padding: 22px 0 6px; }
+.d-search { display: flex; gap: 8px; align-items: center; max-width: 560px; margin-bottom: 14px; }
+.d-search .search-input { flex: 1; }
+.chip-row { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 18px; scrollbar-width: none; }
+.chip-row::-webkit-scrollbar { display: none; }
+.chip-row .chip { flex: none; }
+.d-grid-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
+.d-grid-head .section-title { flex: 1; margin: 18px 0 12px; }
+.account-card { display: flex; flex-direction: column; gap: 14px; }
+.btn.google { gap: 10px; }
+
+/* ---- Discover performance: rows below the fold aren't laid out or painted until they scroll near; lighter shadows on carousel covers */
+.d-row { content-visibility: auto; contain-intrinsic-size: auto 330px; }
+.carousel .cover { box-shadow: 0 1px 2px rgba(20, 30, 35, .25); }
+.carousel .cover.gen { container-type: normal; }
+.carousel .cover.gen .t { font-size: 13px; }
+.carousel .cover::before { display: none; }

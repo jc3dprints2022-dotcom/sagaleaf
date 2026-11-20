@@ -40,12 +40,12 @@ export const coverOf = (b: GBook) => b.formats['image/jpeg']
 export const shortTitle = (t: string) => t.replace(/\s*[:;]\s.*$/s, '').replace(/\s+/g, ' ').trim()
 
 // ---------- listing
-export function listUrl(q: { search?: string; topic?: string }) {
+export function listUrl(q: { search?: string; topic?: string; sort?: 'popular' | 'new' | 'title' }) {
   const u = new URL(GUTENDEX + '/books/')
   u.searchParams.set('copyright', 'false')        // public domain in the USA only
   if (q.search?.trim()) u.searchParams.set('search', q.search.trim())
   if (q.topic) u.searchParams.set('topic', q.topic)
-  if (!q.search?.trim()) u.searchParams.set('sort', 'popular')
+  if (!q.search?.trim()) u.searchParams.set('sort', q.sort === 'new' ? 'descending' : 'popular')   // descending = most recently added
   return u.toString()
 }
 
@@ -64,14 +64,21 @@ const write = (k: string, v: unknown) => { try { localStorage.setItem(k, JSON.st
 
 export function cachedPopular() { return read<{ at: number; page: GPage }>(POPULAR_KEY) }
 export function cachePopular(page: GPage) { write(POPULAR_KEY, { at: Date.now(), page }) }
-function rememberBooks(books: GBook[]) {
-  const items = read<Record<string, GBook>>(ITEMS_KEY) ?? {}
-  for (const b of books) items[b.id] = b
-  const keys = Object.keys(items)
-  if (keys.length > 400) for (const k of keys.slice(0, keys.length - 400)) delete items[k]
-  write(ITEMS_KEY, items)
+// The detail page reads these; writing the whole map is slow, so it happens a moment later, off the first paint.
+let pendingBooks: GBook[] = [], flushTimer: ReturnType<typeof setTimeout> | undefined
+export function rememberBooks(books: GBook[]) {
+  pendingBooks.push(...books)
+  clearTimeout(flushTimer)
+  flushTimer = setTimeout(() => {
+    const items = read<Record<string, GBook>>(ITEMS_KEY) ?? {}
+    for (const b of pendingBooks) items[b.id] = b
+    pendingBooks = []
+    const keys = Object.keys(items)
+    if (keys.length > 400) for (const k of keys.slice(0, keys.length - 400)) delete items[k]
+    write(ITEMS_KEY, items)
+  }, 2000)
 }
-export function cachedBook(id: number) { return read<Record<string, GBook>>(ITEMS_KEY)?.[id] ?? null }
+export function cachedBook(id: number) { return pendingBooks.find(b => b.id === id) ?? read<Record<string, GBook>>(ITEMS_KEY)?.[id] ?? null }
 export async function fetchBook(id: number): Promise<GBook> {
   const r = await proxiedFetch(`${GUTENDEX}/books/${id}`, { signal: AbortSignal.timeout(60_000) })
   if (!r.ok) throw new Error(r.status === 404 ? 'This book isn’t in the catalog.' : `Discover couldn’t load this book (${r.status}).`)
@@ -107,7 +114,7 @@ export async function getBook(b: GBook): Promise<{ bookId: string; title: string
       bytes = new Uint8Array(await r.arrayBuffer())
     } catch { blocked = true; continue }        // network error or CORS refusal: try the next format, then fall back
     if (c.ext === 'epub' && !(bytes[0] === 0x50 && bytes[1] === 0x4b)) { lastError = 'The download wasn’t an EPUB file.'; continue }
-    const res = await importBytes(store, `${shortTitle(b.title)}.${c.ext}`, bytes, { source: 'catalog', catalogId: catalogIdOf(b.id), license: LICENSE })
+    const res = await importBytes(store, `${shortTitle(b.title)}.${c.ext}`, bytes, { source: 'catalog', catalogId: catalogIdOf(b.id), license: LICENSE }, { defer: true })
     if (res.status === 'failed') { lastError = res.error ?? 'The file couldn’t be added.'; continue }
     // Already in the library (same file imported before): link it to this Discover entry.
     const existing = await store.db.books.get(res.bookId!)

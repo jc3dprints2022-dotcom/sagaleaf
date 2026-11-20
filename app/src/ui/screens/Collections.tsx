@@ -4,21 +4,20 @@ import { loadCollections, createCollection, renameCollection, deleteCollection, 
 import { Cover, ProgressBar, Modal } from '../components'
 import { Icon } from '../icons'
 
-export function Collections() {
+/** The Collections segment of Library. `q` filters by name. */
+export function CollectionsBody({ q }: { q: string }) {
   const cols = useLive(loadCollections, [], ['collections', 'members'])
   const books = useLive(loadBooks, [], ['books', 'positions'])
   const [name, setName] = useState('')
   if (!cols || !books) return null
   return (
     <>
-      <h1 className="page-title">Collections</h1>
-      <p className="page-sub">Shelves you make yourself. A book can sit on as many as you like.</p>
       <form className="row" style={{ maxWidth: 460, marginBottom: 30 }} onSubmit={async e => { e.preventDefault(); if (!name.trim()) return; const id = await createCollection(name); setName(''); go(`collection/${id}`) }}>
         <input className="input" value={name} onChange={e => setName(e.target.value)} placeholder="Name a new collection" aria-label="New collection name" />
         <button className="btn primary" type="submit"><Icon.plus />Create</button>
       </form>
       {!cols.length ? <div className="empty"><h2>No collections yet</h2><p>Try “Summer reading”, “Research” or “Re-read someday”.</p></div> : (
-        <div className="grid-2">{cols.map(c => {
+        <div className="grid-2">{cols.filter(c => !q.trim() || c.name.toLowerCase().includes(q.trim().toLowerCase())).map(c => {
           const bs = c.bookIds.map(id => books.find(b => b.id === id)).filter(Boolean).slice(0, 4)
           return (
             <a key={c.id} href={href(`collection/${c.id}`)} className="panel" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', gap: 18, alignItems: 'center' }}>
@@ -39,15 +38,15 @@ export function CollectionDetail({ id }: { id: string }) {
   const [renaming, setRenaming] = useState<string | null>(null)
   const c = cols?.find(x => x.id === id)
   if (!cols || !books) return null
-  if (!c) return <div className="empty"><h2>This collection was deleted</h2><a className="btn" href={href('collections')}>All collections</a></div>
+  if (!c) return <div className="empty"><h2>This collection was deleted</h2><a className="btn" href={href('library?seg=collections')}>All collections</a></div>
   const members = c.bookIds.map(bid => books.find(b => b.id === bid)).filter(Boolean)
   return (
     <>
-      <a href={href('collections')} className="btn quiet small" style={{ marginLeft: -10, marginBottom: 14 }}><Icon.back />Collections</a>
+      <a href={href('library?seg=collections')} className="btn quiet small" style={{ marginLeft: -10, marginBottom: 14 }}><Icon.back />Library</a>
       <div className="row wrap"><h1 className="page-title" style={{ flex: 1 }}>{c.name}</h1>
         <button className="btn small" onClick={() => setAdding(true)}><Icon.plus />Add books</button>
         <button className="btn small quiet" onClick={() => setRenaming(c.name)}>Rename</button>
-        <button className="btn small quiet danger" onClick={async () => { await deleteCollection(c.id); toast(`Deleted “${c.name}”. The books are still in your library.`); go('collections') }}>Delete</button>
+        <button className="btn small quiet danger" onClick={async () => { await deleteCollection(c.id); toast(`Deleted “${c.name}”. The books are still in your library.`); go('library?seg=collections') }}>Delete</button>
       </div>
       <p className="page-sub">{members.length} book{members.length === 1 ? '' : 's'}</p>
       {!members.length ? <div className="empty"><h2>Empty for now</h2><p>Add books from here, or from any book’s page.</p><button className="btn primary" onClick={() => setAdding(true)}>Add books</button></div> : (

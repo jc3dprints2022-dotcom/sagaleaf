@@ -23,6 +23,7 @@ export interface Book {
   addedAt: number
   source: 'import' | 'catalog'
   catalogId?: string
+  sourceUrl?: string       // where the file came from (a pasted link), so another device can fetch it again
   license?: string         // catalog items only: the licence the entitlement was granted under
   hasCover: boolean
   tint: number             // hue for generated covers

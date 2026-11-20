@@ -1,79 +1,85 @@
 {
-  "at": "2026-11-18T18:54:39.692Z",
+  "at": "2026-11-20T00:47:59.402Z",
   "results": [
     {
-      "step": "No account needed: nothing is loaded from Supabase until Settings",
+      "step": "No account needed: nothing is loaded from Supabase until Settings; Google is the primary button",
       "ok": true,
-      "ms": 2479
+      "ms": 1807
     },
     {
-      "step": "Email magic link: sends the link with the site’s redirect address",
+      "step": "Email me a link: sends the link with the site’s redirect address",
       "ok": true,
-      "ms": 138,
+      "ms": 124,
       "detail": "redirect_to https://saga.proxima-3d.com/saga-reader.html"
     },
     {
-      "step": "Opening the link signs in (PKCE code exchange) and returns to Settings",
+      "step": "Opening the link signs in and sync starts by itself: no code, no switch",
       "ok": true,
-      "ms": 597
+      "ms": 476
     },
     {
-      "step": "Turn on sync: first device gets a library code; rows are encrypted, one per book",
+      "step": "First device: everything uploads on its own, one plain row per book; no recovery code anywhere",
       "ok": true,
-      "ms": 445,
-      "detail": "2 rows (_saga_ke, a78d6d84), ciphertext only"
+      "ms": 169,
+      "detail": "2 rows; the old encrypted row for the book was overwritten"
     },
     {
-      "step": "Second device: Continue with Google signs in to the same account",
+      "step": "Second device: Continue with Google, same account, and everything is just there",
       "ok": true,
-      "ms": 2896
+      "ms": 2693
     },
     {
-      "step": "Sync asks for the library code; a wrong code is refused, the right one works",
+      "step": "The book and its notes arrive on the second device: “On your other device” with an Add file action",
       "ok": true,
-      "ms": 441
-    },
-    {
-      "step": "Notes arrive on the second device, labelled with the book even before it’s added",
-      "ok": true,
-      "ms": 120
+      "ms": 110
     },
     {
       "step": "After adding the same book, it opens at the first device’s reading place",
       "ok": true,
-      "ms": 4464,
+      "ms": 3840,
       "detail": "opened in section 6 (4% through)"
+    },
+    {
+      "step": "A book from Discover has its source synced: the other device downloads it by itself",
+      "ok": true,
+      "ms": 343,
+      "detail": "downloaded from Project Gutenberg on the second device"
     },
     {
       "step": "An edit on the second device reaches the first",
       "ok": true,
-      "ms": 312
+      "ms": 233
     },
     {
       "step": "Changes sync automatically a few seconds after you make them",
       "ok": true,
-      "ms": 4649,
+      "ms": 4635,
       "detail": "uploaded 4.6 s after the edit"
     },
     {
       "step": "Reload keeps you signed in and sync on",
       "ok": true,
-      "ms": 712
+      "ms": 498
     },
     {
-      "step": "Sign out: email gone, sync off, notes stay on the device; no Supabase calls on next launch",
+      "step": "Sign out: email gone, notes stay on the device; no Supabase calls on next launch",
       "ok": true,
-      "ms": 2076
+      "ms": 1901
+    },
+    {
+      "step": "Delete account and synced data: rows removed, delete-account called, signed out, books stay",
+      "ok": true,
+      "ms": 320
     },
     {
       "step": "Empty configuration: no sign-in UI, no requests, everything else works",
       "ok": true,
-      "ms": 2012
+      "ms": 1176
     },
     {
       "step": "Supabase or its CDN unreachable: sign-in is disabled with a note; no errors",
       "ok": true,
-      "ms": 1100
+      "ms": 787
     }
   ],
   "consoleErrors": []

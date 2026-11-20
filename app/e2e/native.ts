@@ -2,7 +2,8 @@
 // Chromium with no network: only the page's own origin answers, as in the Capacitor WebView
 // (https://localhost there, http://localhost here). This stands in for an emulator run, which
 // the CI sandbox can't do (no KVM). It checks:
-//   - no service worker, no manifest, no sign-in anywhere
+//   - no service worker, no manifest; sign-in offered but silent until used
+//   - Google sign-in returning through llc.proxima.readerleaf://auth-callback (Supabase mocked, app-return simulated)
 //   - import a local EPUB through the file picker, read it, highlight
 //   - kill the browser and relaunch: the highlight is still there
 //   - the web half of "open with" from another app (src/app/native.ts openExternalFiles)
@@ -12,6 +13,7 @@ import { createServer } from 'node:http'
 import { mkdtempSync, readFileSync, mkdirSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
+import { FakeSupabase } from './mocks'
 
 const DIST = resolve('dist-native'), SAMPLES = resolve('public/samples')
 const SHOTS = 'screenshots/native'
@@ -26,6 +28,7 @@ const server = createServer((req, res) => {
 await new Promise(r => server.once('listening', r))
 const ORIGIN = `http://localhost:${(server.address() as { port: number }).port}`
 
+const fake = new FakeSupabase('https://uxlvtbqmhcheklazboxr.supabase.co')
 const profile = mkdtempSync(join(tmpdir(), 'saga-native-'))
 const results: { step: string; ok: boolean; detail?: string }[] = []
 const blocked: string[] = [], errors: string[] = []
@@ -38,9 +41,11 @@ async function launch() {
   })
   // No network: anything that isn't the page's own origin fails, like a phone in airplane mode.
   await ctx.route('**/*', r => { const u = r.request().url(); if (u.startsWith(ORIGIN) || /^(data|blob):/.test(u)) return r.continue(); blocked.push(u); return r.abort('internetdisconnected') })
+  await fake.install(ctx)
+  await ctx.route('**/functions/v1/gutenberg-proxy**', r => { blocked.push(r.request().url()); return r.abort('internetdisconnected') })   // the Discover proxy shares Supabase's host: still offline here
   page = ctx.pages()[0] ?? await ctx.newPage()
   page.on('pageerror', e => errors.push((e.stack ?? e.message).split('\n').slice(0, 4).join(' ← ')))
-  page.on('console', m => { if (m.type() === 'error') errors.push('console: ' + m.text().slice(0, 300)) })
+  page.on('console', m => { if (m.type() === 'error' && !/ERR_INTERNET_DISCONNECTED/.test(m.text())) errors.push('console: ' + m.text().slice(0, 300)) })
 }
 async function step(name: string, fn: () => Promise<string | void>) {
   try { const d = await fn(); results.push({ step: name, ok: true, detail: d || undefined }); console.log(`✓ ${name}${d ? ' — ' + d : ''}`) }
@@ -65,15 +70,17 @@ await step('Starts with no network, no account, no service worker', async () => 
   if (sw || manifest) throw new Error(`service workers: ${sw}, manifest links: ${manifest}`)
   await page.screenshot({ path: `${SHOTS}/01-home.png` })
 })
-await step('No sign-in anywhere (Settings has no Account section)', async () => {
+await step('Sign-in is offered in the app, and nothing contacts Supabase until it is used', async () => {
   await page.goto(ORIGIN + '/#/settings'); await page.waitForSelector('text=Back up everything')
-  const n = await page.getByText(/Continue with Google|Send sign-in link|^Account/).count()
-  if (n) throw new Error(`${n} sign-in elements`)
+  await page.getByRole('button', { name: 'Continue with Google' }).waitFor()
+  await page.getByRole('button', { name: 'Email me a link' }).waitFor()
+  if (fake.log.length) throw new Error('Supabase contacted: ' + fake.log[0].path)
 })
 await step('Import a local EPUB with the file picker', async () => {
   await page.goto(ORIGIN + '/#/')
+  await page.getByRole('button', { name: 'Add books' }).click()
   const chooser = page.waitForEvent('filechooser')
-  await page.getByRole('button', { name: 'Choose files' }).click()
+  await page.getByRole('button', { name: /Upload a file/ }).click()
   await (await chooser).setFiles(join(SAMPLES, 'frankenstein.epub'))
   await page.waitForSelector('text=/Added “/', { timeout: 30000 })
   bookId = await dbg<string>(`return (await store.db.books.toArray())[0].id`)
@@ -99,7 +106,7 @@ await step('Kill the app and relaunch: the highlight is still there', async () =
   await ctx.close(); await launch(); await page.goto(ORIGIN + '/')
   await page.waitForSelector('text=/Continue reading|Frankenstein/')
   const n = await liveHighlights(); if (n !== 1) throw new Error(`${n} highlights after relaunch`)
-  await page.goto(ORIGIN + '/#/notes'); await page.waitForSelector(`text=${hl.trim().slice(0, 20)}`, { timeout: 8000 })
+  await page.goto(ORIGIN + '/#/library?seg=highlights'); await page.waitForSelector(`text=${hl.trim().slice(0, 20)}`, { timeout: 8000 })
   await page.screenshot({ path: `${SHOTS}/03-after-relaunch.png` })
 })
 await step('Reader survives resizes and section jumps while sections load', async () => {
@@ -136,9 +143,24 @@ await step('"Open with" from another app (web half): imports and opens the book'
   await page.screenshot({ path: `${SHOTS}/04-opened-from-outside.png` })
   return t.join(', ')
 })
+await step('Google sign-in: the system browser is opened, the callback URL comes back, the code is exchanged, sync starts', async () => {
+  await page.goto(ORIGIN + '/#/settings'); await page.getByRole('button', { name: 'Continue with Google' }).click()
+  await page.waitForFunction(() => !!(window as unknown as { __sagaAuth: { lastAuthUrl(): string } }).__sagaAuth.lastAuthUrl())
+  const url = await page.evaluate(() => (window as unknown as { __sagaAuth: { lastAuthUrl(): string } }).__sagaAuth.lastAuthUrl())
+  const q = new URL(url).searchParams
+  if (q.get('provider') !== 'google' || q.get('redirect_to') !== 'llc.proxima.readerleaf://auth-callback' || !q.get('code_challenge')) throw new Error('authorize URL: ' + url)
+  const code = fake.issueCode('reader@example.com')
+  const r = await page.evaluate(u => (window as unknown as { __sagaAuth: { appUrlOpen(u: string): Promise<{ ok: boolean }> } }).__sagaAuth.appUrlOpen(u), `llc.proxima.readerleaf://auth-callback?code=${code}`)
+  if (!r.ok) throw new Error('exchange failed')
+  await page.waitForSelector('text=Signed in as'); await page.waitForSelector('text=/Up to date/', { timeout: 20000 })
+  const rows = [...fake.rows.values()]
+  if (!rows.length || rows.some(x => (x.data as { v: number }).v !== 2)) throw new Error('no plain sync rows')
+  return `${rows.length} book rows synced, no code asked`
+})
 await step('Made no requests outside the app', async () => {
-  const outside = blocked.filter(u => !/sagaleaf\.local|192\.168\.4\.1/.test(u))   // Leaf discovery probes only run on the Devices screen
+  const outside = blocked.filter(u => !/sagaleaf\.local|192\.168\.4\.1|functions\/v1\/gutenberg-proxy/.test(u))   // Leaf probes run on Settings; Home's Recommended asks the Discover proxy   // Leaf discovery probes only run on the Devices screen
   if (outside.length) throw new Error(outside.slice(0, 5).join(', '))
+  if (errors.length) console.log('fake paths:', [...new Set(fake.log.map(l => l.method + ' ' + l.path.split('?')[0]))].join(' | '))
   if (errors.length) throw new Error('page errors: ' + errors.slice(0, 3).join(' | '))
 })
 await ctx.close(); server.close()

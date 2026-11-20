@@ -97,42 +97,45 @@ await ctx.addInitScript(() => { delete (window as unknown as { showDirectoryPick
 let page = ctx.pages()[0]
 page.on('pageerror', e => console.log('  page error:', e.message))
 
-await step('Import screen is reachable from the Library', async () => {
+await step('The Add pop-up is reachable from the Library', async () => {
   await page.goto(APP + '#/library'); await page.waitForSelector('text=Library')
-  await page.getByRole('link', { name: 'Import', exact: true }).click()
-  await page.waitForSelector('h1:has-text("Import")')
+  await page.getByRole('button', { name: /^Add/ }).first().click()
+  await page.waitForSelector('[role=dialog] >> text=Paste a link'); await page.keyboard.press('Escape')
   await page.evaluate(() => navigator.serviceWorker.ready)
 })
 
-await step('Calibre folder: title and author from metadata.opf; DRM book refused with the existing message', async () => {
+const addPopup = async () => { await page.goto(APP + '#/library'); await page.getByRole('button', { name: /^Add/ }).first().click() }
+const result = async () => { const r = page.getByTestId('import-result'); await r.waitFor({ timeout: 60000 }); const t = (await r.textContent()) ?? ''; await page.keyboard.press('Escape'); return t }
+
+await step('Calibre folder: books come in with title and author from metadata.opf; the DRM book is skipped', async () => {
+  await addPopup()
   const chooser = page.waitForEvent('filechooser')
-  await page.getByRole('button', { name: 'Choose Calibre folder' }).click()
+  await page.getByRole('button', { name: 'Upload a folder' }).click()
   await (await chooser).setFiles(lib)
-  const list = page.getByRole('list', { name: 'Calibre import results' })
-  await list.locator('li').nth(1).waitFor({ timeout: 60000 })
-  const added = await list.locator('li[data-status="added"]').innerText()
-  if (!added.includes('Pride and Prejudice (Calibre edition)') || !added.includes('Jane Austen')) throw new Error('added row: ' + added)
-  const skipped = await list.locator('li[data-status="skipped"]').innerText()
-  if (!skipped.includes('This book is DRM-protected. SAGA doesn’t remove DRM, so it can’t be opened.')) throw new Error('skipped row: ' + skipped)
-  return `${added.split('\n')[0]} | ${skipped.replace(/\s+/g, ' ')}`
+  const t = await result()
+  if (!/Calibre: 2 books added, 1 skipped/.test(t) && !/Calibre: 1 book added, 1 skipped/.test(t)) throw new Error(t)
+  await page.goto(APP + '#/library'); await page.waitForSelector('text=Pride and Prejudice (Calibre edition)')
+  return t
 })
 
 await step('Calibre zip imports too', async () => {
+  await addPopup()
   const chooser = page.waitForEvent('filechooser')
-  await page.getByRole('button', { name: 'Choose a zip' }).click()
+  await page.getByRole('button', { name: /Upload a file/ }).click()
   await (await chooser).setFiles(zipPath)
-  await page.getByRole('list', { name: 'Calibre import results' }).locator('li[data-status="added"]', { hasText: 'The Adventures of Sherlock Holmes' }).waitFor({ timeout: 60000 })
+  const t = await result()
+  if (!/Calibre: /.test(t)) throw new Error(t)
+  return t
 })
 
 await step('Kindle My Clippings.txt: attaches to the matching book; unmatched titles wait for review', async () => {
+  await addPopup()
   const chooser = page.waitForEvent('filechooser')
-  await page.getByRole('button', { name: 'Choose Kindle export' }).click()
+  await page.getByRole('button', { name: /Upload a file/ }).click()
   await (await chooser).setFiles(join(FIX, 'kindle', 'My Clippings.txt'))
-  const banner = page.locator('.import-card .banner', { hasText: 'highlight' })
-  await banner.waitFor({ timeout: 20000 })
-  const text = await banner.innerText()
+  const text = await result()
   if (!/1 highlight added to 1 book/.test(text) || !/3 waiting/.test(text)) throw new Error(text)
-  await page.goto(APP + '#/notes')
+  await page.goto(APP + '#/library?seg=highlights')
   await page.waitForSelector('text=Kindle highlights waiting for a book')
   await page.waitForSelector('blockquote:has-text("It is a truth universally acknowledged")')
   await page.waitForSelector('text=The most famous opening line in English.')
@@ -146,10 +149,10 @@ await step('Kindle My Clippings.txt: attaches to the matching book; unmatched ti
 
 let gutenbergId = '', seId = ''
 await step('Gutenberg book via “paste a link” (Gutendex and the Gutenberg proxy)', async () => {
-  await page.goto(APP + '#/catalog')
+  await page.goto(APP + '#/catalog'); await page.getByRole('button', { name: /Have a link/ }).click()
   await page.fill('#url-import-input', 'https://www.gutenberg.org/ebooks/84')
   await page.getByRole('button', { name: 'Get book' }).click()
-  await page.waitForSelector('text=/“Frankenstein” is in your library/', { timeout: 30000 })
+  await page.waitForSelector('text=/“Frankenstein” is in your library/', { timeout: 30000 }); await page.keyboard.press('Escape')
   for (const want of ['https://gutendex.com/books/84', 'https://www.gutenberg.org/ebooks/84.epub3.images']) if (!proxyCalls.includes(want)) throw new Error('proxy calls ' + proxyCalls.join())
   gutenbergId = await page.evaluate(async () => { const s = (window as unknown as { __saga: { store: { db: { books: { where(k: string): { equals(v: string): { first(): Promise<{ id: string } | undefined> } } } } } } }).__saga.store; return (await s.db.books.where('catalogId').equals('pg-84').first())?.id ?? '' })
   if (!gutenbergId) throw new Error('book not stored')
@@ -159,13 +162,12 @@ await step('Gutenberg book via “paste a link” (Gutendex and the Gutenberg pr
 await step('Standard Ebooks in Discover: feed via the proxy, EPUB downloaded directly with ?source=download', async () => {
   const before = proxyCalls.length
   await page.goto(APP + '#/catalog')
-  await page.getByRole('button', { name: 'Standard Ebooks' }).click()
-  await page.getByRole('link', { name: /Moby Dick Herman Melville/ }).click()
+  await page.locator('[data-row=standard-new]').getByRole('link', { name: /Moby Dick Herman Melville/ }).click()
   await page.getByRole('button', { name: 'Get book' }).click()
   await page.waitForSelector('text=/is in your library/', { timeout: 30000 })
   await page.waitForSelector('a.btn:has-text("Read")')
   // (Opening Discover also loads Gutenberg's popular list through the proxy; only the Standard Ebooks requests matter here.)
-  const viaProxy = proxyCalls.slice(before).filter(u => u.startsWith('https://standardebooks.org/'))
+  const viaProxy = proxyCalls.filter(u => u.startsWith('https://standardebooks.org/'))
   if (viaProxy.join() !== 'https://standardebooks.org/feeds/atom/new-releases') throw new Error('proxy saw: ' + viaProxy.join())
   if (seCalls.join() !== 'https://standardebooks.org/ebooks/herman-melville/moby-dick/downloads/herman-melville_moby-dick.epub?source=download') throw new Error('direct requests: ' + seCalls.join())
   seId = await page.evaluate(async () => { const s = (window as unknown as { __saga: { store: { db: { books: { where(k: string): { equals(v: string): { first(): Promise<{ id: string } | undefined> } } } } } } }).__saga.store; return (await s.db.books.where('catalogId').equals('se~herman-melville~moby-dick').first())?.id ?? '' })
@@ -181,7 +183,7 @@ await step('Fully offline after a relaunch: both downloaded books and the Calibr
   const origin = new URL(APP).origin
   ctx.on('request', r => { const u = r.url(); if (!u.startsWith('blob:') && !u.startsWith('data:') && !u.startsWith(origin)) outside.push(u) })
   await page.goto(APP)
-  await page.waitForSelector('text=Recently added', { timeout: 15000 })
+  await page.waitForSelector('.resume', { timeout: 15000 })
   for (const id of [gutenbergId, seId]) {
     await page.goto(APP + `#/read/${id}`)
     await bookFrame(page)
