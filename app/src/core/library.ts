@@ -6,7 +6,7 @@ import { parseEpub, extractEpubText, isZip, sectionTextOf } from './epub'
 import { parseTxt, chapterXhtml } from './txt'
 import { parsePdf, renderPdfCover } from './pdf'
 import { sha256, sortKey, tintOf, workKey, yieldToUi, norm } from './util'
-import type { TextRow } from './db'
+import type { TextRow, ParsedRow } from './db'
 import { PRODUCT } from '../app/product'
 
 export type ImportStatus = 'added' | 'duplicate' | 'restored' | 'failed'
@@ -48,7 +48,9 @@ function indexOfAscii(b: Uint8Array, needle: string) {
   return -1
 }
 
-export async function importBytes(store: Store, name: string, bytes: Uint8Array, extra: Partial<Book> = {}): Promise<ImportResult> {
+/** `defer`: for an EPUB, store the file and show the book now; the full-text index (and section lengths) are built
+ *  right after, in idle time (see indexBook). Search and Home's passage appear when it finishes. */
+export async function importBytes(store: Store, name: string, bytes: Uint8Array, extra: Partial<Book> = {}, opts: { defer?: boolean } = {}): Promise<ImportResult> {
   const t0 = performance.now()
   const fmt = detectFormat(name, bytes)
   if (typeof fmt !== 'string') return { name, status: 'failed', error: fmt.error }
@@ -60,11 +62,13 @@ export async function importBytes(store: Store, name: string, bytes: Uint8Array,
   let meta: Partial<Book> = {}
   let texts: { section: number; title: string; text: string }[] = []
   let cover: { data: Uint8Array; type: string } | null = null
+  let deferred = 0
   try {
     if (fmt === 'epub') {
       const p = parseEpub(bytes)
       if (p.drm) return { name, status: 'failed', error: DRM_MESSAGE }
-      texts = extractEpubText(bytes, p)
+      if (opts.defer) deferred = p.sections.length
+      else texts = extractEpubText(bytes, p)
       meta = { title: p.title, author: p.author, language: p.language, publisher: p.publisher, description: p.description, published: p.published, series: p.series, seriesIndex: p.seriesIndex, subjects: p.subjects.slice(0, 12), identifiers: p.identifiers }
       cover = p.cover ?? null
     } else if (fmt === 'pdf') {
@@ -83,7 +87,7 @@ export async function importBytes(store: Store, name: string, bytes: Uint8Array,
   } catch (e) {
     return { name, status: 'failed', error: friendly(e) }
   }
-  if (!texts.some(t => t.text.trim())) {
+  if (!deferred && !texts.some(t => t.text.trim())) {
     if (fmt === 'pdf') return { name, status: 'failed', error: `This PDF has no selectable text (it’s probably scanned images). ${PRODUCT.shortName} can’t read it yet.` }
     return { name, status: 'failed', error: 'No readable text was found in this file.' }
   }
@@ -100,22 +104,27 @@ export async function importBytes(store: Store, name: string, bytes: Uint8Array,
     ...meta, ...extra,
     size: bytes.length, addedAt: existing?.addedAt ?? Date.now(), source: extra.source ?? 'import',
     hasCover: !!cover, tint: tintOf(title + author), fileState: 'local', status: existing?.status ?? 'new',
-    indexed: true, sections: texts.length, chars: texts.reduce((n, t) => n + t.text.length, 0), filename: name,
+    indexed: !deferred, sections: deferred || texts.length, chars: texts.reduce((n, t) => n + t.text.length, 0), filename: name,
   } as Book
 
   // File, cover and text land first; the book record (which makes the book
   // visible and replicates) is written last. A crash in between leaves only
   // unreferenced rows, which `sweepOrphans` removes.
-  await store.db.transaction('rw', [store.db.files, store.db.covers, store.db.texts], async () => {
+  await store.db.transaction('rw', [store.db.files, store.db.covers, store.db.texts, store.db.parsed], async () => {
     await store.db.files.put({ hash, data: bytes, type: mime(fmt), size: bytes.length })
     if (cover) await store.db.covers.put({ bookId: id, ...cover })
     await store.db.texts.where('bookId').equals(id).delete()
-    await store.db.texts.bulkPut(texts.map(t => ({ bookId: id, section: t.section, title: t.title, text: t.text })))
+    await store.db.parsed.delete(id)
+    if (!deferred) {
+      await store.db.texts.bulkPut(texts.map(t => ({ bookId: id, section: t.section, title: t.title, text: t.text })))
+      await store.db.parsed.put({ bookId: id, lengths: texts.map(t => t.text.length), titles: texts.map(t => t.title) })
+    }
   })
   const fields: Partial<Book> & { deleted?: boolean } = { ...book }
   if (existing?.deleted) fields.deleted = false
   await store.put<Book>('book', id, fields)
   store.emit('files', 'covers')
+  if (deferred) scheduleIndex(store, id)
   return {
     name, status: existing?.deleted ? 'restored' : existing ? 'restored' : 'added', bookId: id, title,
     possibleDuplicateOf: others.length ? others.map(o => o.id) : undefined, ms: Math.round(performance.now() - t0),
@@ -145,6 +154,47 @@ const friendly = (e: unknown) => {
   return m.length < 200 ? m : 'This file couldn’t be read.'
 }
 
+const indexing = new Map<string, Promise<void>>()
+/** Builds a deferred EPUB's text rows and section lengths. Safe to call twice; resolves when the book is indexed. */
+export function indexBook(store: Store, bookId: string): Promise<void> {
+  const running = indexing.get(bookId)
+  if (running) return running
+  const job = (async () => {
+    const b = await store.db.books.get(bookId)
+    if (!b || b.deleted || b.indexed || b.fileState !== 'local' || b.format !== 'epub') return
+    const f = await store.db.files.get(b.hash)
+    if (!f) return
+    const texts = extractEpubText(f.data, parseEpub(f.data))
+    await store.db.transaction('rw', [store.db.texts, store.db.parsed, store.db.books], async () => {
+      if (!(await store.db.books.get(bookId))) return
+      await store.db.texts.where('bookId').equals(bookId).delete()
+      await store.db.texts.bulkPut(texts.map(t => ({ bookId, section: t.section, title: t.title, text: t.text })))
+      await store.db.parsed.put({ bookId, lengths: texts.map(t => t.text.length), titles: texts.map(t => t.title) })
+      await store.db.books.update(bookId, { indexed: true, sections: texts.length, chars: texts.reduce((n, t) => n + t.text.length, 0) })
+    })
+    store.emit('books', 'texts')
+  })().catch(() => undefined).finally(() => { indexing.delete(bookId) })
+  indexing.set(bookId, job)
+  return job
+}
+const idle = (fn: () => void) => { const w = globalThis as { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => void }; if (w.requestIdleCallback) w.requestIdleCallback(fn, { timeout: 4000 }); else setTimeout(fn, 250) }
+export function scheduleIndex(store: Store, bookId: string) { idle(() => { void indexBook(store, bookId) }) }
+/** At startup: finish indexing for books whose import was interrupted before the index was built. */
+export async function indexPending(store: Store) {
+  for (const b of await store.db.books.toArray()) if (!b.deleted && !b.indexed && b.fileState === 'local' && b.format === 'epub') await indexBook(store, b.id)
+}
+
+/** Section lengths and titles, from the cache when there is one (no need to load every section's text). */
+export async function bookParsed(store: Store, bookId: string): Promise<ParsedRow | null> {
+  const row = await store.db.parsed.get(bookId)
+  if (row) return row
+  const texts = await bookTexts(store, bookId)
+  if (!texts.length) return null
+  const made: ParsedRow = { bookId, lengths: texts.map(t => t.text.length), titles: texts.map(t => t.title) }
+  await store.db.parsed.put(made)
+  return made
+}
+
 export async function bookTexts(store: Store, bookId: string): Promise<TextRow[]> {
   return store.db.texts.where('bookId').equals(bookId).sortBy('section')
 }
@@ -153,11 +203,12 @@ export async function removeBook(store: Store, bookId: string) {
   const b = await store.db.books.get(bookId)
   if (!b) return
   await store.remove('book', bookId)
-  await store.db.transaction('rw', [store.db.files, store.db.covers, store.db.texts, store.db.books], async () => {
+  await store.db.transaction('rw', [store.db.files, store.db.covers, store.db.texts, store.db.books, store.db.parsed], async () => {
     const sameHash = (await store.db.books.where('hash').equals(b.hash).toArray()).filter(x => !x.deleted)
     if (!sameHash.length) await store.db.files.delete(b.hash)
     await store.db.covers.delete(bookId)
     await store.db.texts.where('bookId').equals(bookId).delete()
+    await store.db.parsed.delete(bookId)
   })
   store.emit('files')
 }

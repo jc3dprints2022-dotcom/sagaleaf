@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { Store } from '../core/store'
 import { SyncEngine, type EngineStatus } from '../core/sync/engine'
 import { syncLeaf } from '../core/leaf/sync'
-import { sweepOrphans } from '../core/library'
+import { sweepOrphans, indexPending } from '../core/library'
 import { localPlatform, localPlatformImage } from './localPlatform'
 import { installLocalLeaf } from './localLeaf'
 
@@ -25,6 +25,7 @@ export function boot() {
     await store.init()
     await navigator.storage?.persist?.().catch(() => false)
     sweepOrphans(store).catch(() => 0)
+    setTimeout(() => { indexPending(store).catch(() => 0) }, 3000)   // finish any book whose full-text index was still pending
     engine.start()
   })())
 }

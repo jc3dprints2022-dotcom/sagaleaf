@@ -88,7 +88,7 @@ export async function getStandardEbook(p: { segments: string[]; pageUrl: string;
   }
   if (!isZip(bytes)) throw new Error('Standard Ebooks sent a page instead of the EPUB. Open the book’s page and download it there, then add the file to your library.')
   const name = `${p.segments.join('_')}.epub`
-  const res = await importBytes(store, name, bytes, { source: 'catalog', catalogId: seCatalogId(p.segments), license: SE_LICENSE })
+  const res = await importBytes(store, name, bytes, { source: 'catalog', catalogId: seCatalogId(p.segments), license: SE_LICENSE }, { defer: true })
   if (res.status === 'failed') throw new Error(res.error ?? 'The file couldn’t be added.')
   const existing = await store.db.books.get(res.bookId!)
   if (existing && !existing.catalogId) await store.put('book', existing.id, { catalogId: seCatalogId(p.segments), license: existing.license ?? SE_LICENSE })

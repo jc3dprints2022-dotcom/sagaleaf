@@ -1,0 +1,12 @@
+{
+  "batchcomplete": true,
+  "continue": { "gcmcontinue": "page|4a4f4e|9999", "continue": "gcmcontinue||" },
+  "query": { "pages": [
+    { "pageid": 12, "title": "A Study in Scarlet (Doyle)", "index": 2, "extract": "A Study in Scarlet is a detective novel.", "thumbnail": { "source": "https://upload.wikimedia.org/thumb/study.jpg", "width": 240, "height": 360 } },
+    { "pageid": 11, "title": "Pride and Prejudice", "index": 1, "extract": "Pride and Prejudice is a novel of manners.", "thumbnail": { "source": "https://upload.wikimedia.org/thumb/pride.jpg" } },
+    { "pageid": 13, "title": "Pride and Prejudice/Chapter 1", "index": 3 },
+    { "pageid": 14, "title": "Author:Jane Austen", "index": 4 },
+    { "pageid": 15, "title": "Dracula (1897)", "index": 5, "extract": "" },
+    { "pageid": 16, "title": "Index:Moby Dick.djvu", "index": 6 }
+  ] }
+}

@@ -1,0 +1,44 @@
+{
+  "at": "2026-11-20T00:47:13.729Z",
+  "results": [
+    {
+      "step": "Desktop: rows, then a grid that keeps loading as you scroll, with no duplicates",
+      "ok": true,
+      "detail": "grid 64 → 116 → 153 cards, 153 unique"
+    },
+    {
+      "step": "Sort and topic chips",
+      "ok": true,
+      "detail": "57 cards for Mystery, sorted by title"
+    },
+    {
+      "step": "Search covers every source; a work in two sources shows once; scans come last and are labelled",
+      "ok": true
+    },
+    {
+      "step": "End of the list shows a closing note",
+      "ok": true,
+      "detail": "10 cards then “That’s everything for now.”"
+    },
+    {
+      "step": "Wikisource: Get book works when the proxy allows ws-export",
+      "ok": true,
+      "detail": "imported through the proxy"
+    },
+    {
+      "step": "Proxy not updated yet: Wikisource and Internet Archive downloads say “Open on …” instead of failing",
+      "ok": true
+    },
+    {
+      "step": "Phone: carousels scroll sideways with snapping, and See all opens a grid",
+      "ok": true,
+      "detail": "11 rows, snap x mandatory, scrolled 252 px"
+    },
+    {
+      "step": "Phone: See all → grid scrolls forward with no duplicates",
+      "ok": true,
+      "detail": "grid 64 → 116 → 153"
+    }
+  ],
+  "errors": []
+}

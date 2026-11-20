@@ -1,25 +1,33 @@
 import { useMemo, useState, useEffect } from 'react'
 import MiniSearch from 'minisearch'
-import { store, useLive, href, go, toast } from '../../app/state'
-import { loadBooks, pickFiles, importWithFeedback, loadCollections, setMembership, deleteBookWithUndo, type BookView } from '../../app/data'
+import { store, useLive, href, go, toast, useRoute } from '../../app/state'
+import { loadBooks, loadCollections, setMembership, deleteBookWithUndo, type BookView } from '../../app/data'
 import { Cover, ProgressBar, Seg, Modal, pct } from '../components'
 import { Icon } from '../icons'
 import { workKey, fmtBytes } from '../../core/util'
-import { mergeDuplicate } from '../../core/library'
-import type { ImportResult } from '../../core/library'
+import { mergeDuplicate, searchText, type Hit } from '../../core/library'
+import { importUi } from './ImportModal'
+import { CollectionsBody } from './Collections'
+import { NotesBody } from './Notes'
 
 type Sort = 'recent' | 'added' | 'title' | 'author' | 'progress'
+type Seg = 'books' | 'collections' | 'highlights'
+export const SEG_OF_ROUTE: Record<string, Seg> = { notes: 'highlights', collections: 'collections' }
 type Filter = 'all' | 'reading' | 'new' | 'finished' | 'leaf' | 'pdf'
 
+const replaceHash = (h: string) => { location.replace(h) }
+
 export function Library() {
+  const route = useRoute()
+  const seg: Seg = SEG_OF_ROUTE[route.name] ?? (route.query.get('seg') as Seg | null) ?? 'books'
   const books = useLive(loadBooks, [], ['books', 'positions'])
   const leaves = useLive(async () => (await store.db.peers.toArray()).filter(p => p.kind === 'leaf'), [], ['peers'])
-  const [q, setQ] = useState('')
+  const [q, setQ] = useState(route.query.get('q') ?? '')
+  const [hits, setHits] = useState<Hit[] | null>(null)
   const [sort, setSort] = useState<Sort>(() => (localStorage.getItem('saga.sort') as Sort) || 'recent')
   const [filter, setFilter] = useState<Filter>('all')
   const [view, setView] = useState<'grid' | 'rows'>(() => (localStorage.getItem('saga.view') as 'grid') || 'grid')
   const [sel, setSel] = useState<Set<string> | null>(null)
-  const [importing, setImporting] = useState<{ done: number; total: number; log: ImportResult[] } | null>(null)
   const [collect, setCollect] = useState(false)
   useEffect(() => { try { localStorage.setItem('saga.sort', sort); localStorage.setItem('saga.view', view) } catch { /* private mode */ } }, [sort, view])
 
@@ -48,20 +56,27 @@ export function Library() {
     return [...list].sort(cmp[sort])
   }, [books, q, filter, sort, index, onLeaf])
 
-  async function doImport() {
-    const files = await pickFiles(); if (!files.length) return
-    if (files.length > 3) setImporting({ done: 0, total: files.length, log: [] })
-    await importWithFeedback(files, (done, total, r) => setImporting(s => (s ? { done, total, log: [r, ...s.log].slice(0, 200) } : s)))
-  }
+  // full text: passages inside books, from the local index (Books segment)
+  useEffect(() => {
+    if (seg !== 'books' || q.trim().length < 2) { setHits(null); return }
+    const sig = { aborted: false }
+    const t = setTimeout(async () => { const r = await searchText(store, q, { limit: 200, signal: sig }); if (!sig.aborted) setHits(r) }, 250)
+    return () => { sig.aborted = true; clearTimeout(t) }
+  }, [q, seg])
+  const grouped = useMemo(() => { const m = new Map<string, Hit[]>(); for (const h of hits ?? []) m.set(h.bookId, [...(m.get(h.bookId) ?? []), h]); return [...m] }, [hits])
+  useEffect(() => { if (route.name === 'import') importUi.open() }, [route.name])
+  const urlQ = route.query.get('q')
+  useEffect(() => { if (route.name === 'search' && urlQ != null) setQ(urlQ) }, [route.name, urlQ])   // the old #/search?q= address
   const toggle = (id: string) => setSel(s => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n })
   if (!books) return null
   const visibleDupes = dupes.filter(g => !dismissed.includes(g.map(b => b.id).sort().join('|')))
 
+  const placeholder = seg === 'books' ? 'Search titles, authors and the text of your books' : seg === 'collections' ? 'Search collections' : 'Search highlights, notes and tags'
   return (
     <>
-      <div className="row wrap" style={{ marginBottom: 8 }}>
+      <div className="row wrap" style={{ marginBottom: 14 }}>
         <h1 className="page-title" style={{ flex: 1 }}>Library</h1>
-        {sel ? (
+        {sel && seg === 'books' ? (
           <div className="row">
             <span className="muted small">{sel.size} selected</span>
             <button className="btn small" disabled={!sel.size} onClick={() => setCollect(true)}>Add to collection</button>
@@ -70,11 +85,16 @@ export function Library() {
             <button className="btn small quiet" onClick={() => setSel(null)}>Done</button>
           </div>
         ) : (
-          <div className="row"><button className="btn quiet small" onClick={() => setSel(new Set())}>Select</button><a className="btn" href={href('import')}><Icon.upload />Import</a><button className="btn primary" onClick={doImport}><Icon.plus />Add books</button></div>
+          <div className="row">{seg === 'books' && <button className="btn quiet small" onClick={() => setSel(new Set())}>Select</button>}<button className="btn primary" onClick={() => importUi.open()}><Icon.plus />Add</button></div>
         )}
       </div>
-      <p className="page-sub">{books.length} book{books.length === 1 ? '' : 's'}, all stored on this device. Drop files anywhere to add more, or <a href={href('import')}>import a Calibre library, Kindle highlights or a free book from a link</a>.</p>
-
+      <div className="lib-head">
+        <Seg<Seg> label="Library" value={seg} onChange={v => replaceHash(`#/library?seg=${v}`)} options={[{ value: 'books', label: 'Books' }, { value: 'collections', label: 'Collections' }, { value: 'highlights', label: 'Highlights' }]} />
+        <label className="search-input"><span className="sr-only">Search the library</span><Icon.search /><input className="input" type="search" placeholder={placeholder} value={q} onChange={e => setQ(e.target.value)} /></label>
+      </div>
+      {seg === 'collections' && <CollectionsBody q={q} />}
+      {seg === 'highlights' && <NotesBody q={q} />}
+      {seg === 'books' && <>
       {visibleDupes.slice(0, 1).map(g => (
         <div key={g[0].id} className="banner warn">
           <span><b>Possible duplicate:</b> {g.length} copies of “{g[0].title}” ({g.map(b => `${b.format.toUpperCase()} ${fmtBytes(b.size)}`).join(', ')}).</span>
@@ -84,7 +104,6 @@ export function Library() {
       ))}
 
       <div className="toolbar">
-        <label className="search-input"><span className="sr-only">Search your library</span><Icon.search /><input className="input" placeholder="Title, author, series, subject" value={q} onChange={e => setQ(e.target.value)} /></label>
         <select className="input" style={{ width: 'auto' }} value={sort} onChange={e => setSort(e.target.value as Sort)} aria-label="Sort by">
           <option value="recent">Recently read</option><option value="added">Recently added</option><option value="title">Title</option><option value="author">Author</option><option value="progress">Progress</option>
         </select>
@@ -95,7 +114,7 @@ export function Library() {
       </div>
 
       {!shown.length ? (
-        <div className="empty"><h2>{q ? 'Nothing matches' : 'No books here yet'}</h2><p>{q ? `No titles, authors or subjects match “${q}”. Try the full-text search to look inside books.` : 'Change the filter, or add books.'}</p>{q && <a className="btn" href={href(`search?q=${encodeURIComponent(q)}`)}>Search inside books</a>}</div>
+        <div className="empty"><h2>{q ? 'No titles match' : 'No books here yet'}</h2>{!q && <p>Change the filter, or add books.</p>}{!q && <button className="btn primary" onClick={() => importUi.open()}>Add books</button>}</div>
       ) : view === 'grid' ? (
         <div className="shelf">
           {shown.map(b => (
@@ -120,16 +139,23 @@ export function Library() {
         </div>
       )}
 
-      {importing && (
-        <Modal title={importing.done < importing.total ? `Adding ${importing.total} books` : 'Import finished'} onClose={() => setImporting(null)} actions={<button className="btn primary" onClick={() => setImporting(null)}>{importing.done < importing.total ? 'Continue in background' : 'Done'}</button>}>
-          <ProgressBar value={importing.done / importing.total} />
-          <p className="small muted num">{importing.done} of {importing.total}. Each book is saved as soon as it’s read, so closing the app keeps everything finished so far.</p>
-          <ul className="progress-list" style={{ listStyle: 'none', padding: 0 }}>
-            {importing.log.map((r, i) => <li key={i}><span className={`dot ${r.status === 'failed' ? 'err' : r.status === 'duplicate' ? 'off' : 'ok'}`} style={{ marginTop: 7 }} /><span><b>{r.title ?? r.name}</b> {r.status === 'failed' ? <span className="muted">{r.error}</span> : r.status === 'duplicate' ? <span className="muted">already in your library</span> : r.possibleDuplicateOf ? <span className="muted">added (looks like another copy you have)</span> : null}</span></li>)}
-          </ul>
-        </Modal>
+      {q.trim().length >= 2 && (
+        <section aria-label="Inside your books" style={{ marginTop: 28 }}>
+          <h2 className="section-title">Inside your books {hits && <span className="muted small num">{hits.length}{hits.length >= 200 ? '+' : ''} passages</span>}</h2>
+          {hits && !hits.length && <p className="muted">No passage contains “{q}”.</p>}
+          {grouped.map(([bid, list]) => {
+            const b = books.find(x => x.id === bid); if (!b) return null
+            return (
+              <div key={bid} style={{ marginBottom: 20 }}>
+                <h3 className="title-serif" style={{ fontSize: 17, margin: '0 0 8px' }}>{b.title} <span className="muted small" style={{ fontFamily: 'var(--ui)' }}>{list.length}</span></h3>
+                <div className="list">{list.slice(0, 5).map((h, i) => <a key={i} className="list-row" href={href(`read/${bid}?s=${h.section}&o=${h.start}`)} style={{ color: 'inherit', textDecoration: 'none' }}><span className="title-serif">…{h.before.slice(-70)}<mark style={{ background: 'var(--hl-amber)', borderRadius: 2 }}>{h.match}</mark>{h.after.slice(0, 90)}…</span></a>)}</div>
+              </div>
+            )
+          })}
+        </section>
       )}
-      {collect && sel && <CollectPicker bookIds={[...sel]} onClose={() => { setCollect(false); setSel(null) }} />}
+      </>}
+      {collect && sel && seg === 'books' && <CollectPicker bookIds={[...sel]} onClose={() => { setCollect(false); setSel(null) }} />}
     </>
   )
 }

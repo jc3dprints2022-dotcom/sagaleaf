@@ -3,7 +3,8 @@ import { store, useLive, go, href, toast, engine as syncEngine } from '../../app
 import { loadAnnotations } from '../../app/data'
 import type { Annotation, Book, Position, ReaderPrefs } from '../../core/types'
 import { defaultPrefs } from '../../core/types'
-import { bookTexts, searchText, type Hit } from '../../core/library'
+import { bookTexts, bookParsed, indexBook, searchText, type Hit } from '../../core/library'
+import type { FileRow } from '../../core/db'
 import { findQuote, quoteAt, absoluteFraction, fromFraction } from '../../core/anchor'
 import { txtToEpub } from '../../core/txt'
 import { hlcTime, ago, uid } from '../../core/util'
@@ -14,19 +15,28 @@ import './reader.css'
 
 type Panel = null | 'toc' | 'search' | 'notes' | 'type'
 
-export default function Reader({ id }: { id: string }) {
+// The last book opened keeps its file bytes in memory, so reopening it skips the database read.
+let warm: { hash: string; row: FileRow } | null = null
+async function fileFor(hash: string) {
+  if (warm?.hash === hash) return warm.row
+  const row = await store.db.files.get(hash)
+  if (row) warm = { hash, row }
+  return row
+}
+
+export default function Reader({ id, closeTo = '#/library' }: { id: string; closeTo?: string }) {
   const book = useLive(() => store.db.books.get(id), [id], ['books'])
   if (book === undefined) return <div className="reader-loading">Opening…</div>
   if (!book || book.deleted) return <ReaderMissing text="This book isn’t in your library anymore." />
   if (book.fileState !== 'local') return <ReaderMissing text="This book’s file is on your other devices. Download it from the book page to read offline." action={<a className="btn primary" href={href(`book/${id}`)}>Go to book</a>} />
-  return <ReaderInner book={book} />
+  return <ReaderInner book={book} closeTo={closeTo} />
 }
 
 function ReaderMissing({ text, action }: { text: string; action?: React.ReactNode }) {
   return <div className="reader-loading"><p>{text}</p>{action ?? <a className="btn" href={href('library')}>Back to library</a>}</div>
 }
 
-function ReaderInner({ book }: { book: Book }) {
+function ReaderInner({ book, closeTo }: { book: Book; closeTo: string }) {
   const host = useRef<HTMLDivElement>(null)
   const eng = useRef<Engine | null>(null)
   const [ready, setReady] = useState(false)
@@ -76,12 +86,16 @@ function ReaderInner({ book }: { book: Book }) {
     const abort = new AbortController()   // stops an EPUB that is still opening when the reader closes
     ;(async () => {
       try {
-        const [file, texts, positions] = await Promise.all([store.db.files.get(book.hash), bookTexts(store, book.id), store.db.positions.where('bookId').equals(book.id).toArray()])
+        // Section lengths and titles come from the per-book cache, not from loading every section's text.
+        const [file, parsed, positions] = await Promise.all([fileFor(book.hash), bookParsed(store, book.id), store.db.positions.where('bookId').equals(book.id).toArray()])
         if (!file) throw new Error('The book file is missing on this device. Re-import it to read.')
-        lengths.current = texts.map(t => t.text.length); titles.current = texts.map(t => t.title)
+        lengths.current = parsed?.lengths ?? []; titles.current = parsed?.titles ?? []
+        if (parsed?.toc) setToc(parsed.toc as TocItem[])
         // annotations that arrived from elsewhere without a location (Leaf, merged edition): place them now
         const all = await loadAnnotations(book.id)
-        for (const a of all) if (!a.deleted && a.exact && (a.section < 0 || a.orphaned)) {
+        const unplaced = all.filter(a => !a.deleted && a.exact && (a.section < 0 || a.orphaned))
+        const texts = book.format === 'txt' || unplaced.length ? await bookTexts(store, book.id) : []
+        for (const a of unplaced) {
           const m = findQuote(texts.map(t => t.text), a, { fraction: a.fraction })
           await store.put<Annotation>('annotation', a.id, m ? { section: m.section, start: m.start, end: m.end, cfi: undefined, orphaned: false, fraction: absoluteFraction(lengths.current, m.section, m.start) } : { orphaned: true })
         }
@@ -114,6 +128,9 @@ function ReaderInner({ book }: { book: Book }) {
         }
         if (dead) { e.destroy(); return }
         eng.current = e; setToc(e.toc); setReady(true)
+        void store.db.parsed.update(book.id, { toc: e.toc })
+        // First page is up: finish the full-text index of a freshly downloaded book now (idle work, not in the way).
+        if (!book.indexed && book.format === 'epub') void indexBook(store, book.id).then(async () => { const p = await bookParsed(store, book.id); if (p && !dead) { lengths.current = p.lengths; titles.current = p.titles } })
         if (target?.section != null && target.section >= 0) void e.goToOffset(target.section, target.start, target.end, true)
       } catch (err) { if (dead || err instanceof EngineAborted) return; console.error(err); setError((err as Error).message || 'This book couldn’t be opened.') }
     })()
@@ -132,7 +149,7 @@ function ReaderInner({ book }: { book: Book }) {
     const k = e.key
     if (k === 'ArrowRight' || k === 'PageDown' || (k === ' ' && !e.shiftKey)) { e.preventDefault(); void eng.current?.next(); setChrome(false) }
     else if (k === 'ArrowLeft' || k === 'PageUp' || (k === ' ' && e.shiftKey)) { e.preventDefault(); void eng.current?.prev(); setChrome(false) }
-    else if (k === 'Escape') { if (editing) setEditing(null); else if (panel) setPanel(null); else if (sel) eng.current?.clearSelection(); else go(`book/${book.id}`) }
+    else if (k === 'Escape') { if (editing) setEditing(null); else if (panel) setPanel(null); else if (sel) eng.current?.clearSelection(); else location.hash = closeTo }
     else if (k === 't') setPanel(p => (p === 'toc' ? null : 'toc'))
     else if (k === '/' || k === 'f') { e.preventDefault(); setPanel('search') }
     else if (k === 'n') setPanel(p => (p === 'notes' ? null : 'notes'))
@@ -179,7 +196,7 @@ function ReaderInner({ book }: { book: Book }) {
   return (
     <div className={`reader theme-${theme.id}${chrome ? ' chrome' : ''}`} style={{ '--r-bg': theme.bg, '--r-fg': theme.fg, '--r-muted': theme.muted, '--r-accent': theme.accent } as React.CSSProperties}>
       <header className="r-top" aria-hidden={!chrome}>
-        <a className="icon-btn" href={href(`book/${book.id}`)} onClick={() => void flush()} aria-label="Close book"><Icon.back /></a>
+        <a className="icon-btn" href={closeTo} onClick={() => void flush()} aria-label="Close book"><Icon.back /></a>
         <div className="r-title"><b>{book.title}</b><span>{chapter}</span></div>
         <button className="icon-btn" aria-label="Contents (T)" aria-pressed={panel === 'toc'} onClick={() => setPanel(panel === 'toc' ? null : 'toc')}><Icon.toc /></button>
         <button className="icon-btn" aria-label="Search in book (/)" aria-pressed={panel === 'search'} onClick={() => setPanel(panel === 'search' ? null : 'search')}><Icon.search /></button>

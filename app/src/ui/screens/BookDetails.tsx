@@ -1,11 +1,16 @@
 import { useState } from 'react'
 import { store, useLive, href, go, toast, engine } from '../../app/state'
-import { loadBooks, loadAnnotations, loadCollections, setMembership, editBook, deleteBookWithUndo, downloadBytes, setStatus } from '../../app/data'
+import { loadBooks, loadAnnotations, loadCollections, setMembership, editBook, deleteBookWithUndo, downloadBytes, setStatus, pickFiles } from '../../app/data'
+import { forceRetry } from '../../app/account'
+import { mergeDuplicate, importBytes } from '../../core/library'
+import { gutenbergPage } from '../../app/gutendex'
+import { SE_ORIGIN, seSegmentsOf } from '../../app/standardebooks'
+import { wsPage, wsTitleOf } from '../../app/wikisource'
+import { iaPage, iaIdOf } from '../../app/openlibrary'
 import { Cover, ProgressBar, Modal, Toggle, pct, hlCss } from '../components'
 import { Icon } from '../icons'
 import { ago, fmtBytes, hlcTime, sortKey } from '../../core/util'
 import { annotationsMarkdown } from '../../core/library'
-import { RelayClient } from '../../core/sync/engine'
 import type { Book } from '../../core/types'
 import { PRODUCT } from '../../app/product'
 
@@ -23,16 +28,31 @@ export function BookDetails({ id }: { id: string }) {
   const hl = live.filter(a => a.kind !== 'bookmark')
   const devices = book.positions.filter((p, i, arr) => arr.findIndex(x => x.deviceId === p.deviceId) === i)
 
+  const hasSource = !!(book.catalogId || book.sourceUrl)
   async function fetchFile() {
     setFetching(true)
     try {
-      const relay = (await store.db.peers.toArray()).find(p => p.kind === 'relay')
-      if (!relay) throw new Error('Turn on sync to fetch books from your other devices.')
-      const ok = await engine.downloadBlob(new RelayClient(relay), book!)
-      if (!ok) throw new Error(`The file hasn’t been uploaded from your other device yet. Open ${PRODUCT.name} there with file sync on.`)
+      if (!navigator.onLine) throw new Error('Getting a book needs an internet connection.')
+      await forceRetry(book!.id)
+      const now = await store.db.books.get(book!.id)
+      if (now?.fileState === 'remote' && !(await store.db.books.where('catalogId').equals(book!.catalogId ?? '').filter(b => b.fileState === 'local' && !b.deleted).count())) throw new Error('That download didn’t work from here. Try again later, or add the file yourself.')
       toast('Downloaded. Ready to read offline.')
     } catch (e) { toast((e as Error).message, undefined, 7000) } finally { setFetching(false) }
   }
+  async function addFile() {
+    const [f] = await pickFiles('.epub,.pdf,.txt,application/epub+zip,application/pdf,text/plain', false)
+    if (!f) return
+    const r = await importBytes(store, f.name, new Uint8Array(await f.arrayBuffer()))
+    if (r.status === 'failed') { toast(`${f.name}: ${r.error}`, undefined, 7000); return }
+    if (r.bookId && r.bookId !== book!.id) await mergeDuplicate(store, r.bookId, book!.id)   // a different copy of the file: keep this device's notes with it
+    toast('Added. Your place and notes are kept.')
+    if (r.bookId && r.bookId !== book!.id) go(`book/${r.bookId}`)
+  }
+  const sourceLink = book.catalogId?.startsWith('pg-') ? { label: 'Project Gutenberg', url: gutenbergPage(Number(book.catalogId.slice(3))) }
+    : book.catalogId?.startsWith('se~') ? { label: 'Standard Ebooks', url: `${SE_ORIGIN}/ebooks/${seSegmentsOf(book.catalogId).join('/')}` }
+    : book.catalogId?.startsWith('ws~') ? { label: 'Wikisource', url: wsPage(wsTitleOf(book.catalogId)) }
+    : book.catalogId?.startsWith('ia~') ? { label: 'Internet Archive (scanned)', url: iaPage(iaIdOf(book.catalogId)) }
+    : book.sourceUrl ? { label: new URL(book.sourceUrl).hostname.replace(/^www\./, ''), url: book.sourceUrl } : null
 
   return (
     <>
@@ -44,7 +64,9 @@ export function BookDetails({ id }: { id: string }) {
           <p className="by">{book.author}{book.series ? <span className="muted">, {book.series}{book.seriesIndex ? ` ${book.seriesIndex}` : ''}</span> : null}</p>
           <div className="row wrap">
             {book.fileState === 'remote'
-              ? <button className="btn primary" disabled={fetching} onClick={fetchFile}><Icon.download />{fetching ? 'Downloading…' : 'Download to this device'}</button>
+              ? (hasSource
+                ? <button className="btn primary" disabled={fetching} onClick={fetchFile}><Icon.download />{fetching ? 'Downloading…' : 'Download to this device'}</button>
+                : <><span className="pill"><Icon.cloud width={14} />On your other device</span><button className="btn primary" onClick={addFile}><Icon.plus />Add file</button></>)
               : <a className="btn primary" href={href(`read/${book.id}`)}>{book.progress > 0.002 ? 'Continue reading' : 'Start reading'}</a>}
             <button className="btn" onClick={() => setEditing(true)}>Edit details</button>
             <select className="input" style={{ width: 'auto', height: 38, borderRadius: 999 }} aria-label="Reading status" value={book.status === 'finished' || book.progress >= 0.995 ? 'finished' : book.progress > 0.002 ? 'reading' : book.status} onChange={e => setStatus(book.id, e.target.value as Book['status'])}>
@@ -71,12 +93,13 @@ export function BookDetails({ id }: { id: string }) {
           {book.description && <p className="desc" style={{ marginTop: 22 }} dangerouslySetInnerHTML={undefined}>{book.description}</p>}
 
           <dl className="facts">
-            <dt>Format</dt><dd>{book.format.toUpperCase()}, {fmtBytes(book.size)}{book.fileState === 'remote' ? ' (on your other devices)' : ''}</dd>
+            <dt>Format</dt><dd>{book.format.toUpperCase()}{book.size ? `, ${fmtBytes(book.size)}` : ''}{book.fileState === 'remote' ? ' (on your other device)' : ''}</dd>
             {book.publisher && <><dt>Publisher</dt><dd>{book.publisher}</dd></>}
             {book.published && <><dt>Published</dt><dd>{book.published.slice(0, 10)}</dd></>}
             {book.language && <><dt>Language</dt><dd>{book.language}</dd></>}
             {!!book.subjects?.length && <><dt>Subjects</dt><dd>{book.subjects.slice(0, 6).join(', ')}</dd></>}
-            <dt>Added</dt><dd>{new Date(book.addedAt).toLocaleDateString()}{book.source === 'catalog' ? (book.catalogId?.startsWith('pg-') ? ' from Project Gutenberg' : ' from Discover') : ''}{book.license ? `, ${book.license}` : ''}</dd>
+            <dt>Added</dt><dd>{new Date(book.addedAt).toLocaleDateString()}{book.license ? `, ${book.license}` : ''}</dd>
+            {sourceLink && <><dt>Source</dt><dd><a href={sourceLink.url} target="_blank" rel="noreferrer">{sourceLink.label}</a></dd></>}
           </dl>
 
           {!!leaves?.length && (
@@ -97,7 +120,7 @@ export function BookDetails({ id }: { id: string }) {
           <h2 className="section-title">Collections</h2>
           <div className="row wrap" style={{ gap: 8 }}>
             {(cols ?? []).map(c => <button key={c.id} className="chip" aria-pressed={c.bookIds.includes(book.id)} onClick={() => setMembership(c.id, book.id, !c.bookIds.includes(book.id))}>{c.name}</button>)}
-            <a className="chip" href={href('collections')}><Icon.plus width={14} />New</a>
+            <a className="chip" href={href('library?seg=collections')}><Icon.plus width={14} />New</a>
           </div>
 
           <h2 className="section-title">Highlights and notes <span className="muted small">{hl.length}</span>
@@ -109,7 +132,7 @@ export function BookDetails({ id }: { id: string }) {
                 {a.exact && <blockquote>{a.exact}</blockquote>}{a.note && <p className="note">{a.note}</p>}
                 <div className="meta"><span>{a.label}</span><span>{Math.round(a.fraction * 100)}%</span>{a.orphaned && a.exact && <span className="pill warn">Passage not found in this edition</span>}</div>
               </a>
-            ))}{hl.length > 8 && <a className="list-row" href={href(`notes?book=${book.id}`)}>See all {hl.length}</a>}</div>
+            ))}{hl.length > 8 && <a className="list-row" href={href(`library?seg=highlights&book=${book.id}`)}>See all {hl.length}</a>}</div>
           ) : <p className="muted">Select text while reading to highlight it or add a note.</p>}
 
           <div className="row wrap" style={{ marginTop: 40, gap: 8 }}>
@@ -133,7 +156,6 @@ function EditBook({ book, onClose }: { book: Book; onClose: () => void }) {
   }
   return (
     <Modal title="Edit details" onClose={onClose} actions={<><button className="btn quiet" onClick={onClose}>Cancel</button><button className="btn primary" onClick={save}>Save</button></>}>
-      <p className="small muted">Changes stay in {PRODUCT.name}. Your original file isn’t modified.</p>
       <div className="field"><label htmlFor="e-t">Title</label><input id="e-t" className="input" value={f.title} onChange={set('title')} /></div>
       <div className="field"><label htmlFor="e-a">Author</label><input id="e-a" className="input" value={f.author} onChange={set('author')} /></div>
       <div className="row"><div className="field" style={{ flex: 3 }}><label htmlFor="e-s">Series</label><input id="e-s" className="input" value={f.series} onChange={set('series')} /></div><div className="field" style={{ flex: 1 }}><label htmlFor="e-n">Number</label><input id="e-n" className="input" inputMode="decimal" value={f.seriesIndex} onChange={set('seriesIndex')} /></div></div>

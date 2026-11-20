@@ -1,0 +1,8 @@
+{
+  "numFound": 3,
+  "docs": [
+    { "key": "/works/OL1W", "title": "Pride and Prejudice", "author_name": ["Jane Austen"], "first_publish_year": 1813, "cover_i": 8231856, "ia": ["prideprejudice00aust", "prideprejudice01aust"], "subject": ["Fiction", "Courtship"] },
+    { "key": "/works/OL2W", "title": "A book with no scan", "author_name": ["Nobody"] },
+    { "key": "/works/OL3W", "title": "Dracula", "author_name": ["Bram Stoker", "Someone Else", "Third"], "ia": ["sim_magazine_1897", "dracula00stok"], "cover_i": 1 }
+  ]
+}

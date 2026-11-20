@@ -53,10 +53,10 @@ ctx.on('requestfailed', r => { const u = r.url(); if (!u.startsWith('blob:') && 
 
 await step('First online visit loads; service worker controls only the reader page', async () => {
   await page.goto(APP)
-  await page.waitForSelector('text=Choose files')
+  await page.waitForSelector('text=Add classic books')
   const scope = await page.evaluate(async () => (await navigator.serviceWorker.ready).scope)
   if (scope !== APP) throw new Error(`scope ${scope}`)
-  await page.reload(); await page.waitForSelector('text=Choose files')
+  await page.reload(); await page.waitForSelector('text=Add classic books')
   if (!(await page.evaluate(() => !!navigator.serviceWorker.controller))) throw new Error('reader page not controlled after reload')
   const landing = await ctx.newPage(); await landing.goto(ORIGIN + '/')
   const landingControlled = await landing.evaluate(() => !!navigator.serviceWorker.controller); await landing.close()
@@ -87,14 +87,14 @@ await step('Author/Publisher hidden; sign-in UI present', async () => {
   await page.goto(APP + '#/author'); await page.waitForSelector('text=Page not found')
   await page.goto(APP + '#/publisher'); await page.waitForSelector('text=Page not found')
   await page.goto(APP + '#/settings')
-  await page.waitForSelector('text=Email me a sign-in link', { timeout: 20000 })
-  return 'no Author/Publisher links or routes; Settings shows “Email me a sign-in link”'
+  await page.waitForSelector('text=Email me a link', { timeout: 20000 })
+  return 'no Author/Publisher links or routes; Settings shows “Continue with Google” and “Email me a link”'
 })
 
 
 await step('Online: import EPUB, PDF and TXT; highlight with a note', async () => {
   await page.goto(APP + '#/')
-  const chooser = page.waitForEvent('filechooser'); await page.getByRole('button', { name: 'Choose files' }).click()
+  await page.getByRole('button', { name: 'Add books' }).click(); const chooser = page.waitForEvent('filechooser'); await page.getByRole('button', { name: /Upload a file/ }).click()
   await (await chooser).setFiles(['frankenstein.epub', 'frankenstein-letters.pdf', 'sherlock-holmes-sample.txt'].map(f => join(SAMPLES, f)))
   await page.goto(APP + '#/library'); await page.waitForSelector('.book-tile >> nth=2', { timeout: 60000 })
   await page.getByRole('link', { name: /Frankenstein Mary Shelley/ }).first().click()
@@ -113,7 +113,7 @@ await step('Fully offline after a relaunch: the reader opens from the service wo
   await ctx.close(); ctx = await launch(); page = ctx.pages()[0]
   await ctx.setOffline(true); down = true
   await page.goto(APP)
-  await page.waitForSelector('text=Recently added', { timeout: 15000 })
+  await page.waitForSelector('.resume', { timeout: 15000 })
   if (await page.evaluate(() => navigator.onLine)) throw new Error('browser still online')
   return 'server unreachable and browser offline; page served from the worker cache'
 })
@@ -122,7 +122,7 @@ const offlineRequests: string[] = []
 await step('Offline: the highlight and note show; EPUB, PDF and TXT open; export works; no network requests', async () => {
   served.length = 0
   ctx.on('request', r => { const u = r.url(); if (!u.startsWith('blob:') && !u.startsWith('data:')) offlineRequests.push(u) })
-  await page.goto(APP + '#/notes'); await page.waitForSelector('text=Offline PWA test note', { timeout: 15000 })
+  await page.goto(APP + '#/library?seg=highlights'); await page.waitForSelector('text=Offline PWA test note', { timeout: 15000 })
   await page.goto(APP + '#/library'); await page.getByRole('link', { name: /Frankenstein Mary Shelley/ }).first().click()
   await page.waitForSelector('text=Offline PWA test note')
   const dl = page.waitForEvent('download'); await page.getByRole('button', { name: 'Export Markdown' }).click()

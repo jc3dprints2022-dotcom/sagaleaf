@@ -11,7 +11,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:e2e": "tsx e2e/run.ts",
+    "test:e2e": "tsx e2e/run.ts && tsx e2e/discover.ts && tsx e2e/nav.ts",
     "bench": "tsx bench/run.ts",
     "typecheck": "tsc --noEmit",
     "build:standalone": "vite build -c vite.standalone.config.ts && node -e \"require('fs').copyFileSync('dist-standalone/index.html','dist-standalone/saga-reader.html')\"",
@@ -24,6 +24,8 @@
   },
   "dependencies": {
     "@capacitor/android": "^8.6.2",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/browser": "^8.0.5",
     "@capacitor/core": "^8.6.2",
     "@capacitor/splash-screen": "^8.0.2",
     "@fontsource-variable/fraunces": "^5.3.0",
@@ -43,7 +45,7 @@
   "devDependencies": {
     "@capacitor/cli": "^8.6.2",
     "@resvg/resvg-js": "^2.6.2",
-    "@supabase/supabase-js": "^2.119.1",
+    "@supabase/supabase-js": "^2.119.2",
     "@types/busboy": "^1.5.5",
     "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",

@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-19T16:37:54.220Z",
+  "at": "2026-11-20T00:48:42.603Z",
   "results": [
     {
       "step": "First online visit loads; service worker controls only the reader page",
@@ -14,7 +14,7 @@
     {
       "step": "Author/Publisher hidden; sign-in UI present",
       "ok": true,
-      "detail": "no Author/Publisher links or routes; Settings shows “Email me a sign-in link”"
+      "detail": "no Author/Publisher links or routes; Settings shows “Continue with Google” and “Email me a link”"
     },
     {
       "step": "Online: import EPUB, PDF and TXT; highlight with a note",
@@ -33,7 +33,7 @@
     {
       "step": "A new deploy is picked up: new worker activates, old cache removed, page offers a reload",
       "ok": true,
-      "detail": "worker 04496f3f8b09 → newdeploy001; caches now saga-shell-newdeploy001; fresh HTML served online"
+      "detail": "worker dbf1cd64de89 → newdeploy001; caches now saga-shell-newdeploy001; fresh HTML served online"
     }
   ]
 }

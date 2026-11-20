@@ -1,0 +1,78 @@
+{
+  "at": "2026-11-20T00:42:55.364Z",
+  "env": "Chrome (Pixel 7 profile), 4x CPU throttle, production build, mocked network +120 ms/request",
+  "summary": {
+    "discoverColdMs": {
+      "median": 525,
+      "runs": [
+        537,
+        521,
+        522,
+        538,
+        525,
+        524,
+        530
+      ]
+    },
+    "nextPageMs": {
+      "median": 184,
+      "runs": [
+        152,
+        184,
+        194,
+        184,
+        195,
+        162,
+        232
+      ]
+    },
+    "discoverWarmMs": {
+      "median": 215,
+      "runs": [
+        230,
+        215,
+        215,
+        185,
+        188,
+        221,
+        210
+      ]
+    },
+    "getBookMs": {
+      "median": 395,
+      "runs": [
+        383,
+        396,
+        395,
+        403,
+        387,
+        395,
+        444
+      ]
+    },
+    "openBookMs": {
+      "median": 861,
+      "runs": [
+        919,
+        919,
+        860,
+        854,
+        875,
+        860,
+        861
+      ]
+    },
+    "closeToLibraryMs": {
+      "median": 81,
+      "runs": [
+        89,
+        193,
+        70,
+        72,
+        64,
+        199,
+        81
+      ]
+    }
+  }
+}

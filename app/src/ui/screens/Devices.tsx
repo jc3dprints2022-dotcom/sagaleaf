@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react'
-import { store, engine, useLive, href, go, toast, useSyncStatus, PLATFORM_URL, DEV_SIMULATORS, LOCAL_LEAF, STANDALONE } from '../../app/state'
+import { store, engine, useLive, href, go, toast, DEV_SIMULATORS, LOCAL_LEAF } from '../../app/state'
 import { loadBooks } from '../../app/data'
 import { Modal, Toggle, ProgressBar } from '../components'
 import { Icon } from '../icons'
-import { ago, fmtBytes } from '../../core/util'
-import { newLibrarySecret } from '../../core/sync/crypto'
-import { addRelayPeer } from '../../core/sync/engine'
+import { ago, fmtBytes, hlcTime } from '../../core/util'
 import { discover, productName, LeafClient, DEFAULT_CANDIDATES, SIM_CANDIDATES, isLocalDevice, type LeafHello } from '../../core/leaf/client'
 import { LOCAL_LEAF_URL } from '../../app/localLeaf'
 import { LeafScreen } from './LeafScreen'
@@ -13,104 +11,35 @@ import { addLeafPeer } from '../../core/leaf/sync'
 import type { Peer } from '../../core/types'
 import { PRODUCT } from '../../app/product'
 
-export function Devices() {
+/** Settings > Devices: this device's name, the other devices signed in to the account, and SAGA Leaf pairing. */
+export function DevicesSection() {
   const peers = useLive(() => store.db.peers.toArray(), [], ['peers'])
-  const status = useSyncStatus()
+  const others = useLive(async () => {
+    const m = new Map<string, { name: string; at: number }>()
+    for (const p of await store.db.positions.toArray()) {
+      if (p.deleted || p.deviceId === store.deviceId || p.deviceId.startsWith('leaf-')) continue
+      const at = hlcTime(p.at), cur = m.get(p.deviceId)
+      if (!cur || at > cur.at) m.set(p.deviceId, { name: p.deviceName, at })
+    }
+    return [...m].map(([id, v]) => ({ id, ...v })).sort((a, b) => b.at - a.at)
+  }, [], ['positions'])
   const [pairing, setPairing] = useState(false)
-  const [linking, setLinking] = useState<null | 'new' | 'join'>(null)
   const [name, setName] = useState(store.deviceName)
   if (!peers) return null
-  const relay = peers.find(p => p.kind === 'relay')
   const leaves = peers.filter(p => p.kind === 'leaf')
-
   return (
     <>
-      <h1 className="page-title">Devices</h1>
-      <p className="page-sub">Your library lives on each of your devices. Sync keeps them in step; nothing depends on a server to keep working.</p>
-
-      <h2 className="section-title">This device</h2>
       <div className="panel row wrap">
         <Icon.devices width={22} />
-        <label className="field" style={{ margin: 0, flex: 1, minWidth: 220 }}><span className="sr-only">Device name</span><input className="input" value={name} onChange={e => setName(e.target.value)} onBlur={() => name.trim() && name !== store.deviceName && store.setDeviceName(name.trim()).then(() => toast('Renamed. Other devices see the new name after the next sync.'))} /></label>
-        <span className="small muted">Shown on your other devices, e.g. “Continue from {name}”.</span>
+        <label className="field" style={{ margin: 0, flex: 1, minWidth: 220 }}><span className="sr-only">Device name</span><input className="input" value={name} onChange={e => setName(e.target.value)} onBlur={() => name.trim() && name !== store.deviceName && store.setDeviceName(name.trim()).then(() => toast('Renamed. Your other devices see the new name after the next sync.'))} /></label>
+        <span className="pill">This device</span>
       </div>
-
-      <h2 className="section-title">Sync between your phones and computers</h2>
-      {relay ? <RelayCard relay={relay} status={status} /> : (
-        <div className="panel">
-          <p style={{ marginTop: 0, maxWidth: '62ch' }}>Turn on sync to carry your place, highlights, notes and collections between devices. Everything is encrypted on this device with a key only your devices hold; the sync service stores scrambled data it can’t read.</p>
-          <div className="row wrap"><button className="btn primary" onClick={() => setLinking('new')}><Icon.sync />Turn on sync</button><button className="btn" onClick={() => setLinking('join')}>I have a library code</button></div>
-        </div>
-      )}
-
-      <h2 className="section-title">SAGA Leaf <button className="btn small" onClick={() => setPairing(true)}><Icon.plus />Add a SAGA Leaf</button></h2>
-      {!leaves.length ? (
-        <div className="empty" style={{ padding: 36 }}><h2>No SAGA Leaf paired</h2><p>Your SAGA Leaf carries the books you’re reading and comes back with your place and highlights. Turn on its Wi-Fi from Settings on the device, then add it here.</p><button className="btn primary" onClick={() => setPairing(true)}>Find my SAGA Leaf</button></div>
-      ) : <div className="stack">{leaves.map(l => <LeafCard key={l.id} peer={l} />)}</div>}
-
+      {!!others?.length && <div className="list" style={{ marginTop: 10 }}>{others.map(o => <div key={o.id} className="list-row"><Icon.devices width={20} /><b style={{ flex: 1 }}>{o.name}</b><span className="small muted">last seen {ago(o.at)}</span></div>)}</div>}
+      <h3 className="sub-title">SAGA Leaf <button className="btn small" onClick={() => setPairing(true)}><Icon.plus />Add a SAGA Leaf</button></h3>
+      {!leaves.length ? <p className="muted small" style={{ margin: 0 }}>No SAGA Leaf paired. <button className="linklike" onClick={() => setPairing(true)}>Find my SAGA Leaf</button></p>
+        : <div className="stack">{leaves.map(l => <LeafCard key={l.id} peer={l} />)}</div>}
       {pairing && <PairLeaf onClose={() => setPairing(false)} />}
-      {linking && <LinkSync mode={linking} onClose={() => setLinking(null)} />}
     </>
-  )
-}
-
-function RelayCard({ relay, status }: { relay: Peer; status: ReturnType<typeof useSyncStatus> }) {
-  const [show, setShow] = useState(false)
-  const remote = useLive(async () => (await store.db.books.toArray()).filter(b => !b.deleted && b.fileState === 'remote').length, [], ['books'])
-  const state = status.state === 'syncing' ? 'Syncing now' : status.state === 'offline' ? 'Offline' : relay.lastError ? 'Can’t reach the sync service' : 'Up to date'
-  return (
-    <div className="panel">
-      <div className="row wrap">
-        <span className={`dot ${status.state === 'syncing' ? 'busy' : relay.lastError ? 'err' : status.state === 'offline' ? 'off' : 'ok'}`} />
-        <b>{state}</b>
-        <span className="muted small">{relay.lastSyncAt ? `last synced ${ago(relay.lastSyncAt)}` : 'not synced yet'}{status.pending ? `, ${status.pending} change${status.pending > 1 ? 's' : ''} waiting` : ''}</span>
-        <span className="spacer" />
-        <button className="btn small" onClick={() => engine.syncAll().then(() => toast('Synced'))}><Icon.sync />Sync now</button>
-      </div>
-      {relay.lastError && <p className="small" style={{ color: 'var(--danger)' }}>{relay.lastError}. Your changes are safe on this device and will go out when the connection is back.</p>}
-      {status.progress && <div style={{ margin: '12px 0' }}><p className="small muted" style={{ margin: '0 0 6px' }}>{status.progress.label}</p><ProgressBar value={status.progress.done / status.progress.total} /></div>}
-      <div className="row" style={{ marginTop: 16 }}>
-        <div style={{ flex: 1 }}><b>Sync book files too</b><p className="small muted" style={{ margin: 0 }}>Uploads your files (encrypted) so other devices can download them. Off: only progress, highlights and notes sync.{remote ? ` ${remote} book${remote > 1 ? 's are' : ' is'} waiting to download here.` : ''}</p></div>
-        <Toggle label="Sync book files" checked={relay.syncFiles} onChange={async v => { await store.db.peers.update(relay.id, { syncFiles: v }); store.emit('peers'); engine.schedule(0) }} />
-      </div>
-      <div style={{ marginTop: 18 }}>
-        <b>Add another device</b>
-        <p className="small muted" style={{ margin: '2px 0 10px' }}>Open {PRODUCT.name} there, choose “I have a library code”, and enter this code. Anyone with the code can read your synced library, so keep it private.</p>
-        {show ? <div className="code-box">{relay.secret}</div> : <button className="btn small" onClick={() => setShow(true)}>Show library code</button>}
-      </div>
-      <div className="row" style={{ marginTop: 18 }}><span className="spacer" /><button className="btn small quiet danger" onClick={async () => { if (!confirm('Stop syncing this device? Your library stays here, nothing is deleted.')) return; await store.db.peers.delete(relay.id); store.emit('peers'); toast('Sync turned off on this device') }}>Turn off sync on this device</button></div>
-    </div>
-  )
-}
-
-function LinkSync({ mode, onClose }: { mode: 'new' | 'join'; onClose: () => void }) {
-  const [secret] = useState(() => newLibrarySecret())
-  const [code, setCode] = useState('')
-  const [url, setUrl] = useState(PLATFORM_URL)
-  const [busy, setBusy] = useState(false)
-  const [err, setErr] = useState('')
-  async function go_() {
-    setBusy(true); setErr('')
-    const s = mode === 'new' ? secret : code.trim().toLowerCase()
-    if (!/^saga-[a-z0-9]{5}-[a-z0-9]{5}-[a-z0-9]{5}$/.test(s)) { setErr('That code doesn’t look right. It has the form saga-xxxxx-xxxxx-xxxxx.'); setBusy(false); return }
-    try {
-      const r = await fetch(url.replace(/\/$/, '') + '/api/health').catch(() => null)
-      if (!r?.ok) throw new Error('The sync service didn’t answer. Check the address, or try again when you’re online.')
-      await addRelayPeer(store, url.replace(/\/$/, ''), s, true)
-      store.emit('peers'); await engine.syncAll()
-      toast(mode === 'new' ? 'Sync is on' : 'Joined your library. Books and notes are arriving.')
-      onClose()
-    } catch (e) { setErr((e as Error).message) } finally { setBusy(false) }
-  }
-  return (
-    <Modal title={mode === 'new' ? 'Turn on sync' : 'Join your library'} onClose={onClose} actions={<><button className="btn quiet" onClick={onClose}>Cancel</button><button className="btn primary" disabled={busy} onClick={go_}>{busy ? 'Connecting…' : mode === 'new' ? 'Turn on sync' : 'Join'}</button></>}>
-      {mode === 'new' ? <>
-        <p>This is your library code. Your devices use it to encrypt and find your library. Write it down or keep it in a password manager: if you lose every device, it’s the only way back to your synced notes.</p>
-        <div className="code-box">{secret}</div>
-      </> : <div className="field" style={{ marginTop: 12 }}><label htmlFor="lc">Library code</label><input id="lc" className="input" autoFocus value={code} onChange={e => setCode(e.target.value)} placeholder="saga-xxxxx-xxxxx-xxxxx" autoComplete="off" spellCheck={false} /><span className="hint">Find it on a device that already syncs: Devices, then Show library code.</span></div>}
-      <details style={{ marginTop: 16 }} open={STANDALONE}><summary className="small muted">Sync service address</summary>{STANDALONE && <p className="small" style={{ marginBottom: 0 }}>This copy of {PRODUCT.name} runs straight from a file, so there’s no sync service built in. Start one on a computer your devices can reach (<code>npm run platform</code> in the {PRODUCT.name} project) and enter its address here. Everything else, including the simulated SAGA Leaf, works without it.</p>}<input className="input" value={url} onChange={e => setUrl(e.target.value)} style={{ marginTop: 8 }} aria-label="Sync service address" /><p className="small muted">You can run your own; it only stores encrypted data.</p></details>
-      {err && <p style={{ color: 'var(--danger)' }}>{err}</p>}
-    </Modal>
   )
 }
 
@@ -215,7 +144,6 @@ function PairLeaf({ onClose }: { onClose: () => void }) {
           <input className="input" placeholder="Address, e.g. 192.168.1.40" value={manual} onChange={e => setManual(e.target.value)} aria-label="SAGA Leaf address" />
           <button className="btn" type="submit">Look</button>
         </form>
-        <p className="small muted" style={{ marginTop: 14 }}>Browsers can’t scan your network, so {PRODUCT.name} checks the SAGA Leaf’s usual addresses. Using {PRODUCT.name} from a secure (https) address? Browsers block it from reaching a SAGA Leaf; use the installed app or the local address.</p>
       </> : chosen.protocol === 2 ? <>
         <p>Enter the 6-digit code now showing on the SAGA Leaf’s screen.</p>
         {isLocalDevice(chosen.url) ? <div style={{ margin: '10px 0 16px' }}><LeafScreen showLog={false} /></div>
@@ -234,14 +162,14 @@ function PairLeaf({ onClose }: { onClose: () => void }) {
 }
 
 export function DeviceDetail({ id }: { id: string }) {
-  const peer = useLive(() => store.db.peers.get(id), [id], ['peers'])
+  const peer = useLive(async () => (await store.db.peers.get(id)) ?? null, [id], ['peers'])
   const books = useLive(loadBooks, [], ['books', 'positions'])
   const transfers = useLive(() => store.db.transfers.where('peerId').equals(id).toArray(), [id], ['transfers'])
   const [busy, setBusy] = useState(false)
   const [screen, setScreen] = useState(false)
   const passage = useLeafPassage(id)
   if (peer === undefined || !books) return null
-  if (!peer || peer.kind !== 'leaf') return <div className="empty"><h2>Device not found</h2><a className="btn" href={href('devices')}>Devices</a></div>
+  if (!peer || peer.kind !== 'leaf') return <div className="empty"><h2>Device not found</h2><a className="btn" href={href('settings?at=devices')}>Settings</a></div>
   const L = peer.leaf!
   const v2 = L.protocol === 2
   const set = async (patch: Partial<typeof L>) => { peer.leaf = { ...L, ...patch }; await store.db.peers.put(peer); store.emit('peers') }
@@ -254,7 +182,7 @@ export function DeviceDetail({ id }: { id: string }) {
   ]
   return (
     <>
-      <a href={href('devices')} className="btn quiet small" style={{ marginLeft: -10, marginBottom: 14 }}><Icon.back />Devices</a>
+      <a href={href('settings?at=devices')} className="btn quiet small" style={{ marginLeft: -10, marginBottom: 14 }}><Icon.back />Settings</a>
       <div className="device-card" style={{ marginBottom: 26 }}>
         {leafArt(peer, passage || 'No book open yet.')}
         <div>
@@ -264,12 +192,12 @@ export function DeviceDetail({ id }: { id: string }) {
             <button className="btn primary small" disabled={busy} onClick={async () => { setBusy(true); const r = await engine.syncPeer(peer); setBusy(false); toast(r.errors.length ? r.errors[0] : summary(r, peer.name), undefined, 6000) }}><Icon.sync />{busy ? 'Syncing…' : 'Sync now'}</button>
             {isLocalDevice(peer.url) ? <button className="btn small" onClick={() => setScreen(true)}>Open simulated screen</button>
               : peer.url.includes('127.0.0.1') && <a className="btn small" href={`${peer.url}/device`} target="_blank" rel="noreferrer">Open simulated screen</a>}
-            <button className="btn small quiet danger" onClick={async () => { if (!confirm(`Forget ${peer.name}? Books stay on the device.`)) return; if (v2) await new LeafClient(peer.url, peer.token).unpair(store.deviceId).catch(() => 0); await store.db.peers.delete(peer.id); store.emit('peers'); go('devices') }}>Forget this SAGA Leaf</button>
+            <button className="btn small quiet danger" onClick={async () => { if (!confirm(`Forget ${peer.name}? Books stay on the device.`)) return; if (v2) await new LeafClient(peer.url, peer.token).unpair(store.deviceId).catch(() => 0); await store.db.peers.delete(peer.id); store.emit('peers'); go('settings?at=devices') }}>Forget this SAGA Leaf</button>
           </div>
         </div>
       </div>
 
-      <div className="panel row"><div style={{ flex: 1 }}><b>Send what I’m reading</b><p className="small muted" style={{ margin: 0 }}>Books you’ve started go to the SAGA Leaf automatically. Switch any book off below to keep it off.</p></div><Toggle label="Send what I’m reading" checked={L.autoSend} onChange={v => set({ autoSend: v })} /></div>
+      <div className="panel row"><div style={{ flex: 1 }}><b>Send what I’m reading</b></div><Toggle label="Send what I’m reading" checked={L.autoSend} onChange={v => set({ autoSend: v })} /></div>
 
       <h2 className="section-title">Books</h2>
       <div className="list">
@@ -295,7 +223,6 @@ export function DeviceDetail({ id }: { id: string }) {
 
       <h2 className="section-title">What this SAGA Leaf can do</h2>
       <div className="list">{caps.map(([k, ok, note]) => <div key={k} className="list-row"><span className={`dot ${ok ? 'ok' : 'off'}`} /><span style={{ width: 200 }}>{k}</span><span className="small muted">{note}</span></div>)}</div>
-      {!v2 && <p className="small muted" style={{ marginTop: 12 }}>The missing pieces need the firmware changes described in the SAGA Leaf protocol document (docs/LEAF_PROTOCOL.md).</p>}
       {screen && <Modal title={peer.name} onClose={() => setScreen(false)} wide><LeafScreen /><div className="actions"><button className="btn primary" onClick={async () => { await engine.syncPeer(peer); const p = await store.db.peers.get(peer.id); toast(p?.lastError ? `Couldn’t reach ${peer.name}` : `${peer.name} is up to date`) }}><Icon.sync />Sync now</button><button className="btn" onClick={() => setScreen(false)}>Done</button></div></Modal>}
     </>
   )

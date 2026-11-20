@@ -9,6 +9,8 @@ export interface FileRow { hash: string; data: Uint8Array; type: string; size: n
 export interface CoverRow { bookId: string; data: Uint8Array; type: string }
 export interface TextRow { bookId: string; section: number; title: string; text: string }
 export interface OpRow extends Op { seq?: number }
+/** Per-book parse results, kept so reopening a book (and the first page) doesn't re-read every section. */
+export interface ParsedRow { bookId: string; lengths: number[]; titles: string[]; toc?: unknown }
 export interface MetaRow { key: string; value: unknown }
 
 export class SagaDB extends Dexie {
@@ -24,6 +26,7 @@ export class SagaDB extends Dexie {
   peers!: Table<Peer, string>
   transfers!: Table<Transfer, string>
   meta!: Table<MetaRow, string>
+  parsed!: Table<ParsedRow, string>
 
   constructor(name = 'saga-reader') {
     super(name)
@@ -41,6 +44,7 @@ export class SagaDB extends Dexie {
       transfers: 'id, peerId, bookId, state',
       meta: 'key',
     })
+    this.version(2).stores({ parsed: 'bookId' })
   }
 }
 

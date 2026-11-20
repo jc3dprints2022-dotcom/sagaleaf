@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { store, useLive, href, useRoute, toast } from '../../app/state'
+import { importUi } from './ImportModal'
 import { loadBooks, loadAnnotations, downloadBytes } from '../../app/data'
 import { HL_COLORS, hlCss } from '../components'
 import { Icon } from '../icons'
@@ -9,11 +10,11 @@ import type { BookView } from '../../app/data'
 import { ago, norm, hlcTime } from '../../core/util'
 import type { Annotation } from '../../core/types'
 
-export function Notes() {
+/** The Highlights segment of Library. `q` is the Library's search box. */
+export function NotesBody({ q }: { q: string }) {
   const route = useRoute()
   const books = useLive(loadBooks, [], ['books'])
   const anns = useLive(() => loadAnnotations(), [], ['annotations'])
-  const [q, setQ] = useState('')
   const [color, setColor] = useState<string | null>(null)
   const [tag, setTag] = useState<string | null>(null)
   const [bookId, setBookId] = useState<string | null>(route.query.get('book'))
@@ -30,18 +31,17 @@ export function Notes() {
 
   return (
     <>
-      <div className="row wrap"><h1 className="page-title" style={{ flex: 1 }}>Highlights and notes</h1>
+      <div className="row wrap" style={{ marginBottom: 14 }}>
+        <p className="muted" style={{ flex: 1, margin: 0 }}>{live.filter(a => a.kind !== 'bookmark').length} highlights across {new Set(live.map(a => a.bookId)).size} books</p>
         <div className="row">
-          <a className="btn small" href={href('import')}><Icon.upload />Import Kindle highlights</a>
+          <button className="btn small" onClick={() => importUi.open()}><Icon.upload />Import Kindle highlights</button>
           <button className="btn small" disabled={!live.length} onClick={() => downloadBytes('saga-highlights.md', annotationsMarkdown(books, live), 'text/markdown')}><Icon.download />Markdown</button>
           <button className="btn small" disabled={!live.length} onClick={() => downloadBytes('saga-highlights.jsonld', JSON.stringify(webAnnotations(books, live), null, 1), 'application/ld+json')} title="W3C Web Annotation format, readable by other tools">Web Annotation</button>
         </div>
       </div>
-      <p className="page-sub">{live.filter(a => a.kind !== 'bookmark').length} highlights across {new Set(live.map(a => a.bookId)).size} books. Every highlight keeps the quoted text, so it survives font changes, new editions and moving between devices.</p>
       <KindleReview books={books} />
       {conflicts > 0 && <div className="banner warn"><span>{conflicts} note{conflicts > 1 ? ' was' : 's were'} edited on two devices at once. Both versions are kept until you choose.</span></div>}
       <div className="toolbar">
-        <label className="search-input"><span className="sr-only">Search notes</span><Icon.search /><input className="input" value={q} onChange={e => setQ(e.target.value)} placeholder="Search highlights, notes and tags" /></label>
         <select className="input" style={{ width: 'auto' }} value={bookId ?? ''} onChange={e => setBookId(e.target.value || null)} aria-label="Book"><option value="">All books</option>{books.filter(b => anns.some(a => a.bookId === b.id)).map(b => <option key={b.id} value={b.id}>{b.title}</option>)}</select>
         <div className="row" style={{ gap: 6 }} role="group" aria-label="Colour">{HL_COLORS.map(c => <button key={c.id} className="swatch" style={{ background: c.css }} aria-label={c.label} aria-pressed={color === c.id} onClick={() => setColor(color === c.id ? null : c.id)} />)}</div>
       </div>
@@ -54,7 +54,6 @@ export function Notes() {
         return (
           <section key={bid} style={{ marginBottom: 30 }}>
             <h2 className="section-title" style={{ marginTop: 10 }}><span className="title-serif" style={{ fontSize: 20 }}>{b?.title ?? synced?.[bid]?.title ?? 'Removed book'}</span><span className="muted small">{list.length}</span></h2>
-            {!b && synced?.[bid] && <p className="small muted" style={{ marginTop: -8 }}>Synced from your account. Add this book on this device to open these highlights in it.</p>}
             <div className="list">{list.map(a => <NoteRow key={a.id} a={a} canOpen={!!b && b.fileState === 'local'} />)}</div>
           </section>
         )
@@ -97,7 +96,7 @@ function KindleReview({ books }: { books: BookView[] }) {
   return (
     <section className="card kindle-review" aria-labelledby="kr-h" style={{ marginBottom: 26 }}>
       <h2 className="section-title" id="kr-h">Kindle highlights waiting for a book <span className="muted small">{pending!.length}</span></h2>
-      <p className="small muted" style={{ marginTop: -6 }}>These titles didn’t clearly match a book in your library. Choose the book to attach them to, or add the book and they attach themselves.</p>
+      
       <div className="list">{groups.map(g => <ReviewGroup key={g[0].title + g[0].author} list={g} books={local} />)}</div>
     </section>
   )

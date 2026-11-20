@@ -1,28 +1,29 @@
 {
-  "at": "2026-11-19T16:37:58.821Z",
+  "at": "2026-11-20T00:48:30.202Z",
   "results": [
     {
-      "step": "Import screen is reachable from the Library",
+      "step": "The Add pop-up is reachable from the Library",
       "ok": true
     },
     {
-      "step": "Calibre folder: title and author from metadata.opf; DRM book refused with the existing message",
+      "step": "Calibre folder: books come in with title and author from metadata.opf; the DRM book is skipped",
       "ok": true,
-      "detail": "Pride and Prejudice (Calibre edition) Jane Austen added from Pride and Prejudice - Jane Austen.epub · Open | Frankenstein Mary Shelley skipped Frankenstein - Mary Shelley.epub: This book is DRM-protected. SAGA doesn’t remove DRM, so it can’t be opened."
+      "detail": "Calibre: 1 book added, 1 skippedOpen Library"
     },
     {
       "step": "Calibre zip imports too",
-      "ok": true
+      "ok": true,
+      "detail": "Calibre: 1 book addedOpen Library"
     },
     {
       "step": "Kindle My Clippings.txt: attaches to the matching book; unmatched titles wait for review",
       "ok": true,
-      "detail": "1 highlight added to 1 book, 3 waiting for you to choose a book. Added to “Pride and Prejudice (Calibre edition)” (1). 1 bookmark skipped. Review"
+      "detail": "Kindle: 1 highlight added to 1 book, 3 waiting for you to choose a bookReview"
     },
     {
       "step": "Gutenberg book via “paste a link” (Gutendex and the Gutenberg proxy)",
       "ok": true,
-      "detail": "book 4979bfd1d516480d; proxy saw 3 requests"
+      "detail": "book 4979bfd1d516480d; proxy saw 11 requests"
     },
     {
       "step": "Standard Ebooks in Discover: feed via the proxy, EPUB downloaded directly with ?source=download",

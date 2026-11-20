@@ -4,7 +4,7 @@
     "ok": true
   },
   {
-    "step": "No sign-in anywhere (Settings has no Account section)",
+    "step": "Sign-in is offered in the app, and nothing contacts Supabase until it is used",
     "ok": true
   },
   {
@@ -30,6 +30,11 @@
     "step": "\"Open with\" from another app (web half): imports and opens the book",
     "ok": true,
     "detail": "Frankenstein, Moby Dick"
+  },
+  {
+    "step": "Google sign-in: the system browser is opened, the callback URL comes back, the code is exchanged, sync starts",
+    "ok": true,
+    "detail": "2 book rows synced, no code asked"
   },
   {
     "step": "Made no requests outside the app",
