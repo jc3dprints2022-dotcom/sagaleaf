@@ -1,0 +1,90 @@
+{
+  "$comment": "DEVELOPMENT FIXTURE. Concept options only. No item here is for sale, priced or in stock. Replace with a real catalogue (same schema) when prices, SKUs and stock exist.",
+  "version": 1,
+  "currency": null,
+  "groups": [
+    {
+      "id": "model",
+      "label": "Model",
+      "required": true,
+      "items": [
+        {
+          "id": "leaf-unlit",
+          "label": "SAGA Leaf (unlit)",
+          "description": "Board 1 design: 3.97″ e-paper, no front light.",
+          "concept": true,
+          "price": null,
+          "sku": null,
+          "stock": null,
+          "status": "preorder-interest",
+          "available": true,
+          "source": "rev4 board design (unlit). Not built yet."
+        },
+        {
+          "id": "leaf-frontlit",
+          "label": "Front-lit (planned)",
+          "description": "Modelled in CAD only. Lit-panel quote pending.",
+          "concept": true,
+          "price": null,
+          "sku": null,
+          "stock": null,
+          "status": "preorder-interest",
+          "available": false,
+          "source": "rev4 CAD front-lit variant (planned / under evaluation)"
+        }
+      ]
+    },
+    {
+      "id": "skin",
+      "label": "Rear skin finish",
+      "required": true,
+      "items": [
+        {
+          "id": "skin-copper",
+          "label": "Copper",
+          "description": "Concept finish from CAD renders.",
+          "swatch": "#B8663A",
+          "concept": true,
+          "price": null,
+          "sku": null,
+          "stock": null,
+          "status": "preorder-interest",
+          "available": true,
+          "source": "rev4 CAD render finish (concept; production material undecided)"
+        },
+        {
+          "id": "skin-slate",
+          "label": "Slate",
+          "description": "Concept finish from CAD renders.",
+          "swatch": "#45484E",
+          "concept": true,
+          "price": null,
+          "sku": null,
+          "stock": null,
+          "status": "preorder-interest",
+          "available": true,
+          "source": "rev4 CAD render finish (concept; production material undecided)"
+        }
+      ]
+    },
+    {
+      "id": "accessory",
+      "label": "Accessory",
+      "required": false,
+      "items": [
+        {
+          "id": "accessory-none",
+          "label": "No accessories announced yet",
+          "description": "Cases and folios will appear here only once they exist.",
+          "concept": true,
+          "price": null,
+          "sku": null,
+          "stock": null,
+          "status": "preorder-interest",
+          "available": true,
+          "source": "Proxima project status: no accessories designed"
+        }
+      ]
+    }
+  ]
+}
