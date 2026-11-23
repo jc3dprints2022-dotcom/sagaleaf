@@ -44,7 +44,7 @@ export const SPECS: Spec[] = [
   { id: 'elec-mcu', group: 'Electronics', label: 'Processor', value: 'ESP32-C3 module (ESP32-C3-MINI-1-H8X, 8 MB) with Wi-Fi', status: 'Confirmed', src: 'rev4 board design (unverified on hardware)' },
   { id: 'elec-pcb', group: 'Electronics', label: 'Board', value: '0.8 mm custom PCB', status: 'Confirmed', src: 'rev4 board design (unverified on hardware)' },
   { id: 'elec-sd', group: 'Electronics', label: 'Storage', value: 'microSD slot; you supply the card', status: 'Confirmed', src: 'rev4 board design, Molex 104031' },
-  { id: 'elec-usb', group: 'Electronics', label: 'Port', value: 'USB-C for charging and data, bottom edge', status: 'Confirmed', src: 'rev4 board design, GCT USB4110' },
+  { id: 'elec-usb', group: 'Electronics', label: 'Port', value: 'USB-C for charging and data, on the right side', status: 'Confirmed', src: 'rev4 CAD; GCT USB4110' },
   { id: 'elec-charger', group: 'Electronics', label: 'Charging', value: 'TI BQ21040 charger with battery-temperature protection', status: 'Confirmed', src: 'rev4 board design (unverified on hardware)' },
   { id: 'elec-buttons', group: 'Electronics', label: 'Buttons', value: 'Four: BACK and PREV on the left, SELECT and NEXT on the right', status: 'Confirmed', src: 'rev4 CAD button layout' },
 
@@ -56,7 +56,7 @@ export const SPECS: Spec[] = [
 
   // Enclosure
   { id: 'enc-skin', group: 'Enclosure', label: 'Rear skin', value: '0.6 mm snap-on rear skin', status: 'Confirmed', src: 'rev4 CAD rear skin' },
-  { id: 'enc-finish', group: 'Enclosure', label: 'Finishes', value: 'Copper and Slate (concept renders)', status: 'Planned', src: 'rev4 CAD renders' },
+  { id: 'enc-finish', group: 'Enclosure', label: 'Finishes', value: 'Copper and Slate (concept finishes, not final)', status: 'Planned', src: 'rev4 CAD renders' },
   { id: 'enc-material', group: 'Enclosure', label: 'Materials', value: 'Prototypes are 3D-printed; production materials undecided', status: 'Confirmed', src: 'Proxima project status' },
 
   // Software
@@ -82,7 +82,7 @@ export const spec = (id: string): Spec => {
 export const CALLOUTS = {
   display: { text: '3.97″ e-paper, 480 × 800', spec: 'display-size', src: 'Good Display GDEY0397T81P datasheet' },
   buttons: { text: 'Four physical buttons. No touchscreen', spec: 'elec-buttons', src: 'rev4 CAD button layout' },
-  ports: { text: 'USB-C and microSD', spec: 'elec-usb', src: 'rev4 board design' },
+  ports: { text: 'USB-C and microSD', spec: 'elec-usb', src: 'rev4 CAD' },
   ring: { text: 'MagSafe-pattern magnetic ring', spec: 'attach-ring', src: 'rev4 CAD ring' },
   thin: { text: 'About 8.5 mm thin (CAD estimate)', spec: 'size-thin', src: 'rev4 CAD report' },
 } as const

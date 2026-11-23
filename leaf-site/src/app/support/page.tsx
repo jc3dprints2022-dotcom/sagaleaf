@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { READER_APP } from '@/lib/paths'
+import { asset, READER_APP } from '@/lib/paths'
 
 export const metadata: Metadata = {
   title: 'Support and FAQ',
@@ -14,6 +14,7 @@ const FAQ = [
   { q: 'Will it work with the SAGA Reader app?', a: 'Sync is planned. The app already has a Devices screen built against a simulated Leaf, but sync has not run on Leaf hardware.' },
   { q: 'How much will it cost?', a: 'There is no price yet. The preorder list takes no payment and reserves nothing.' },
   { q: 'Does it have a front light?', a: 'Board 1 is unlit. A front-lit variant is planned and under evaluation.' },
+  { q: 'Where is the USB-C port?', a: 'On the right side, below the SELECT and NEXT buttons. It is used for charging and data.' },
   { q: 'How do I get books onto it?', a: 'It is designed for EPUB books stored on a microSD card you supply, and for wireless upload over Wi-Fi. This is in development.' },
 ]
 
@@ -34,6 +35,12 @@ export default function Support() {
       </div>
       <h2>Need the app?</h2>
       <p className="text-dim">SAGA Reader is live in your browser today. <a className="underline text-ivory" href={READER_APP}>Open SAGA Reader</a>.</p>
+      <figure className="app-shots app-shots--phone mt-6">
+        <img src={asset('app/real/phone-library.webp')} alt="SAGA Reader on a phone: the library with public-domain book covers" width={390} height={844} loading="lazy" />
+        <img src={asset('app/real/phone-reader-highlighted.webp')} alt="SAGA Reader on a phone: a page with an amber highlight on the opening line" width={390} height={844} loading="lazy" />
+        <img src={asset('app/real/phone-highlights-notes.webp')} alt="SAGA Reader on a phone: the panel listing a highlight and a note" width={390} height={844} loading="lazy" />
+      </figure>
+      <p className="mt-3 text-xs uppercase tracking-[0.12em] text-dim">SAGA Reader app (live) · real screenshots</p>
     </div>
   )
 }

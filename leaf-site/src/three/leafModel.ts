@@ -1,40 +1,29 @@
 /**
- * Procedural concept model of SAGA Leaf, built from src/data/geometry.ts.
+ * The SAGA Leaf model handle shared by every scene.
  *
- * Contract for the future CAD swap (public/models/leaf.glb from the rev 4 STEP):
+ * Two builders return the same `LeafModel`:
+ *  - `buildLeafFromGltf()` (src/three/leafGlb.ts): the rev 4 CAD model, public/models/leaf.glb.
+ *  - `buildLeafModel()` (this file): a procedural stand-in drawn from src/data/geometry.ts and the
+ *    CAD manifest. It is only a fallback for when the GLB cannot be loaded.
+ *
+ * Contract (both builders):
  *  - top-level node names: bezel, panel (with child `screen`), pcb, battery, ring, tray, skin, buttons
  *  - units: millimetres; origin at the bottom-left-rear corner of the core body
- *  - x = width, y = height (0 = bottom/USB edge), z = thickness (0 = rear face, +z = screen side)
- * `buildLeafModel()` returns the same handle shape a GLB loader would, so scenes don't care which.
+ *  - x = width, y = height (0 = bottom end), z = thickness (0 = rear face, +z = screen side)
+ *  - groups and named parts have identity transforms, so exploding a layer is translating its group
  */
 import * as THREE from 'three'
-import { GEO, n, type LayerId, FINISHES } from '@/data/geometry'
+import { GEO, n, type LayerId, FINISHES, SCENE_SCALE } from '@/data/geometry'
+import { BUTTON_IDS, GROUP_BOX, LAYER_IDS, PARTS, PIVOT, SCREEN_CENTER, SCREEN_SIZE, centerOf, sizeOf, type BoxMm } from './parts'
 
 const core = n(GEO.core)
 const skinDims = n(GEO.withSkin)
 const tray = n(GEO.tray)
 const bez = n(GEO.bezel)
 const pan = n(GEO.panel)
-const pcbG = n(GEO.pcb)
-const bat = n(GEO.battery)
 const ring = n(GEO.ring)
 const skin = n(GEO.skin)
-const btn = n(GEO.buttons)
-const esp = n(GEO.esp32)
-
-// ---------- derived layout (mm) ----------
-const inner = { x0: tray.wallLeft, x1: core.w - tray.wallRight, y0: tray.wallEnds, y1: core.h - tray.wallEnds }
-const panelX0 = inner.x0 + (inner.x1 - inner.x0 - pan.w) / 2
-const panelY0 = (core.h - pan.h) / 2
-const activeX0 = panelX0 + (pan.w - pan.activeW) / 2
-const activeY0 = panelY0 + pan.activeFromBottom
-export const LAYOUT = {
-  inner,
-  panelX0, panelY0, activeX0, activeY0,
-  activeCx: activeX0 + pan.activeW / 2,
-  activeCy: activeY0 + pan.activeH / 2,
-  center: new THREE.Vector3(core.w / 2, core.h / 2, core.t / 2),
-}
+const usb = n(GEO.usb)
 
 // ---------- helpers ----------
 function roundedRect(x: number, y: number, w: number, h: number, r: number, path: THREE.Path = new THREE.Shape()) {
@@ -56,9 +45,10 @@ function extrude(shape: THREE.Shape, z0: number, depth: number, bevel = 0, segs 
   g.translate(0, 0, z0 + bevel)
   return g
 }
-function box(w: number, h: number, t: number, x0: number, y0: number, z0: number) {
+function boxOf(b: BoxMm) {
+  const [w, h, t] = sizeOf(b), [cx, cy, cz] = centerOf(b)
   const g = new THREE.BoxGeometry(w, h, t)
-  g.translate(x0 + w / 2, y0 + h / 2, z0 + t / 2)
+  g.translate(cx, cy, cz)
   return g
 }
 function mesh(g: THREE.BufferGeometry, m: THREE.Material, name: string, shadows = true) {
@@ -68,33 +58,44 @@ function mesh(g: THREE.BufferGeometry, m: THREE.Material, name: string, shadows 
   o.receiveShadow = shadows
   return o
 }
-/** Deterministic pseudo-random so the board looks the same on every load. */
-function rng(seed: number) { return () => ((seed = (seed * 16807) % 2147483647) / 2147483647) }
 
-/** Fine horizontal lines: the layer texture of a 3D-printed shell, used as a bump map. */
-function layerLinesTexture() {
+function canvasTexture(w: number, h: number, draw: (ctx: CanvasRenderingContext2D) => void) {
   if (typeof document === 'undefined') return null
   const c = document.createElement('canvas')
-  c.width = 8; c.height = 256
-  const ctx = c.getContext('2d')!
-  for (let y = 0; y < 256; y++) {
-    const v = 128 + Math.round(Math.sin(y * Math.PI * 0.5) * 40 + (y % 4 === 0 ? 20 : 0))
-    ctx.fillStyle = `rgb(${v},${v},${v})`
-    ctx.fillRect(0, y, 8, 1)
-  }
+  c.width = w; c.height = h
+  draw(c.getContext('2d')!)
   const t = new THREE.CanvasTexture(c)
   t.wrapS = t.wrapT = THREE.RepeatWrapping
-  t.repeat.set(1, 12)
   return t
 }
+/** Fine horizontal lines: the layer texture of a 3D-printed shell, used as a bump map. */
+function layerLinesTexture() {
+  return canvasTexture(8, 256, ctx => {
+    for (let y = 0; y < 256; y++) {
+      const v = 128 + Math.round(Math.sin(y * Math.PI * 0.5) * 40 + (y % 4 === 0 ? 20 : 0))
+      ctx.fillStyle = `rgb(${v},${v},${v})`
+      ctx.fillRect(0, y, 8, 1)
+    }
+  })
+}
+/** Pouch-cell surface: a soft fold near each long edge and a centre seam. Material detail only. */
+function pouchTexture() {
+  return canvasTexture(128, 128, ctx => {
+    ctx.fillStyle = '#808080'; ctx.fillRect(0, 0, 128, 128)
+    const line = (x: number, w: number, c: string) => { ctx.fillStyle = c; ctx.fillRect(x, 0, w, 128) }
+    line(9, 2, '#5a5a5a'); line(11, 2, '#9c9c9c')
+    line(115, 2, '#9c9c9c'); line(117, 2, '#5a5a5a')
+    ctx.fillStyle = '#6c6c6c'; ctx.fillRect(0, 112, 128, 1); ctx.fillStyle = '#939393'; ctx.fillRect(0, 113, 128, 1)
+  })
+}
 
+/** Material slots. The names match the material names inside leaf.glb. */
 export interface LeafMaterials {
   shell: THREE.MeshStandardMaterial
   bezel: THREE.MeshStandardMaterial
   paper: THREE.MeshStandardMaterial
   screen: THREE.MeshStandardMaterial
   pcb: THREE.MeshStandardMaterial
-  gold: THREE.MeshStandardMaterial
   metal: THREE.MeshStandardMaterial
   chip: THREE.MeshStandardMaterial
   pouch: THREE.MeshStandardMaterial
@@ -102,20 +103,53 @@ export interface LeafMaterials {
   skin: THREE.MeshPhysicalMaterial
   button: THREE.MeshStandardMaterial
   flex: THREE.MeshStandardMaterial
-  port: THREE.MeshStandardMaterial
+}
+export const MATERIAL_KEYS = ['shell', 'bezel', 'paper', 'screen', 'pcb', 'metal', 'chip', 'pouch', 'steel', 'skin', 'button', 'flex'] as const
+
+export interface LeafModelOptions { screenTexture?: THREE.Texture | null; lowDetail?: boolean; skinColor?: string }
+
+/**
+ * Tuned materials, shared by the CAD model and the fallback: matte printed shell with a faint
+ * layer texture, diffuse paper-white e-paper (no glow), dark steel ring, satin skin with a thin
+ * clearcoat, and clean engineering blocks for the board parts.
+ */
+export function createLeafMaterials(opts: LeafModelOptions = {}) {
+  const bump = layerLinesTexture()
+  const pouchBump = pouchTexture()
+  const M: LeafMaterials = {
+    shell: new THREE.MeshStandardMaterial({ color: '#2d2e34', roughness: 0.84, metalness: 0, bumpMap: bump, bumpScale: 0.55, envMapIntensity: 1 }),
+    bezel: new THREE.MeshStandardMaterial({ color: '#2f3036', roughness: 0.82, metalness: 0, bumpMap: bump, bumpScale: 0.35, envMapIntensity: 1 }),
+    paper: new THREE.MeshStandardMaterial({ color: '#c9c9bf', roughness: 1, metalness: 0, envMapIntensity: 0.35 }),
+    screen: new THREE.MeshStandardMaterial({ color: '#DBDBD1', roughness: 1, metalness: 0, envMapIntensity: 0.3, map: opts.screenTexture ?? null }),
+    pcb: new THREE.MeshStandardMaterial({ color: '#15382a', roughness: 0.5, metalness: 0.05 }),
+    metal: new THREE.MeshStandardMaterial({ color: '#b9bcc0', roughness: 0.38, metalness: 0.9 }),
+    chip: new THREE.MeshStandardMaterial({ color: '#17171a', roughness: 0.55, metalness: 0.1 }),
+    pouch: new THREE.MeshStandardMaterial({ color: '#b4b7bc', roughness: 0.46, metalness: 0.7, bumpMap: pouchBump, bumpScale: 0.8 }),
+    steel: new THREE.MeshStandardMaterial({ color: '#2c2e33', roughness: 0.42, metalness: 0.9 }),
+    skin: new THREE.MeshPhysicalMaterial({ color: opts.skinColor ?? FINISHES.copper.color, roughness: 0.5, metalness: 0.2, clearcoat: 0.35, clearcoatRoughness: 0.42, bumpMap: bump, bumpScale: 0.18 }),
+    button: new THREE.MeshStandardMaterial({ color: '#33343a', roughness: 0.72, metalness: 0.03 }),
+    flex: new THREE.MeshStandardMaterial({ color: '#b5762c', roughness: 0.5, metalness: 0.1 }),
+  }
+  for (const k of MATERIAL_KEYS) M[k].name = k
+  return { M, dispose() { Object.values(M).forEach(m => m.dispose()); bump?.dispose(); pouchBump?.dispose() } }
 }
 
 export interface LeafModel {
+  /** 'cad' = public/models/leaf.glb; 'procedural' = the fallback drawn in code. */
+  kind: 'cad' | 'procedural'
   /** Pivot at the device centre, scaled to scene units. Rotate/position this. */
   root: THREE.Group
   /** The millimetre-space model inside the pivot. */
   model: THREE.Group
   nodes: Record<LayerId, THREE.Group>
+  /** The four button caps (btn-back, btn-prev, btn-select, btn-next). */
+  buttons: THREE.Object3D[]
+  /** The e-paper active area: a UV quad that carries the screen texture. */
   screen: THREE.Mesh
   materials: LeafMaterials
-  /** 0 = assembled, 1 = fully exploded, per layer. */
+  /** 0 = assembled (every group at its CAD position), 1 = fully exploded, per layer. */
   applyExplode(e: Partial<Record<LayerId, number>>): void
-  /** 0 = clipped on, 1 = detached behind the device (hinges on the USB end, as the real skin does). */
+  /** 0 = clipped on, 1 = detached behind the device (pulled straight off, then hinged on the bottom edge). */
   setSkinDetach(t: number): void
   setSkinColor(hex: string): void
   /** 0 = solid, 1 = rear shell and skin see-through (to show the ring and battery). */
@@ -125,210 +159,61 @@ export interface LeafModel {
 
 /** Explode vectors in mm (front layers travel furthest toward the viewer). */
 export const EXPLODE: Record<LayerId, [number, number, number]> = {
-  bezel: [0, 6, 78],
-  panel: [0, 3, 58],
-  pcb: [0, 0, 38],
-  battery: [0, -4, 20],
-  ring: [0, 4, 8],
+  bezel: [0, 5, 82],
+  panel: [0, 2.5, 62],
+  pcb: [0, 0, 44],
+  battery: [0, -3, 22],
+  ring: [0, 3, 9],
   tray: [0, 0, 0],
   skin: [0, -2, -24],
-  buttons: [0, 0, 0], // buttons move sideways, handled below
+  buttons: [0, 0, 0], // the caps slide sideways out of their slots, handled in applyExplode
 }
+/** How far each button cap slides out of its slot when exploded (mm). */
+export const BUTTON_OUT = 12
 
-export function buildLeafModel(opts: { screenTexture?: THREE.Texture | null; lowDetail?: boolean; skinColor?: string } = {}): LeafModel {
-  const segs = opts.lowDetail ? 4 : 8
-  const bump = layerLinesTexture()
-  const M: LeafMaterials = {
-    shell: new THREE.MeshStandardMaterial({ color: '#28292E', roughness: 0.82, metalness: 0.02, bumpMap: bump, bumpScale: 0.6 }),
-    bezel: new THREE.MeshStandardMaterial({ color: '#2a2b30', roughness: 0.78, metalness: 0.02, bumpMap: bump, bumpScale: 0.4 }),
-    paper: new THREE.MeshStandardMaterial({ color: '#cfcfc4', roughness: 0.95, metalness: 0 }),
-    screen: new THREE.MeshStandardMaterial({ color: '#DBDBD1', roughness: 0.92, metalness: 0, map: opts.screenTexture ?? null }),
-    pcb: new THREE.MeshStandardMaterial({ color: '#173a2a', roughness: 0.55, metalness: 0.05 }),
-    gold: new THREE.MeshStandardMaterial({ color: '#c9a24a', roughness: 0.3, metalness: 1 }),
-    metal: new THREE.MeshStandardMaterial({ color: '#b8bbbf', roughness: 0.35, metalness: 0.9 }),
-    chip: new THREE.MeshStandardMaterial({ color: '#141416', roughness: 0.5, metalness: 0.1 }),
-    pouch: new THREE.MeshStandardMaterial({ color: '#b9bcc1', roughness: 0.42, metalness: 0.7 }),
-    steel: new THREE.MeshStandardMaterial({ color: '#3a3c40', roughness: 0.45, metalness: 0.85 }),
-    skin: new THREE.MeshPhysicalMaterial({ color: opts.skinColor ?? FINISHES.copper.color, roughness: 0.55, metalness: 0.15, clearcoat: 0.25, clearcoatRoughness: 0.6, bumpMap: bump, bumpScale: 0.3 }),
-    button: new THREE.MeshStandardMaterial({ color: '#34353b', roughness: 0.7, metalness: 0.05 }),
-    flex: new THREE.MeshStandardMaterial({ color: '#b5762c', roughness: 0.5, metalness: 0.1 }),
-    port: new THREE.MeshStandardMaterial({ color: '#08080a', roughness: 0.9 }),
-  }
-  const model = new THREE.Group(); model.name = 'leaf'
-  const group = (name: LayerId) => { const g = new THREE.Group(); g.name = name; model.add(g); return g }
-  const nodes = {} as Record<LayerId, THREE.Group>
-  for (const id of ['bezel', 'panel', 'pcb', 'battery', 'ring', 'tray', 'skin', 'buttons'] as LayerId[]) nodes[id] = group(id)
+const smooth = (a: number, b: number, t: number) => { const x = THREE.MathUtils.clamp((t - a) / (b - a), 0, 1); return x * x * (3 - 2 * x) }
 
-  // ---- tray (rear shell): floor + walls ----
-  const R = core.cornerR
-  {
-    const floor = roundedRect(0, 0, core.w, core.h, R) as THREE.Shape
-    nodes.tray.add(mesh(extrude(floor, 0, tray.floor, 0, segs), M.shell, 'tray-floor'))
-    const wall = roundedRect(0, 0, core.w, core.h, R) as THREE.Shape
-    const innerR = Math.max(0.6, R - tray.wallRight)
-    wall.holes.push(roundedRect(inner.x0, inner.y0, inner.x1 - inner.x0, inner.y1 - inner.y0, innerR, new THREE.Path()))
-    nodes.tray.add(mesh(extrude(wall, tray.floor, tray.wallTopZ - tray.floor, 0.25, segs), M.shell, 'tray-walls'))
-    // USB-C opening, drawn as a dark slot on the bottom face
-    const slot = new THREE.Mesh(new THREE.ShapeGeometry(roundedRect(-4.6, -1.65, 9.2, 3.3, 1.6) as THREE.Shape, segs), M.port)
-    slot.rotation.x = Math.PI / 2
-    slot.position.set(53, -0.02, 3.9)
-    slot.name = 'usb-opening'
-    nodes.tray.add(slot)
-  }
-
-  // ---- bezel: front frame with the window, rebated over the panel ----
-  {
-    const s = roundedRect(0, 0, core.w, core.h, R) as THREE.Shape
-    const wx = LAYOUT.activeCx - bez.windowW / 2
-    const wy = LAYOUT.activeCy - bez.windowH / 2
-    s.holes.push(roundedRect(wx, wy, bez.windowW, bez.windowH, 0.4, new THREE.Path()))
-    nodes.bezel.add(mesh(extrude(s, tray.wallTopZ, bez.topZ - tray.wallTopZ, 0.2, segs), M.bezel, 'bezel-frame'))
-    // rebate lip that drops over the panel edge
-    const lip = roundedRect(panelX0 - 0.4, panelY0 - 0.4, pan.w + 0.8, pan.h + 0.8, 1.2) as THREE.Shape
-    lip.holes.push(roundedRect(panelX0 + 0.6, panelY0 + 0.6, pan.w - 1.2, pan.h - 1.2, 0.6, new THREE.Path()))
-    nodes.bezel.add(mesh(extrude(lip, pan.z1, tray.wallTopZ - pan.z1), M.bezel, 'bezel-rebate'))
-  }
-
-  // ---- panel: e-paper glass + active area + flex tail ----
-  let screen: THREE.Mesh
-  {
-    nodes.panel.add(mesh(box(pan.w, pan.h, pan.t, panelX0, panelY0, pan.z0), M.paper, 'panel-glass'))
-    const sg = new THREE.PlaneGeometry(pan.activeW, pan.activeH)
-    screen = new THREE.Mesh(sg, M.screen)
-    screen.name = 'screen'
-    screen.position.set(LAYOUT.activeCx, LAYOUT.activeCy, pan.z1 + 0.02)
-    nodes.panel.add(screen)
-    // driver strip below the active area, then the flex tail folding back to the board
-    nodes.panel.add(mesh(box(16, 2.2, 0.3, LAYOUT.activeCx - 8, panelY0 + 2.5, pan.z1), M.chip, 'panel-driver'))
-    nodes.panel.add(mesh(box(14, 0.15, pan.z1 - pcbG.z0, LAYOUT.activeCx + 6, panelY0 - 0.2, pcbG.z0), M.flex, 'panel-flex'))
-  }
-
-  // ---- pcb: L-shaped board (top block + right strip down to the USB end), parts on the rear face ----
-  {
-    const xL = inner.x0 + 0.3, xR = inner.x1 - 0.3, yT = inner.y1 - 0.3, yB = inner.y0 + 0.3
-    const s = new THREE.Shape()
-    s.moveTo(xL, pcbG.topBlockY0)
-    s.lineTo(pcbG.stripX0, pcbG.topBlockY0)
-    s.lineTo(pcbG.stripX0, yB)
-    s.lineTo(xR, yB)
-    s.lineTo(xR, yT)
-    // antenna keep-out notch under the module's antenna end, near the top edge
-    s.lineTo(xL + 18, yT)
-    s.lineTo(xL + 18, yT - 4.2)
-    s.lineTo(xL + 3, yT - 4.2)
-    s.lineTo(xL + 3, yT)
-    s.lineTo(xL, yT)
-    s.lineTo(xL, pcbG.topBlockY0)
-    nodes.pcb.add(mesh(extrude(s, pcbG.z0, pcbG.t), M.pcb, 'pcb-board'))
-    const under = pcbG.z0 // parts hang below the board (rear face)
-    // ESP32-C3 module: shield can + antenna end overhanging the notch
-    const mx = xL + 3.2, my = yT - esp.h + 0.2
-    nodes.pcb.add(mesh(box(esp.w, esp.h - 4, esp.t - 0.6, mx, my, under - esp.t + 0.6), M.metal, 'esp32-shield'))
-    nodes.pcb.add(mesh(box(esp.w, esp.h, 0.8, mx, my, under - 0.8), M.pcb, 'esp32-module'))
-    // microSD socket (Molex 104031 class)
-    nodes.pcb.add(mesh(box(11.4, 14.6, 1.5, pcbG.stripX0 + 0.6, 16, under - 1.5), M.metal, 'microsd'))
-    // USB-C receptacle at the bottom edge
-    nodes.pcb.add(mesh(box(8.94, 7.35, 3.2, 53 - 4.47, 0.4, under - 3.2), M.metal, 'usb-c'))
-    // display connector
-    nodes.pcb.add(mesh(box(18, 4, 1.2, 30, pcbG.topBlockY0 + 1, under - 1.2), M.chip, 'display-connector'))
-    // charger IC, passives and gold pads (front and rear)
-    nodes.pcb.add(mesh(box(2, 2, 0.8, 50, 40, under - 0.8), M.chip, 'bq21040'))
-    const rand = rng(7)
-    const pads = new THREE.Group(); pads.name = 'pads'
-    for (let i = 0; i < (opts.lowDetail ? 14 : 34); i++) {
-      const front = i % 2 === 0
-      const x = xL + 4 + rand() * (xR - xL - 8), y = pcbG.topBlockY0 + 2 + rand() * (yT - pcbG.topBlockY0 - 8)
-      const w = 0.8 + rand() * 1.4, h = 0.6 + rand() * 0.9
-      pads.add(mesh(box(w, h, 0.05, x, y, front ? pcbG.z1 : under - 0.05), M.gold, 'pad', false))
-    }
-    for (let i = 0; i < (opts.lowDetail ? 6 : 16); i++) {
-      const x = xL + 20 + rand() * (xR - xL - 26), y = pcbG.topBlockY0 + 8 + rand() * 30
-      pads.add(mesh(box(1 + rand(), 0.5 + rand() * 0.6, 0.45, x, y, under - 0.45), M.chip, 'passive', false))
-    }
-    nodes.pcb.add(pads)
-  }
-
-  // ---- battery pouch (selected cell) ----
-  {
-    const s = roundedRect(bat.x0, bat.y0, bat.w, bat.h, 1.2) as THREE.Shape
-    nodes.battery.add(mesh(extrude(s, tray.floor, bat.t, 0.9, segs), M.pouch, 'battery-pouch'))
-    nodes.battery.add(mesh(box(26, 2.2, 1, bat.x0 + 8, bat.y0 + bat.h, tray.floor + 2), M.pcb, 'battery-protection'))
-  }
-
-  // ---- magnet ring ----
-  {
-    const cx = (inner.x0 + inner.x1) / 2
-    const s = new THREE.Shape(); s.absarc(cx, ring.cy, ring.od / 2, 0, Math.PI * 2, false)
-    const h = new THREE.Path(); h.absarc(cx, ring.cy, ring.id / 2, 0, Math.PI * 2, true)
-    s.holes.push(h)
-    nodes.ring.add(mesh(extrude(s, tray.floor, ring.t, 0, opts.lowDetail ? 24 : 48), M.steel, 'magnet-ring'))
-  }
-
-  // ---- rear skin: floor + U-shaped walls (open at the top end) ----
-  {
-    const ox = (skinDims.w - core.w) / 2, oy = (skinDims.h - core.h) / 2
-    const Ro = R + ox
-    const floor = roundedRect(-ox, -oy, skinDims.w, skinDims.h, Ro) as THREE.Shape
-    nodes.skin.add(mesh(extrude(floor, -skin.t, skin.t, 0.15, segs), M.skin, 'skin-floor'))
-    const u = new THREE.Shape()
-    const x0 = -ox, x1 = core.w + ox, y0 = -oy, top = core.h - 6
-    u.moveTo(x0, top)
-    u.lineTo(x0, y0 + Ro); u.absarc(x0 + Ro, y0 + Ro, Ro, Math.PI, Math.PI * 1.5, false)
-    u.lineTo(x1 - Ro, y0); u.absarc(x1 - Ro, y0 + Ro, Ro, -Math.PI / 2, 0, false)
-    u.lineTo(x1, top); u.lineTo(core.w, top)
-    u.lineTo(core.w, R); u.absarc(core.w - R, R, R, 0, -Math.PI / 2, true)
-    u.lineTo(R, 0); u.absarc(R, R, R, -Math.PI / 2, -Math.PI, true)
-    u.lineTo(0, top); u.lineTo(x0, top)
-    nodes.skin.add(mesh(extrude(u, 0, skin.wallH - skin.t, 0, segs), M.skin, 'skin-walls'))
-  }
-
-  // ---- buttons: BACK, PREV (left) · SELECT, NEXT (right) ----
-  {
-    const topInner = inner.y1
-    const zc = 4.6, ht = 2.0
-    const mk = (name: string, left: boolean, fromTop: number) => {
-      const y = topInner - fromTop - btn.capLen / 2
-      const x = left ? -btn.capProud : core.w
-      const m = mesh(extrude(roundedRect(x, y, btn.capProud + 0.3, btn.capLen, 0.35) as THREE.Shape, zc - ht / 2, ht, 0.12), M.button, name)
-      if (!left) m.position.x = -0.3
-      m.userData.side = left ? -1 : 1
-      nodes.buttons.add(m)
-    }
-    mk('btn-back', true, btn.upperFromTopInner)
-    mk('btn-prev', true, btn.lowerFromTopInner)
-    mk('btn-select', false, btn.upperFromTopInner)
-    mk('btn-next', false, btn.lowerFromTopInner)
-  }
-
-  // pivot at the device centre, scaled to scene units
+/** Wraps a millimetre-space model in the shared handle: pivot, explode, skin detach, x-ray. */
+export function makeLeafHandle(p: {
+  kind: LeafModel['kind']; model: THREE.Group; nodes: Record<LayerId, THREE.Group>; buttons: THREE.Object3D[]
+  screen: THREE.Mesh; materials: LeafMaterials; dispose: () => void
+}): LeafModel {
+  const { model, nodes, buttons, materials: M } = p
   const root = new THREE.Group(); root.name = 'leaf-root'
-  model.position.copy(LAYOUT.center).multiplyScalar(-1)
-  const scaler = new THREE.Group(); scaler.scale.setScalar(0.01); scaler.add(model)
+  model.position.set(-PIVOT[0], -PIVOT[1], -PIVOT[2])
+  const scaler = new THREE.Group(); scaler.name = 'leaf-scale'; scaler.scale.setScalar(SCENE_SCALE); scaler.add(model)
   root.add(scaler)
 
-  const skinBase = { rx: 0, z: 0, y: 0 }
-  let skinDetach = 0
-  let skinExplode = 0
+  const side = (b: THREE.Object3D) => (b.name === 'btn-back' || b.name === 'btn-prev' ? -1 : 1)
+  // The skin is a shallow cup: its walls wrap the lowest 2.9 mm of the shell. To come off without
+  // passing through the shell it first pulls straight back past the wall height, and only then
+  // hinges about its bottom edge and drifts away.
+  const hingeY = GROUP_BOX.skin.min[1], floorZ = GROUP_BOX.skin.min[2]
+  const wallH = GROUP_BOX.skin.max[2] - GROUP_BOX.skin.min[2]
+  let skinDetach = 0, skinExplode = 0
   const placeSkin = () => {
-    // Detach: hinge about the USB (bottom) end, lift the open top end away, then drift back.
     const t = skinDetach
-    const hinge = Math.min(1, t * 1.6)
-    const drift = Math.max(0, t - 0.45) / 0.55
-    nodes.skin.position.set(0, skinBase.y + EXPLODE.skin[1] * skinExplode - drift * 6, EXPLODE.skin[2] * skinExplode - hinge * 3 - drift * 26)
-    nodes.skin.rotation.x = hinge * 0.32 * (1 - drift * 0.6)
+    const pull = smooth(0, 0.4, t) * (wallH + 2.5)
+    const angle = -0.42 * smooth(0.3, 1, t)
+    const drift = smooth(0.4, 1, t)
+    const pz = floorZ - pull // hinge line: the skin's bottom edge, after the straight pull
+    const c = Math.cos(angle), s = Math.sin(angle)
+    // rotate about the x axis through (hingeY, floorZ) in skin space, then put that line at (hingeY, pz)
+    nodes.skin.rotation.x = angle
+    nodes.skin.position.set(
+      0,
+      hingeY - (hingeY * c - floorZ * s) + EXPLODE.skin[1] * skinExplode - drift * 4,
+      pz - (hingeY * s + floorZ * c) + EXPLODE.skin[2] * skinExplode - drift * 20,
+    )
   }
 
   return {
-    root, model, nodes, screen, materials: M,
+    kind: p.kind, root, model, nodes, buttons, screen: p.screen, materials: M,
     applyExplode(e) {
       for (const id of Object.keys(e) as LayerId[]) {
         const t = e[id] ?? 0
         if (id === 'skin') { skinExplode = t; placeSkin(); continue }
-        if (id === 'buttons') {
-          for (const b of nodes.buttons.children) b.position.x = (b.userData.side === 1 ? -0.3 : 0) + b.userData.side * 14 * t
-          nodes.buttons.position.z = 30 * t
-          continue
-        }
+        if (id === 'buttons') { for (const b of buttons) b.position.x = side(b) * BUTTON_OUT * t; continue }
         const [x, y, z] = EXPLODE[id]
         nodes[id].position.set(x * t, y * t, z * t)
       }
@@ -339,14 +224,87 @@ export function buildLeafModel(opts: { screenTexture?: THREE.Texture | null; low
       for (const m of [M.shell, M.skin]) {
         const tr = t > 0.001
         if (m.transparent !== tr) { m.transparent = tr; m.needsUpdate = true }
-        m.opacity = 1 - 0.78 * t
+        m.opacity = 1 - 0.8 * t
         m.depthWrite = t < 0.5
       }
     },
+    dispose: p.dispose,
+  }
+}
+
+/**
+ * Procedural fallback. Enclosure shapes come from src/data/geometry.ts; the board parts, battery,
+ * ring and button caps are boxes placed at their CAD bounding boxes from the manifest.
+ */
+export function buildLeafModel(opts: LeafModelOptions = {}): LeafModel {
+  const segs = opts.lowDetail ? 4 : 8
+  const mats = createLeafMaterials(opts)
+  const M = mats.M
+  const port = new THREE.MeshStandardMaterial({ color: '#08080a', roughness: 0.9 })
+  const model = new THREE.Group(); model.name = 'leaf'
+  const nodes = {} as Record<LayerId, THREE.Group>
+  for (const id of LAYER_IDS) { const g = new THREE.Group(); g.name = id; model.add(g); nodes[id] = g }
+  const inner = { x0: tray.wallLeft, x1: core.w - tray.wallRight, y0: tray.wallEnds, y1: core.h - tray.wallEnds }
+
+  // ---- tray (rear shell): floor + walls ----
+  const R = core.cornerR
+  {
+    const floor = roundedRect(0, 0, core.w, core.h, R) as THREE.Shape
+    nodes.tray.add(mesh(extrude(floor, 0, tray.floor, 0, segs), M.shell, 'tray-floor'))
+    const wall = roundedRect(0, 0, core.w, core.h, R) as THREE.Shape
+    const innerR = Math.max(0.6, R - tray.wallRight)
+    wall.holes.push(roundedRect(inner.x0, inner.y0, inner.x1 - inner.x0, inner.y1 - inner.y0, innerR, new THREE.Path()))
+    nodes.tray.add(mesh(extrude(wall, tray.floor, GROUP_BOX.tray.max[2] - tray.floor, 0.25, segs), M.shell, 'tray-walls'))
+    // USB-C mouth, drawn as a dark slot on the right side wall
+    const len = usb.y1 - usb.y0 - 0.8, h = usb.z1 - usb.z0 - 0.4
+    const slot = new THREE.Mesh(new THREE.ShapeGeometry(roundedRect(-h / 2, -len / 2, h, len, h / 2) as THREE.Shape, segs), port)
+    slot.rotation.y = Math.PI / 2
+    slot.position.set(core.w + 0.02, (usb.y0 + usb.y1) / 2, (usb.z0 + usb.z1) / 2)
+    slot.name = 'usb-opening'
+    nodes.tray.add(slot)
+  }
+
+  // ---- bezel: front frame with the window ----
+  {
+    const s = roundedRect(0, 0, core.w, core.h, R) as THREE.Shape
+    s.holes.push(roundedRect(SCREEN_CENTER[0] - bez.windowW / 2, SCREEN_CENTER[1] - bez.windowH / 2, bez.windowW, bez.windowH, 0.4, new THREE.Path()))
+    nodes.bezel.add(mesh(extrude(s, GROUP_BOX.tray.max[2], bez.topZ - GROUP_BOX.tray.max[2], 0.2, segs), M.bezel, 'bezel-frame'))
+  }
+
+  // ---- panel: e-paper glass + active area ----
+  nodes.panel.add(mesh(boxOf(PARTS['panel-glass'].box), M.paper, 'panel-glass'))
+  const screen = new THREE.Mesh(new THREE.PlaneGeometry(SCREEN_SIZE[0], SCREEN_SIZE[1]), M.screen)
+  screen.name = 'screen'
+  screen.position.set(SCREEN_CENTER[0], SCREEN_CENTER[1], pan.z1 + 0.02)
+  nodes.panel.add(screen)
+
+  // ---- board parts, battery, ring, button caps: boxes at their CAD bounding boxes ----
+  for (const id of ['pcb', 'battery'] as const)
+    for (const [name, part] of Object.entries(PARTS))
+      if (part.group === id) nodes[id].add(mesh(boxOf(part.box), M[part.material as keyof LeafMaterials] ?? M.chip, name))
+  {
+    const s = new THREE.Shape(); s.absarc(ring.cx, ring.cy, ring.od / 2, 0, Math.PI * 2, false)
+    const h = new THREE.Path(); h.absarc(ring.cx, ring.cy, ring.id / 2, 0, Math.PI * 2, true)
+    s.holes.push(h)
+    nodes.ring.add(mesh(extrude(s, ring.z0, ring.t, 0, opts.lowDetail ? 24 : 48), M.steel, 'magnet-ring'))
+  }
+  const buttons = BUTTON_IDS.map(name => { const b = mesh(boxOf(PARTS[name].box), M.button, name); nodes.buttons.add(b); return b })
+
+  // ---- rear skin: floor + walls ----
+  {
+    const ox = (skinDims.w - core.w) / 2, oy = (skinDims.h - core.h) / 2
+    const Ro = R + ox
+    nodes.skin.add(mesh(extrude(roundedRect(-ox, -oy, skinDims.w, skinDims.h, Ro) as THREE.Shape, -skin.t, skin.t, 0.15, segs), M.skin, 'skin-floor'))
+    const wall = roundedRect(-ox, -oy, skinDims.w, skinDims.h, Ro) as THREE.Shape
+    wall.holes.push(roundedRect(0, 0, core.w, core.h, R, new THREE.Path()))
+    nodes.skin.add(mesh(extrude(wall, 0, skin.wallH, 0, segs), M.skin, 'skin-walls'))
+  }
+
+  return makeLeafHandle({
+    kind: 'procedural', model, nodes, buttons, screen, materials: M,
     dispose() {
       model.traverse(o => { if ((o as THREE.Mesh).isMesh) (o as THREE.Mesh).geometry.dispose() })
-      Object.values(M).forEach(m => m.dispose())
-      bump?.dispose()
+      mats.dispose(); port.dispose()
     },
-  }
+  })
 }

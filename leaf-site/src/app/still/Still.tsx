@@ -14,7 +14,7 @@ export default function Still() {
   useEffect(() => {
     const p = new URLSearchParams(location.search)
     const name = p.get('v') ?? 'hero'
-    state.current = presetState(name)
+    state.current = presetState(name, innerWidth / innerHeight > 1.05)
     if (p.get('skin') === 'slate') state.current.skin = '#45484E'
     setV(name)
   }, [])
@@ -32,7 +32,7 @@ export default function Still() {
       {v === 'screen'
         ? <canvas ref={cv} width={SCREEN_PX.w * 2} height={SCREEN_PX.h * 2} style={{ width: SCREEN_PX.w, height: SCREEN_PX.h, filter: 'none' }} />
         : <StoryCanvas state={state as React.MutableRefObject<StoryState>} lowPower={false} active preserve shift={v === 'hero'}
-            onReady={() => setTimeout(() => { document.body.dataset.ready = '1' }, 1500)} />}
+            onReady={kind => document.fonts.ready.then(() => setTimeout(() => { document.body.dataset.model = kind; document.body.dataset.ready = '1' }, 1200))} />}
     </div>
   )
 }

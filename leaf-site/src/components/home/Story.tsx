@@ -2,19 +2,21 @@ import Link from 'next/link'
 import { LAYERS } from '@/data/geometry'
 import { CALLOUTS, spec } from '@/data/specs'
 import { asset, READER_APP } from '@/lib/paths'
+import { PHONE_SCREENS } from '@/three/timeline'
 import { StatusTag } from '@/components/StatusTag'
 import StoryController from './StoryController'
 
 /**
  * The homepage story. All copy is real HTML (crawlable, readable without WebGL). By default it
- * lays out as stacked sections with static renders: that is the reduced-motion and no-WebGL path.
+ * lays out as stacked sections with static renders (made from the rev 4 CAD model) and real app
+ * screenshots: that is the reduced-motion and no-WebGL path.
  * When motion and WebGL are available, an inline script marks <html class="cinematic"> before
  * first paint and StoryController turns the same markup into one pinned, scrubbed camera shot.
  */
 const HARDWARE = [
   { key: 'display', body: 'Monochrome and reflective, with no glow of its own. Board 1 is unlit; a front light is planned and under evaluation.', specs: ['display-size', 'display-res', 'display-frontlight'] },
   { key: 'buttons', body: 'BACK and PREV on the left edge, SELECT and NEXT on the right, near the top where your thumbs rest.', specs: ['elec-buttons', 'display-touch'] },
-  { key: 'ports', body: 'USB-C on the bottom edge for charging and data. Your books live on a microSD card you supply.', specs: ['elec-usb', 'elec-sd'] },
+  { key: 'ports', body: 'USB-C on the right side for charging and data. Your books live on a microSD card you supply.', specs: ['elec-usb', 'elec-sd'] },
   { key: 'ring', body: 'A steel and magnet ring inside the rear lets it snap to the back of a phone or a magnetic mount.', specs: ['attach-ring'] },
   { key: 'thin', body: '64.19 × 102.02 × 8.47 mm with the rear skin, about 62 g. Estimated from the CAD model; nothing has been weighed yet.', specs: ['size-skin', 'size-mass'] },
 ] as const
@@ -28,20 +30,32 @@ export default function Story() {
           __html: `(function(){try{var r=matchMedia('(prefers-reduced-motion: reduce)').matches;var c=document.createElement('canvas');var g=c.getContext('webgl2')||c.getContext('webgl');if(!r&&g&&!/[?&]static\\b/.test(location.search))document.documentElement.classList.add('cinematic')}catch(e){}})()`,
         }}
       />
-      <section id="story" className="story" aria-label="SAGA Leaf, scene by scene">
+      <section id="story" className="story" aria-label="SAGA Leaf, scene by scene" data-settled="1" data-progress="0.0000">
         <div className="stage">
           <div className="stage-visual" aria-hidden="true">
-            <img className="stage-poster" src={asset('renders/leaf-hero.webp')} alt="" width={1600} height={1000} fetchPriority="high" />
-            <div id="stage-canvas" className="absolute inset-0" />
+            {/* Poster: the hero frame, rendered ahead of time from the same camera. It stays up until
+                the CAD model and its textures have drawn their first frame, then the canvas fades in over it. */}
+            <picture>
+              <source media="(max-aspect-ratio: 105/100)" srcSet={asset('renders/leaf-hero-phone.webp')} width={780} height={1688} />
+              <img className="stage-poster" src={asset('renders/leaf-hero.webp')} alt="" width={1600} height={1000} fetchPriority="high" />
+            </picture>
+            <div id="stage-canvas" className="stage-canvas" />
             <div className="stage-vignette" />
           </div>
-          <p className="concept-badge" data-badge="render">Concept render</p>
+          <ol className="layer-chips" aria-hidden="true">
+            {LAYERS.map((l, i) => <li key={l.id} data-chip={l.id}><span>{String(i + 1).padStart(2, '0')}</span></li>)}
+          </ol>
+          <p className="concept-badge" data-badge="render">
+            <span className="badge-cad">Rendered from rev 4 CAD</span>
+            {/* shown instead only if the CAD file could not be loaded and the stand-in model is on screen */}
+            <span className="badge-fallback">Concept model</span>
+          </p>
           <p className="concept-badge concept-badge--screen" data-badge="screen">Concept screen: device UI in development</p>
 
           <div className="beats">
             <article className="beat beat--hero" data-beat="hero">
               <p className="eyebrow">Proxima · in design</p>
-              <h1 className="font-display text-6xl sm:text-8xl font-light tracking-tight text-ivory">SAGA Leaf</h1>
+              <h1 className="hero-title">SAGA Leaf</h1>
               <p className="lede">A small e-paper reader, made for one thing: the page in front of you.</p>
               <p className="fine">Not built yet. It isn’t ready, and we won’t give a date until it is.</p>
               <div className="mt-8 flex flex-wrap gap-3">
@@ -49,8 +63,8 @@ export default function Story() {
                 <Link className="btn btn--ghost" href="/shop/">Shop</Link>
               </div>
               <figure className="static-only">
-                <img src={asset('renders/leaf-assembled.webp')} alt="Concept render of SAGA Leaf, three-quarter view, with a copper rear skin" width={1600} height={1000} loading="lazy" />
-                <figcaption>Concept render</figcaption>
+                <img src={asset('renders/leaf-assembled.webp')} alt="SAGA Leaf rendered from the rev 4 CAD model, three-quarter view, with a copper rear skin" width={1600} height={1000} loading="lazy" />
+                <figcaption>Rendered from rev 4 CAD · concept finish</figcaption>
               </figure>
             </article>
 
@@ -68,8 +82,8 @@ export default function Story() {
                 ))}
               </ol>
               <figure className="static-only">
-                <img src={asset('renders/leaf-exploded.webp')} alt="Concept render of SAGA Leaf exploded into its eight layers" width={1600} height={1000} loading="lazy" />
-                <figcaption>Concept render · layer positions estimated from rev 4 CAD</figcaption>
+                <img src={asset('renders/leaf-exploded.webp')} alt="SAGA Leaf exploded into its eight layers, rendered from the rev 4 CAD model" width={1600} height={1000} loading="lazy" />
+                <figcaption>Rendered from rev 4 CAD · layers spread apart for clarity</figcaption>
               </figure>
             </article>
 
@@ -86,12 +100,12 @@ export default function Story() {
                 ))}
               </ul>
               <figure className="static-only">
-                <img src={asset('renders/leaf-rear.webp')} alt="Concept render of the rear with the shell shown see-through, revealing the magnetic ring and battery" width={1600} height={1000} loading="lazy" />
-                <figcaption>Concept render · rear shell shown see-through</figcaption>
+                <img src={asset('renders/leaf-rear.webp')} alt="The rear of SAGA Leaf with the shell shown see-through, revealing the magnetic ring and the battery below it" width={1600} height={1000} loading="lazy" />
+                <figcaption>Rendered from rev 4 CAD · rear shell shown see-through</figcaption>
               </figure>
               <figure className="static-only">
-                <img src={asset('renders/leaf-side.webp')} alt="Concept render of SAGA Leaf in side profile, showing the left-edge buttons" width={1600} height={1000} loading="lazy" />
-                <figcaption>Concept render · about 8.5 mm thin (CAD estimate)</figcaption>
+                <img src={asset('renders/leaf-side.webp')} alt="SAGA Leaf from its right side, showing the USB-C port in the side wall and the SELECT and NEXT buttons" width={1600} height={1000} loading="lazy" />
+                <figcaption>Rendered from rev 4 CAD · about 8.5 mm thin (CAD estimate)</figcaption>
               </figure>
             </article>
 
@@ -118,9 +132,9 @@ export default function Story() {
               <p className="fine">Leaf ↔ app sync works against a simulated Leaf today, not on hardware.</p>
               <p className="mt-5"><a className="btn btn--ghost" href={READER_APP}>Open SAGA Reader</a></p>
               <figure className="static-only">
-                <div className="flex gap-3 overflow-x-auto">
-                  {['library', 'discover', 'settings'].map(n => (
-                    <img key={n} src={asset(`app/${n}.webp`)} alt={`SAGA Reader app, ${n} screen`} width={390} height={844} loading="lazy" className="w-40 rounded-xl" />
+                <div className="app-strip" data-testid="app-strip">
+                  {PHONE_SCREENS.map(sc => (
+                    <img key={sc.file} src={asset(sc.file)} alt={`SAGA Reader app on a phone: ${sc.label} screen`} width={390} height={844} loading="lazy" />
                   ))}
                 </div>
                 <figcaption>SAGA Reader app (live) · real screenshots</figcaption>
@@ -133,8 +147,8 @@ export default function Story() {
               <p className="lede">Choose a rear skin finish and join the preorder list. No payment is taken and nothing is reserved.</p>
               <p className="mt-6"><Link className="btn btn--primary" href="/shop/">Build your SAGA Leaf</Link></p>
               <figure className="static-only">
-                <img src={asset('renders/leaf-studio.webp')} alt="Concept render of SAGA Leaf in warm studio light" width={1600} height={1000} loading="lazy" />
-                <figcaption>Concept render</figcaption>
+                <img src={asset('renders/leaf-studio.webp')} alt="SAGA Leaf rendered from the rev 4 CAD model in warm studio light" width={1600} height={1000} loading="lazy" />
+                <figcaption>Rendered from rev 4 CAD · concept finish</figcaption>
               </figure>
             </article>
           </div>

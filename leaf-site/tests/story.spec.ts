@@ -1,4 +1,6 @@
 import { test, expect } from '@playwright/test'
+import { offline, scrubTo } from './helpers'
+import { T, PHONE_ON, PHONE_SCREEN_AT, PHONE_SCREENS, phoneAt, phoneScreenAt } from '../src/three/timeline'
 
 /** Scrubbed tweens can land a hair apart depending on frame timing; compare numbers within 0.01. */
 const TOL = 0.01
@@ -13,29 +15,37 @@ function diffState(a: unknown, b: unknown, path = ''): string[] {
 
 test('homepage timeline scrubs forward and back to identical states', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 })
-  await page.route(url => !/^http:\/\/localhost:4610\//.test(url.toString()), r => r.abort())
+  await offline(page)
   await page.goto('/leaf/')
   await page.waitForFunction(() => !!window.__leafStory)
   const snap = () => page.evaluate(() => JSON.parse(JSON.stringify(window.__leafStory!.state, (k, v) => k === '_gsap' ? undefined : v)))
-  const go = async (f: number) => {
-    await page.evaluate(f => { const s = document.getElementById('story')!; scrollTo(0, s.offsetTop + (s.offsetHeight - innerHeight) * f) }, f)
-    // wait for the scrubbed timeline to settle
-    // wait until the scrubbed timeline has fully caught up with the scroll position
-    await page.waitForFunction(f => {
-      const w = window as any, p = w.__leafStory!.progress()
-      const ok = w.__lastP === p && Math.abs(p - f) < 0.005; w.__lastP = p; return ok
-    }, f, { timeout: 15000, polling: 250 })
-  }
-  const checkpoints = [0.1, 0.3, 0.45, 0.6, 0.68, 0.8, 0.97]
-  const forward: Record<number, unknown> = {}
+  const go = (f: number) => scrubTo(page, f)
+  // 0.8 used to be flaky: it sat exactly on a phone-screen switch. The screen is now a pure function of time.
+  const checkpoints = [0.1, 0.3, 0.45, 0.6, 0.68, 0.753, 0.8, 0.97]
+  const forward: Record<number, any> = {}
   await go(0); const start = await snap()
   for (const f of checkpoints) { await go(f); forward[f] = await snap() }
+  for (const f of checkpoints) expect(forward[f].phone.screen, `phone screen at ${f}`).toBe(phoneScreenAt(f * T))
   for (const f of [...checkpoints].reverse()) { await go(f); expect(diffState(await snap(), forward[f]), `state at ${f} after reversing`).toEqual([]) }
   await go(0)
   expect(diffState(await snap(), start), 'state back at the top').toEqual([])
   // Only the hero copy is visible again; no beat left stuck on screen.
   const visible = await page.$$eval('[data-beat]', els => els.filter(e => getComputedStyle(e).visibility !== 'hidden' && +getComputedStyle(e).opacity > 0.05).map(e => (e as HTMLElement).dataset.beat))
   expect(visible).toEqual(['hero'])
+})
+
+test('phone screen selection is a pure function of timeline time, with explicit thresholds', () => {
+  expect(phoneScreenAt(0)).toBe(-1)
+  expect(phoneScreenAt(PHONE_ON - 0.001)).toBe(-1)
+  expect(phoneScreenAt(PHONE_ON)).toBe(0)
+  PHONE_SCREEN_AT.forEach((t, i) => {
+    expect(phoneScreenAt(t - 1e-9)).toBe(i)
+    expect(phoneScreenAt(t)).toBe(i + 1)
+  })
+  expect(phoneScreenAt(T)).toBe(PHONE_SCREENS.length - 1)
+  // same input, same output, whatever was asked before
+  for (const [t, want] of [[80, 3], [20, -1], [80, 3], [99, 4], [80, 3], [76, 1], [80, 3]]) expect(phoneScreenAt(t)).toBe(want)
+  expect(phoneAt(80)).toEqual(phoneAt(80))
 })
 
 test('reduced motion: static stacked path, no Lenis, no canvas', async ({ browser }) => {
@@ -49,6 +59,10 @@ test('reduced motion: static stacked path, no Lenis, no canvas', async ({ browse
   expect(await page.locator('canvas').count()).toBe(0)
   await expect(page.getByRole('heading', { name: 'Built to be held, not tapped.' })).toBeVisible()
   await expect(page.locator('img[src$="renders/leaf-exploded.webp"]')).toBeVisible()
+  // the app strip shows the real screenshots, and the page scrolls natively
+  await expect(page.getByTestId('app-strip').locator('img')).toHaveCount(5)
+  await page.evaluate(() => scrollTo(0, 1200))
+  expect(await page.evaluate(() => scrollY)).toBe(1200)
   await ctx.close()
 })
 
