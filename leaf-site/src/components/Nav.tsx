@@ -37,7 +37,7 @@ export function Footer() {
           <li><a className="foot-link" href="/privacy.html">Privacy</a></li>
         </ul>
       </div>
-      <p className="mx-auto max-w-6xl px-4 sm:px-6 pb-10 text-xs text-dim">All 3D views are concept renders built from rev 4 CAD numbers. Sizes and weight are CAD estimates, not measurements. © Proxima LLC.</p>
+      <p className="mx-auto max-w-6xl px-4 sm:px-6 pb-10 text-xs text-dim">The 3D views are rendered from the rev 4 CAD model: a prototype design, not a finished product. Sizes and weight are CAD estimates, not measurements. © Proxima LLC.</p>
     </footer>
   )
 }

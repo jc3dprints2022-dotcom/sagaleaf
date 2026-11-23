@@ -1,6 +1,7 @@
 # SAGA Leaf site: every spec string and its source
 
-The site may show only facts from the facts block in Task 06. This file lists every product
+The site may show only facts from the facts block in Task 06, plus the part positions read from
+the rev 4 CAD model (Task 07). This file lists every product
 statement on the site with its status and source. `src/data/specs.ts` is the single source in code
 (each entry carries `src` and `status`); the table below is generated from it with
 `node --experimental-strip-types scripts/specs-table.ts`, and `tests/specs.spec.ts` fails if they drift.
@@ -32,13 +33,13 @@ In development = being written, not yet run on Leaf hardware.
 | `elec-mcu` | Electronics | Processor | ESP32-C3 module (ESP32-C3-MINI-1-H8X, 8 MB) with Wi-Fi | Confirmed | rev4 board design (unverified on hardware) |
 | `elec-pcb` | Electronics | Board | 0.8 mm custom PCB | Confirmed | rev4 board design (unverified on hardware) |
 | `elec-sd` | Electronics | Storage | microSD slot; you supply the card | Confirmed | rev4 board design, Molex 104031 |
-| `elec-usb` | Electronics | Port | USB-C for charging and data, bottom edge | Confirmed | rev4 board design, GCT USB4110 |
+| `elec-usb` | Electronics | Port | USB-C for charging and data, on the right side | Confirmed | rev4 CAD; GCT USB4110 |
 | `elec-charger` | Electronics | Charging | TI BQ21040 charger with battery-temperature protection | Confirmed | rev4 board design (unverified on hardware) |
 | `elec-buttons` | Electronics | Buttons | Four: BACK and PREV on the left, SELECT and NEXT on the right | Confirmed | rev4 CAD button layout |
 | `power-battery` | Power | Battery | 1000 mAh battery (selected cell, subject to change) | Planned | YDL 504040 selection; supplier replied, not ordered |
 | `attach-ring` | Attachment | Magnetic attachment | MagSafe-pattern magnetic ring, so it can snap to the back of a phone or a magnetic mount | Confirmed | rev4 CAD ring, 54 mm OD / 46 mm ID / 2.0 mm |
 | `enc-skin` | Enclosure | Rear skin | 0.6 mm snap-on rear skin | Confirmed | rev4 CAD rear skin |
-| `enc-finish` | Enclosure | Finishes | Copper and Slate (concept renders) | Planned | rev4 CAD renders |
+| `enc-finish` | Enclosure | Finishes | Copper and Slate (concept finishes, not final) | Planned | rev4 CAD renders |
 | `enc-material` | Enclosure | Materials | Prototypes are 3D-printed; production materials undecided | Confirmed | Proxima project status |
 | `sw-base` | Software | Firmware | Based on the open-source CrossPoint e-reader firmware | In development | Leaf firmware plan (not yet run on Leaf hardware) |
 | `sw-epub` | Software | Books | Designed for EPUB with reflowable text, stored on microSD | In development | Leaf firmware plan |
@@ -55,7 +56,7 @@ In development = being written, not yet run on Leaf hardware.
 |---|---|---|
 | 3.97″ e-paper, 480 × 800 | `display-size` | Good Display GDEY0397T81P datasheet |
 | Four physical buttons. No touchscreen | `elec-buttons` | rev4 CAD button layout |
-| USB-C and microSD | `elec-usb` | rev4 board design |
+| USB-C and microSD | `elec-usb` | rev4 CAD |
 | MagSafe-pattern magnetic ring | `attach-ring` | rev4 CAD ring |
 | About 8.5 mm thin (CAD estimate) | `size-thin` | rev4 CAD report |
 
@@ -81,14 +82,40 @@ In development = being written, not yet run on Leaf hardware.
 | Shop / cart (`src/data/catalog.dev.json`) | SAGA Leaf (unlit); Front-lit (planned, disabled); Copper; Slate; "No accessories announced yet" | concept: true, price: null | each item's `source` field |
 | Shop / cart | "Price not set yet"; "No payment is taken and nothing is reserved" | Confirmed | no price exists; waitlist provider only |
 | Support FAQ | "We'll share a date when there is one"; "No: e-paper with four buttons"; "Sync is planned"; no price yet; Board 1 unlit, front light planned; EPUB on microSD and Wi-Fi upload in development | as per specs above | specs above |
+| Support FAQ | USB-C port "On the right side, below the SELECT and NEXT buttons. It is used for charging and data." | Confirmed | rev4 CAD (`usb-c` at x 54.96–62.31, y 46.25–55.19 mm; mouth through the right wall at about y 45.7–55.7 mm; button caps at y 83.82–97.02 mm) |
+| Home, hardware callouts | "USB-C on the right side for charging and data. Your books live on a microSD card you supply." | Confirmed | rev4 CAD; rev4 board design |
+| Every 3D view and static render | "Rendered from rev 4 CAD" (and "concept finish" where a skin colour shows) | rev 4 CAD model, a prototype design | `public/models/leaf.glb`, converted from `saga_leaf_v2_rev4_assembly_unlit_c504040y.step` |
+| Footer | "The 3D views are rendered from the rev 4 CAD model: a prototype design, not a finished product. Sizes and weight are CAD estimates, not measurements." | Estimated | rev4 CAD |
+| Shop | "Concept finishes: these skin colours are not final." | Concept | rev4 CAD renders |
+| Product page, support | Real SAGA Reader screenshots (`public/app/real/`), labelled "SAGA Reader app (live) · real screenshots" | Confirmed | captured from saga.proxima-3d.com/saga-reader.html, no sign-in, public-domain books |
 
-## Concept-model numbers that are *not* specs
+## Part positions from the rev 4 CAD model
 
-`src/data/geometry.ts` also holds a few placeholders marked `status: 'assumed'` (end-wall
-thickness, wall height under the bezel, PCB outline split, battery and ring placement, button cap
-size). They exist only so the procedural model can draw; they are never shown as text and will be
-replaced by the rev 4 CAD GLB. The ESP32-C3-MINI-1 module outline (13.2 × 16.6 × 2.4 mm) is from
-Espressif's datasheet and likewise only drives geometry.
+The 3D views draw `public/models/leaf.glb` (rev 4 CAD, converted to glTF). Positions that anchor
+a callout, a label or a camera come from `public/models/leaf.parts.json` (bounding boxes in mm),
+never from eyeballing. Source for all of them: **rev4 CAD**; status: Estimated (never measured).
+
+| Part | Position in CAD (mm; x from the left edge seen from the front, y from the bottom end, z from the rear face) |
+|---|---|
+| USB-C receptacle (GCT USB4110) | **Right side edge.** Body x 54.96–62.31, y 46.25–55.19, z 2.04–5.30; mouth through the right wall at about y 45.7–55.7 |
+| Button caps | BACK y 90.82–97.02 and PREV y 83.82–90.02 on the left edge; SELECT and NEXT at the same heights on the right edge |
+| Magnetic ring | 54 OD, centred at x 31.67, y 71.62; z 0.6–2.6 |
+| Battery bay | x 19.29–59.79, y 1.65–44.15 (lower half); z 0.6–6.1 |
+| Board | PCB z 5.3–6.1, mounted component-side down: module, microSD, connectors and passives hang below it (z 2.04–5.3) |
+| E-paper active area (`screen` quad) | x 5.75–57.59, y 10.32–96.72 (51.84 × 86.4 mm, datasheet), z 7.29 |
+| Assembly with skin | x −0.75…63.44, y −0.75…101.27, z −0.6…7.87 |
+
+The battery, module, microSD, FPC connector, switches and passives are plain box envelopes in the
+CAD, and are drawn as such. The only detail added to them is in materials (for example the fold
+lines on the pouch cell); their geometry and size are the CAD's.
+
+## Fallback-model numbers that are *not* specs
+
+If `leaf.glb` cannot be loaded, `src/three/leafModel.ts` draws a procedural stand-in. For that it
+keeps a few placeholders in `src/data/geometry.ts` marked `status: 'assumed'` (end-wall thickness,
+wall height under the bezel). They are never shown as text. Everything else in the fallback is
+placed from the same CAD manifest. When the fallback is on screen the label reads "Concept model"
+instead of "Rendered from rev 4 CAD".
 
 ## Built-output grep
 

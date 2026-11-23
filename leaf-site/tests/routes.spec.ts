@@ -1,4 +1,6 @@
 import { test, expect } from '@playwright/test'
+import { readdirSync, statSync } from 'node:fs'
+import { join } from 'node:path'
 
 const PAGES = ['/', '/privacy.html', '/saga-reader.html', '/leaf/', '/leaf/shop/', '/leaf/cart/', '/leaf/support/', '/leaf/shop/saga-leaf/']
 
@@ -19,3 +21,13 @@ for (const path of PAGES) {
     expect(bad).toEqual([])
   })
 }
+
+test('200 for the CAD model, its manifest and every real app screenshot under /leaf/', async ({ request }) => {
+  const files = ['models/leaf.glb', 'models/leaf.parts.json', ...readdirSync(join(__dirname, '..', 'public', 'app', 'real')).map(f => `app/real/${f}`), ...readdirSync(join(__dirname, '..', 'public', 'renders')).map(f => `renders/${f}`)]
+  expect(files.filter(f => f.startsWith('app/real/')).length).toBe(24)
+  for (const f of files) {
+    const res = await request.get(`http://localhost:4610/leaf/${f}`)
+    expect(res.status(), f).toBe(200)
+    expect((await res.body()).byteLength, f).toBe(statSync(join(__dirname, '..', 'public', f)).size)
+  }
+})

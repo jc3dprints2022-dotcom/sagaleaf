@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: 'SAGA Leaf is a small 3.97″ e-paper reader with four physical buttons, being designed by Proxima LLC. Not built yet; no date or price until it is ready.',
   applicationName: 'SAGA Leaf',
   authors: [{ name: 'Proxima LLC' }],
-  openGraph: { type: 'website', siteName: 'SAGA Leaf', locale: 'en_US', images: [{ url: '/leaf/og.jpg', width: 1200, height: 630, alt: 'Concept render of SAGA Leaf' }] },
+  openGraph: { type: 'website', siteName: 'SAGA Leaf', locale: 'en_US', images: [{ url: '/leaf/og.jpg', width: 1200, height: 630, alt: 'SAGA Leaf rendered from the rev 4 CAD model' }] },
   twitter: { card: 'summary_large_image' },
   icons: { icon: '/leaf/icon.svg' },
   robots: { index: true, follow: true },

@@ -7,53 +7,72 @@ import * as THREE from 'three'
 import { gsap } from 'gsap'
 import { useLeafModel } from '@/three/useLeafModel'
 import { createScreenCanvas } from '@/three/screenTexture'
-import { Studio } from '@/components/three/Studio'
+import { installLeafDebug } from '@/three/debug'
+import { GROUP_BOX, PIVOT } from '@/three/parts'
+import { SCENE_SCALE } from '@/data/geometry'
+import type { LeafModel } from '@/three/leafModel'
+import { Studio, BlobShadow } from '@/components/three/Studio'
 
 export interface ShopCanvasHandle { reset(): void }
+interface Props { color: string; lowPower: boolean; onSwap: (busy: boolean) => void; onReady: (kind: LeafModel['kind']) => void }
 
-function Leaf({ color, lowPower, onSwap }: { color: string; lowPower: boolean; onSwap: (busy: boolean) => void }) {
+const FLOOR_Y = (GROUP_BOX.skin.min[1] - PIVOT[1]) * SCENE_SCALE - 0.06
+
+function Leaf({ color, lowPower, onSwap, onReady }: Props) {
   const screen = useMemo(() => createScreenCanvas({ page: 0, flash: 0, font: 0, menu: 0, highlight: 0, note: 0 }), [])
   useEffect(() => () => screen.dispose(), [screen])
-  const leaf = useLeafModel({ screenTexture: screen.texture, lowDetail: lowPower, skinColor: color })
+  const { leaf, load } = useLeafModel({ screenTexture: screen.texture, lowDetail: lowPower, skinColor: color })
   const anim = useRef({ detach: 0 })
-  const invalidate = useThree(st => st.invalidate)
+  const { invalidate, camera, gl } = useThree()
   const shown = useRef(color)
+  const announced = useRef(false)
   useEffect(() => {
-    if (shown.current === color) return
+    if (!leaf) return
+    if (shown.current === color) { leaf.setSkinColor(color); return }
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
     if (reduce) { leaf.setSkinColor(color); shown.current = color; invalidate(); return }
     onSwap(true)
-    // Skin releases from the open top end, comes away, changes finish, then clicks back on.
+    // The skin pulls straight off the back, swings away on its bottom edge, changes finish, then clicks back on.
     const tl = gsap.timeline({ onComplete: () => { onSwap(false); invalidate() }, onUpdate: invalidate })
-    tl.to(anim.current, { detach: 1, duration: 0.7, ease: 'power2.inOut' })
+    tl.to(anim.current, { detach: 1, duration: 0.8, ease: 'power2.inOut' })
       .call(() => { leaf.setSkinColor(color); shown.current = color })
-      .to(anim.current, { detach: 0, duration: 0.8, ease: 'power3.inOut' })
-    return () => { tl.kill() }
+      .to(anim.current, { detach: 0, duration: 0.9, ease: 'power2.inOut' })
+    return () => { tl.kill(); leaf.setSkinColor(color); shown.current = color; anim.current.detach = 0; onSwap(false) }
   }, [color, leaf, onSwap, invalidate])
+  useEffect(() => { invalidate() }, [leaf, invalidate])
   useEffect(() => { document.fonts?.ready.then(() => setTimeout(invalidate, 50)) }, [invalidate])
-  useFrame(() => leaf.setSkinDetach(anim.current.detach))
-  return <primitive object={leaf.root} />
+  useEffect(() => (leaf ? installLeafDebug(leaf, { camera, canvas: gl.domElement, invalidate, load }) : undefined), [leaf, camera, gl, invalidate, load])
+  useFrame(() => {
+    if (!leaf) return
+    leaf.setSkinDetach(anim.current.detach)
+    if (!announced.current) { announced.current = true; requestAnimationFrame(() => onReady(leaf.kind)) }
+  })
+  return leaf ? <primitive object={leaf.root} /> : null
 }
 
-const ShopCanvas = forwardRef<ShopCanvasHandle, { color: string; lowPower: boolean; onSwap: (busy: boolean) => void }>(function ShopCanvas({ color, lowPower, onSwap }, ref) {
+const ShopCanvas = forwardRef<ShopCanvasHandle, Props>(function ShopCanvas(props, ref) {
+  const { lowPower } = props
   const controls = useRef<OrbitImpl>(null)
   useImperativeHandle(ref, () => ({ reset: () => controls.current?.reset() }), [])
   return (
     <Canvas
       frameloop="demand"
-      dpr={lowPower ? [1, 1.25] : [1, 1.75]}
+      shadows={lowPower ? false : 'soft'}
+      dpr={lowPower ? [1, 1.5] : [1, 1.75]}
       gl={{ antialias: !lowPower, preserveDrawingBuffer: true }}
-      camera={{ fov: 30, near: 0.05, far: 30, position: [-1.8, 0.5, -1.35] }}
-      onCreated={({ gl, scene }) => { gl.toneMapping = THREE.ACESFilmicToneMapping; gl.toneMappingExposure = 1.3; scene.background = new THREE.Color('#141416') }}
-      aria-label="3D preview of SAGA Leaf (concept render). Drag to orbit, scroll or pinch to zoom."
+      camera={{ fov: 30, near: 0.05, far: 30, position: [-2.15, 0.55, -1.62] }}
+      onCreated={({ gl, scene }) => { gl.toneMapping = THREE.ACESFilmicToneMapping; gl.toneMappingExposure = 1.4; gl.setClearColor(0x000000, 0); scene.background = new THREE.Color('#141416') }}
+      aria-label="3D preview of SAGA Leaf, rendered from the rev 4 CAD model with a concept finish. Drag to orbit, scroll or pinch to zoom."
       role="img"
     >
-      <Studio warm={() => 0.7} />
+      <Studio warm={() => 0.7} shadows={!lowPower} envResolution={lowPower ? 64 : 128} />
       {/* rear key so the skin finish reads from the default rear three-quarter view */}
-      <directionalLight position={[-2.5, 2, -3]} intensity={2.2} color="#f3e6d2" />
+      <directionalLight position={[-2.5, 2, -3]} intensity={3.0} color="#f3e6d2" />
       <pointLight position={[2, -0.5, -2]} intensity={1.2} color="#9aa3b0" />
-      <Leaf color={color} lowPower={lowPower} onSwap={onSwap} />
-      {!lowPower && <ContactShadows position={[0, -0.6, 0]} opacity={0.45} scale={1.6} blur={2.8} far={0.5} resolution={256} />}
+      <Leaf {...props} />
+      {lowPower
+        ? <BlobShadow y={FLOOR_Y} size={[1.2, 0.7]} opacity={() => 0.55} />
+        : <ContactShadows position={[0, FLOOR_Y, 0]} opacity={0.5} scale={2} blur={2.6} far={0.8} resolution={256} />}
       <OrbitControls ref={controls} makeDefault enablePan={false} minDistance={1.2} maxDistance={4} enableDamping dampingFactor={0.08} target={[0, 0, 0]} />
     </Canvas>
   )

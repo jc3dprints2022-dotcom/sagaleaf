@@ -15,7 +15,9 @@ export interface StoryState {
   xray: number
   /** Camera push until the e-paper fills the viewport (0..1). */
   fill: number
-  /** Phone silhouette, in the device group's local space. */
+  /** Layer-number chips on the exploded stack (0..1). */
+  chips: number
+  /** Phone silhouette, in the device group's local space. Computed from timeline time (src/three/timeline.ts). */
   phone: { x: number; y: number; z: number; ry: number; show: number; screen: number }
   screen: ScreenState
   /** 0 = cool night, 1 = warm product studio. */
@@ -28,13 +30,14 @@ export interface StoryState {
 
 export function initialState(): StoryState {
   return {
-    cam: { x: 0.9, y: 0.35, z: 3.1 },
+    cam: { x: 0.9, y: 0.35, z: 3.6 },
     look: { x: 0, y: 0, z: 0 },
-    dev: { x: 0.35, y: 0.02, z: 0, rx: -0.12, ry: -0.75, rz: 0 },
+    dev: { x: 0, y: 0, z: 0, rx: -0.12, ry: -0.75, rz: 0 },
     assemble: 0,
     xray: 0,
     fill: 0,
-    phone: { x: 0, y: 0.12, z: -0.6, ry: Math.PI, show: 0, screen: 0 },
+    chips: 0,
+    phone: { x: 0, y: 0.21, z: -1, ry: Math.PI, show: 0, screen: -1 },
     screen: { page: 0, flash: 0, font: 0, menu: 0, highlight: 0, note: 0 },
     warm: 0,
     idle: 1,

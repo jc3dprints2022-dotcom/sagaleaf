@@ -1,0 +1,574 @@
+{
+ "units": "mm",
+ "source": "saga_leaf_v2_rev4_assembly_unlit_c504040y.step (rev4 CAD, YDL 504040 cell, unlit)",
+ "origin": "bottom-left-rear corner of core body; x=width, y=height (0=bottom), z=thickness (0=rear face of core, +z=screen side). Matches leaf-site/src/data/geometry.ts contract.",
+ "scene_scale_hint": "site uses SCENE_SCALE 0.01 (1 mm -> 0.01 units)",
+ "status": "CAD estimate, not physically measured",
+ "groups": {
+  "bezel": {
+   "bbox_mm": {
+    "min": [
+     -0.0,
+     -0.0,
+     5.2
+    ],
+    "max": [
+     62.69,
+     100.52,
+     7.87
+    ]
+   },
+   "z0_mm": 5.2,
+   "z1_mm": 7.87,
+   "meshes": [
+    {
+     "node": "bezel-frame",
+     "cad_parts": [
+      "bezel"
+     ],
+     "material": "bezel",
+     "triangles": 1304,
+     "bbox_mm": {
+      "min": [
+       -0.0,
+       -0.0,
+       5.2
+      ],
+      "max": [
+       62.69,
+       100.52,
+       7.87
+      ]
+     }
+    }
+   ]
+  },
+  "panel": {
+   "bbox_mm": {
+    "min": [
+     3.55,
+     2.3,
+     6.35
+    ],
+    "max": [
+     59.79,
+     98.92,
+     7.27
+    ]
+   },
+   "z0_mm": 6.35,
+   "z1_mm": 7.27,
+   "meshes": [
+    {
+     "node": "panel-glass",
+     "cad_parts": [
+      "panel"
+     ],
+     "material": "paper",
+     "triangles": 12,
+     "bbox_mm": {
+      "min": [
+       3.55,
+       2.3,
+       6.35
+      ],
+      "max": [
+       59.79,
+       98.92,
+       7.27
+      ]
+     }
+    },
+    {
+     "node": "screen",
+     "material": "screen",
+     "note": "UV quad over the 51.84x86.4 mm active area (datasheet), activeFromBottom 8.02 mm assumed at the y=0 end as in the site LAYOUT; map the screen texture here",
+     "bbox_mm": {
+      "min": [
+       5.75,
+       10.32,
+       7.29
+      ],
+      "max": [
+       57.59,
+       96.72,
+       7.29
+      ]
+     }
+    }
+   ]
+  },
+  "pcb": {
+   "bbox_mm": {
+    "min": [
+     0.94,
+     29.02,
+     2.04
+    ],
+    "max": [
+     62.31,
+     98.92,
+     6.1
+    ]
+   },
+   "z0_mm": 2.04,
+   "z1_mm": 6.1,
+   "meshes": [
+    {
+     "node": "board",
+     "cad_parts": [
+      "pcb"
+     ],
+     "material": "pcb",
+     "triangles": 76,
+     "bbox_mm": {
+      "min": [
+       0.94,
+       29.02,
+       5.3
+      ],
+      "max": [
+       62.31,
+       98.92,
+       6.1
+      ]
+     }
+    },
+    {
+     "node": "usb-c",
+     "cad_parts": [
+      "usb"
+     ],
+     "material": "metal",
+     "triangles": 12,
+     "bbox_mm": {
+      "min": [
+       54.96,
+       46.25,
+       2.04
+      ],
+      "max": [
+       62.31,
+       55.19,
+       5.3
+      ]
+     }
+    },
+    {
+     "node": "esp32-module",
+     "cad_parts": [
+      "module"
+     ],
+     "material": "metal",
+     "triangles": 12,
+     "bbox_mm": {
+      "min": [
+       25.07,
+       75.22,
+       2.9
+      ],
+      "max": [
+       38.27,
+       91.82,
+       5.3
+      ]
+     }
+    },
+    {
+     "node": "microsd",
+     "cad_parts": [
+      "sd"
+     ],
+     "material": "metal",
+     "triangles": 12,
+     "bbox_mm": {
+      "min": [
+       14.225,
+       60.57,
+       3.85
+      ],
+      "max": [
+       30.525,
+       74.27,
+       5.3
+      ]
+     }
+    },
+    {
+     "node": "panel-fpc-connector",
+     "cad_parts": [
+      "fpc"
+     ],
+     "material": "chip",
+     "triangles": 12,
+     "bbox_mm": {
+      "min": [
+       1.25,
+       29.82,
+       3.3
+      ],
+      "max": [
+       18.35,
+       36.62,
+       5.3
+      ]
+     }
+    },
+    {
+     "node": "battery-connector",
+     "cad_parts": [
+      "batc"
+     ],
+     "material": "chip",
+     "triangles": 12,
+     "bbox_mm": {
+      "min": [
+       12.615,
+       42.22,
+       3.7
+      ],
+      "max": [
+       16.915,
+       47.62,
+       5.3
+      ]
+     }
+    },
+    {
+     "node": "switches",
+     "cad_parts": [
+      "sw_BACK",
+      "sw_NEXT",
+      "sw_PREV",
+      "sw_SELECT"
+     ],
+     "material": "chip",
+     "triangles": 48,
+     "bbox_mm": {
+      "min": [
+       4.0,
+       85.17,
+       3.6
+      ],
+      "max": [
+       59.34,
+       95.67,
+       5.3
+      ]
+     }
+    },
+    {
+     "node": "components",
+     "cad_parts": "46 parts (e_C1..)",
+     "material": "chip",
+     "triangles": 552,
+     "bbox_mm": {
+      "min": [
+       4.54,
+       38.62,
+       3.8
+      ],
+      "max": [
+       55.04,
+       95.42,
+       5.3
+      ]
+     }
+    }
+   ]
+  },
+  "battery": {
+   "bbox_mm": {
+    "min": [
+     19.29,
+     1.65,
+     0.6
+    ],
+    "max": [
+     59.79,
+     44.15,
+     6.1
+    ]
+   },
+   "z0_mm": 0.6,
+   "z1_mm": 6.1,
+   "meshes": [
+    {
+     "node": "cell",
+     "cad_parts": [
+      "battery"
+     ],
+     "material": "pouch",
+     "triangles": 12,
+     "bbox_mm": {
+      "min": [
+       19.29,
+       1.65,
+       0.6
+      ],
+      "max": [
+       59.79,
+       44.15,
+       6.1
+      ]
+     }
+    }
+   ]
+  },
+  "ring": {
+   "bbox_mm": {
+    "min": [
+     4.67,
+     44.62,
+     0.6
+    ],
+    "max": [
+     58.67,
+     98.62,
+     2.6
+    ]
+   },
+   "z0_mm": 0.6,
+   "z1_mm": 2.6,
+   "meshes": [
+    {
+     "node": "magnet-ring",
+     "cad_parts": [
+      "ring"
+     ],
+     "material": "steel",
+     "triangles": 892,
+     "bbox_mm": {
+      "min": [
+       4.67,
+       44.62,
+       0.6
+      ],
+      "max": [
+       58.67,
+       98.62,
+       2.6
+      ]
+     }
+    }
+   ]
+  },
+  "tray": {
+   "bbox_mm": {
+    "min": [
+     -0.0,
+     -0.0,
+     0.0
+    ],
+    "max": [
+     62.69,
+     100.52,
+     6.1
+    ]
+   },
+   "z0_mm": 0.0,
+   "z1_mm": 6.1,
+   "meshes": [
+    {
+     "node": "rear-shell",
+     "cad_parts": [
+      "tray"
+     ],
+     "material": "shell",
+     "triangles": 2492,
+     "bbox_mm": {
+      "min": [
+       -0.0,
+       -0.0,
+       0.0
+      ],
+      "max": [
+       62.69,
+       100.52,
+       6.1
+      ]
+     }
+    }
+   ]
+  },
+  "skin": {
+   "bbox_mm": {
+    "min": [
+     -0.75,
+     -0.75,
+     -0.6
+    ],
+    "max": [
+     63.44,
+     101.27,
+     2.9
+    ]
+   },
+   "z0_mm": -0.6,
+   "z1_mm": 2.9,
+   "meshes": [
+    {
+     "node": "rear-skin",
+     "cad_parts": [
+      "skin"
+     ],
+     "material": "skin",
+     "triangles": 3560,
+     "bbox_mm": {
+      "min": [
+       -0.75,
+       -0.75,
+       -0.6
+      ],
+      "max": [
+       63.44,
+       101.27,
+       2.9
+      ]
+     }
+    }
+   ]
+  },
+  "buttons": {
+   "bbox_mm": {
+    "min": [
+     -0.5,
+     83.82,
+     3.0
+    ],
+    "max": [
+     63.19,
+     97.02,
+     5.2
+    ]
+   },
+   "z0_mm": 3.0,
+   "z1_mm": 5.2,
+   "meshes": [
+    {
+     "node": "btn-back",
+     "cad_parts": [
+      "cap_BACK"
+     ],
+     "material": "button",
+     "triangles": 28,
+     "bbox_mm": {
+      "min": [
+       -0.5,
+       90.82,
+       3.0
+      ],
+      "max": [
+       3.95,
+       97.02,
+       5.2
+      ]
+     }
+    },
+    {
+     "node": "btn-prev",
+     "cad_parts": [
+      "cap_PREV"
+     ],
+     "material": "button",
+     "triangles": 28,
+     "bbox_mm": {
+      "min": [
+       -0.5,
+       83.82,
+       3.0
+      ],
+      "max": [
+       3.95,
+       90.02,
+       5.2
+      ]
+     }
+    },
+    {
+     "node": "btn-select",
+     "cad_parts": [
+      "cap_SELECT"
+     ],
+     "material": "button",
+     "triangles": 28,
+     "bbox_mm": {
+      "min": [
+       59.39,
+       90.82,
+       3.0
+      ],
+      "max": [
+       63.19,
+       97.02,
+       5.2
+      ]
+     }
+    },
+    {
+     "node": "btn-next",
+     "cad_parts": [
+      "cap_NEXT"
+     ],
+     "material": "button",
+     "triangles": 28,
+     "bbox_mm": {
+      "min": [
+       59.39,
+       83.82,
+       3.0
+      ],
+      "max": [
+       63.19,
+       90.02,
+       5.2
+      ]
+     }
+    }
+   ]
+  }
+ },
+ "explode_order_front_to_back": [
+  "bezel",
+  "panel",
+  "pcb",
+  "battery",
+  "ring",
+  "tray",
+  "skin",
+  "buttons"
+ ],
+ "cad_z_levels_mm": {
+  "floor": 0.6,
+  "ring": [
+   0.6,
+   2.6
+  ],
+  "battery_bay": [
+   0.6,
+   6.1
+  ],
+  "pcb_bottom": 5.3,
+  "pcb_top": 6.1,
+  "panel": [
+   6.35,
+   7.27
+  ],
+  "bezel": [
+   5.2,
+   7.87
+  ],
+  "top": 7.87,
+  "skin": [
+   -0.6,
+   2.9
+  ]
+ },
+ "notes": [
+  "Node transforms are identity; vertices are in absolute CAD mm, so exploding = translating a group node.",
+  "USB-C sits on the RIGHT side wall (x~55-62.3, y~46-55) in rev4 CAD, not the bottom end as the procedural model assumed.",
+  "Board components hang below the PCB (z 2.9-5.3): the board is mounted component-side down.",
+  "Battery/module/sd/fpc/usb/switches/passives are simple boxes in the CAD (envelopes), not detailed models.",
+  "Skin overall with skin: 64.19 x 102.02 x 8.47 mm (CAD estimate)."
+ ]
+}

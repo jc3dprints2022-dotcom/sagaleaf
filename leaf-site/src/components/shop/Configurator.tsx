@@ -16,6 +16,7 @@ export default function Configurator() {
   const [low, setLow] = useState(false)
   const [busy, setBusy] = useState(false)
   const [live, setLive] = useState(false)
+  const [ready, setReady] = useState<null | 'cad' | 'procedural'>(null)
   const canvas = useRef<ShopCanvasHandle>(null)
   useEffect(() => { setSel(loadSelection()); setGl(hasWebGL()); setLow(isLowPower()) }, [])
   // The static render of the chosen finish shows first; the 3D preview loads on first intent
@@ -32,18 +33,21 @@ export default function Configurator() {
   const choose = (group: keyof Selection, id: string) => setSel(s => { const n = { ...s, [group]: id }; saveSelection(n); return n })
   const onSwap = useCallback((b: boolean) => setBusy(b), [])
   const skin = findItem('skin', sel.skin)!
-  const fallback = sel.skin === 'skin-slate' ? 'renders/leaf-slate.webp' : 'renders/leaf-assembled.webp'
+  // Posters are stills of this same preview (rev 4 CAD model, same camera), one per finish.
+  const poster = sel.skin === 'skin-slate' ? 'renders/leaf-shop-slate.webp' : 'renders/leaf-shop-copper.webp'
 
   return (
     <div className="grid gap-8 lg:grid-cols-[1.4fr_1fr]">
-      <div className="panel relative aspect-[4/3] overflow-hidden lg:sticky lg:top-24 lg:self-start" data-testid="preview">
-        {!gl || !live ? (
-          <img src={asset(fallback)} alt={`Concept render of SAGA Leaf with the ${skin.label} rear skin`} className="h-full w-full object-cover" />
-        ) : (
-          <ShopCanvas ref={canvas} color={skin.swatch ?? '#B8663A'} lowPower={low} onSwap={onSwap} />
-        )}
-        <p className="concept-badge !block">Concept render</p>
+      <div className="panel preview relative aspect-[4/3] overflow-hidden lg:sticky lg:top-24 lg:self-start" data-testid="preview" data-ready={ready ?? undefined} role="group" aria-label="Preview">
+        {/* The poster stays up until the CAD model has drawn its first frame; the canvas then fades in over it. */}
+        <img src={asset(poster)} alt={`SAGA Leaf rendered from the rev 4 CAD model, seen from the rear, with the ${skin.label} concept finish`} width={897} height={672} className="h-full w-full object-cover" aria-hidden={ready ? true : undefined} />
         {gl && live && (
+          <div className="preview-canvas">
+            <ShopCanvas ref={canvas} color={skin.swatch ?? '#B8663A'} lowPower={low} onSwap={onSwap} onReady={setReady} />
+          </div>
+        )}
+        <p className="concept-badge !block">{ready === 'procedural' ? 'Concept model' : 'Rendered from rev 4 CAD'} · concept finish</p>
+        {gl && live && ready && (
           <button type="button" className="btn btn--ghost absolute left-4 bottom-4 !min-h-[36px] !px-4 text-sm bg-night/60" onClick={() => canvas.current?.reset()}>
             Reset view
           </button>
@@ -55,6 +59,7 @@ export default function Configurator() {
         {CATALOG.groups.map(g => (
           <fieldset key={g.id} className="mb-7">
             <legend className="mb-3 text-sm uppercase tracking-[0.18em] text-amber">{g.label}</legend>
+            {g.id === 'skin' && <p className="-mt-1 mb-3 text-sm text-dim" data-testid="finish-note">Concept finishes: these skin colours are not final.</p>}
             <div className="grid gap-2">
               {g.items.map(item => {
                 const checked = sel[g.id] === item.id

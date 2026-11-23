@@ -3,34 +3,50 @@ import { forwardRef, useEffect, useMemo } from 'react'
 import * as THREE from 'three'
 import { RoundedBox } from '@react-three/drei'
 import { asset } from '@/lib/paths'
-
-export const PHONE_SCREENS = ['app/library.webp', 'app/discover.webp', 'app/settings.webp'] as const
+import { PHONE_SCREENS, PHONE_THICKNESS } from '@/three/timeline'
 
 /**
- * A plain phone silhouette (generic, no brand). Used to show the magnetic ring snapping to the
- * back of a phone, and to show real SAGA Reader app screenshots in the ecosystem beat.
+ * A plain phone silhouette (generic, no brand; illustrative, not a product render). Used to show
+ * the magnetic ring snapping to the back of a phone, and to show real SAGA Reader screenshots
+ * (public/app/real/) in the ecosystem beat.
  */
-export interface PhoneHandle { group: THREE.Group; setScreen(i: number): void; setOpacity(o: number): void }
+export interface PhoneTextures { list: (THREE.Texture | undefined)[]; ensure(): void }
 
-export function usePhoneTextures() {
-  const textures = useMemo(() => {
-    const loader = new THREE.TextureLoader()
-    return PHONE_SCREENS.map(p => { const t = loader.load(asset(p)); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t })
+/** The screenshots load on demand (`ensure()`), shortly before the phone first shows its screen. */
+export function usePhoneTextures(onLoad: () => void): PhoneTextures {
+  const tex = useMemo<PhoneTextures>(() => {
+    const list: (THREE.Texture | undefined)[] = []
+    let started = false
+    return {
+      list,
+      ensure() {
+        if (started) return
+        started = true
+        const loader = new THREE.TextureLoader()
+        PHONE_SCREENS.forEach((s, i) => {
+          const t = loader.load(asset(s.file), onLoad)
+          t.colorSpace = THREE.SRGBColorSpace
+          t.anisotropy = 4
+          list[i] = t
+        })
+      },
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-  useEffect(() => () => textures.forEach(t => t.dispose()), [textures])
-  return textures
+  useEffect(() => () => tex.list.forEach(t => t?.dispose()), [tex])
+  return tex
 }
 
-export const Phone = forwardRef<THREE.Group, { textures: THREE.Texture[] }>(function Phone({ textures }, ref) {
-  const screenMat = useMemo(() => new THREE.MeshBasicMaterial({ map: textures[0], toneMapped: false, transparent: true }), [textures])
-  const bodyMat = useMemo(() => new THREE.MeshStandardMaterial({ color: '#1b1c20', roughness: 0.45, metalness: 0.6, transparent: true }), [])
+export const Phone = forwardRef<THREE.Group, { textures: PhoneTextures }>(function Phone({ textures }, ref) {
+  const screenMat = useMemo(() => new THREE.MeshBasicMaterial({ color: '#050506', toneMapped: false, transparent: true }), [])
+  const bodyMat = useMemo(() => new THREE.MeshStandardMaterial({ color: '#1b1c20', roughness: 0.42, metalness: 0.65, transparent: true }), [])
   useEffect(() => () => { screenMat.dispose(); bodyMat.dispose() }, [screenMat, bodyMat])
   // 390 × 844 screenshots → keep that aspect for the glass.
-  const W = 0.72, H = W * (844 / 390) * 0.98
+  const W = 0.72, H = W * (844 / 390)
   return (
     <group ref={ref} userData={{ screenMat, bodyMat, textures }} visible={false}>
-      <RoundedBox args={[W + 0.05, H + 0.07, 0.075]} radius={0.06} smoothness={4} material={bodyMat} />
-      <mesh position={[0, 0, 0.0385]} material={screenMat}>
+      <RoundedBox args={[W + 0.05, H + 0.06, PHONE_THICKNESS]} radius={0.035} smoothness={4} material={bodyMat} />
+      <mesh position={[0, 0, PHONE_THICKNESS / 2 + 0.001]} material={screenMat}>
         <planeGeometry args={[W, H]} />
       </mesh>
     </group>
@@ -40,9 +56,10 @@ export const Phone = forwardRef<THREE.Group, { textures: THREE.Texture[] }>(func
 export function applyPhone(g: THREE.Group | null, show: number, screen: number) {
   if (!g) return
   g.visible = show > 0.01
-  const { screenMat, bodyMat, textures } = g.userData as { screenMat: THREE.MeshBasicMaterial; bodyMat: THREE.MeshStandardMaterial; textures: THREE.Texture[] }
-  // screen < 0: phone is seen from behind / switched off
-  const t = screen < -0.5 ? null : textures[Math.max(0, Math.min(textures.length - 1, Math.round(screen)))]
+  const { screenMat, bodyMat, textures } = g.userData as { screenMat: THREE.MeshBasicMaterial; bodyMat: THREE.MeshStandardMaterial; textures: PhoneTextures }
+  // screen < 0: the phone is seen from behind / switched off. A screenshot shows once it has loaded.
+  const want = screen < 0 ? undefined : textures.list[Math.min(textures.list.length - 1, Math.round(screen))]
+  const t = want?.image ? want : null
   if (screenMat.map !== t) { screenMat.map = t; screenMat.color.set(t ? '#ffffff' : '#050506'); screenMat.needsUpdate = true }
   screenMat.opacity = show
   bodyMat.opacity = show

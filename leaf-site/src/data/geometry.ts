@@ -1,23 +1,27 @@
 /**
- * Every number the concept 3D model uses, with where it came from.
+ * Every number the 3D views use, with where it came from.
  *
  * Units: 1 unit = 1 mm. Axes: x = width (0 = left edge of the core body, seen from the front),
- * y = height (0 = bottom edge, the USB-C end), z = thickness (0 = rear face of the core body,
- * +z toward the screen). A later `public/models/leaf.glb` exported from the rev 4 STEP should
- * keep these node names, this origin and these units so it can replace the procedural model.
+ * y = height (0 = bottom end), z = thickness (0 = rear face of the core body, +z toward the
+ * screen). `public/models/leaf.glb` (converted from the rev 4 STEP) uses these node names, this
+ * origin and these units; `public/models/leaf.parts.json` lists its bounding boxes. The
+ * procedural builder in `src/three/leafModel.ts` draws from the same numbers and is only a
+ * fallback for when the GLB cannot be loaded.
  *
  * Status meanings (same as docs/SPECS.md):
  *   datasheet = from the part's datasheet
  *   estimated = rev 4 CAD output, never physically measured
- *   assumed   = not in the facts block; a placeholder chosen only to make the concept model
- *               draw. Never shown as a spec on the site. CAD will replace it.
+ *   assumed   = not in the facts block; a placeholder chosen only to make the fallback model
+ *               draw. Never shown as a spec on the site.
  */
 export type GeoStatus = 'datasheet' | 'estimated' | 'assumed'
 export interface Dim { v: number; src: string; status: GeoStatus }
 
 const CAD = 'rev4 CAD report (unlit, YDL 504040)'
 const DS_PANEL = 'Good Display GDEY0397T81P datasheet'
-const ASSUMED = 'concept-model placeholder (not a spec)'
+const ASSUMED = 'fallback-model placeholder (not a spec)'
+/** Positions read from the rev 4 CAD model (bounding boxes in public/models/leaf.parts.json). */
+const CAD_MODEL = 'rev4 CAD'
 
 const d = (v: number, src: string, status: GeoStatus): Dim => ({ v, src, status })
 
@@ -39,7 +43,6 @@ export const GEO = {
     wallRight: d(2.7, CAD, 'estimated'),
     floor: d(0.6, CAD, 'estimated'),
     wallEnds: d(1.95, ASSUMED, 'assumed'),
-    wallTopZ: d(7.0, ASSUMED, 'assumed'),
   },
   bezel: {
     topZ: d(7.87, CAD, 'estimated'),
@@ -64,8 +67,6 @@ export const GEO = {
     t: d(0.8, 'rev4 board design (confirmed)', 'estimated'),
     z0: d(5.3, CAD, 'estimated'),
     z1: d(6.1, CAD, 'estimated'),
-    topBlockY0: d(46, ASSUMED, 'assumed'),
-    stripX0: d(47, ASSUMED, 'assumed'),
   },
   battery: {
     w: d(42, 'YDL 504040 cell spec (selected, not ordered)', 'datasheet'),
@@ -73,14 +74,19 @@ export const GEO = {
     t: d(5.0, 'YDL 504040 cell spec (selected, not ordered)', 'datasheet'),
     layer: d(5.5, CAD, 'estimated'),
     mAh: d(1000, 'YDL 504040 cell spec (selected, not ordered)', 'datasheet'),
-    x0: d(4.5, ASSUMED, 'assumed'),
-    y0: d(4, ASSUMED, 'assumed'),
+    /** Bay position of the cell envelope (40.5 × 42.5 mm in CAD, lower half of the device). */
+    x0: d(19.29, CAD_MODEL, 'estimated'),
+    y0: d(1.65, CAD_MODEL, 'estimated'),
+    bayW: d(40.5, CAD_MODEL, 'estimated'),
+    bayH: d(42.5, CAD_MODEL, 'estimated'),
   },
   ring: {
     od: d(54, 'rev4 CAD, MagSafe-pattern ring (confirmed design)', 'estimated'),
     id: d(46, 'rev4 CAD, MagSafe-pattern ring (confirmed design)', 'estimated'),
     t: d(2.0, 'rev4 CAD, MagSafe-pattern ring (confirmed design)', 'estimated'),
-    cy: d(72, ASSUMED, 'assumed'),
+    cx: d(31.67, CAD_MODEL, 'estimated'),
+    cy: d(71.62, CAD_MODEL, 'estimated'),
+    z0: d(0.6, CAD_MODEL, 'estimated'),
   },
   skin: {
     t: d(0.6, 'rev4 CAD rear skin (confirmed design)', 'estimated'),
@@ -90,8 +96,14 @@ export const GEO = {
     /** Centres measured down from the top inner edge (BACK/SELECT at 5 mm, PREV/NEXT at 12 mm). */
     upperFromTopInner: d(5, 'rev4 CAD button layout (confirmed design)', 'estimated'),
     lowerFromTopInner: d(12, 'rev4 CAD button layout (confirmed design)', 'estimated'),
-    capLen: d(4.5, ASSUMED, 'assumed'),
-    capProud: d(0.8, ASSUMED, 'assumed'),
+  },
+  usb: {
+    /** GCT USB4110 receptacle. Its mouth opens through the right side wall (x = core width). */
+    y0: d(45.7, CAD_MODEL, 'estimated'),
+    y1: d(55.7, CAD_MODEL, 'estimated'),
+    bodyX0: d(54.96, CAD_MODEL, 'estimated'),
+    z0: d(2.04, CAD_MODEL, 'estimated'),
+    z1: d(5.3, CAD_MODEL, 'estimated'),
   },
   esp32: {
     // ESP32-C3-MINI-1 module outline from the Espressif datasheet.
@@ -121,7 +133,7 @@ export type LayerId = (typeof LAYERS)[number]['id']
 /** Scene scale: 1 mm → 0.01 scene units, so the device is about one unit tall. */
 export const SCENE_SCALE = 0.01
 
-/** Finishes (concept, from CAD renders). */
+/** Finishes (concept: the skin colours are not final). */
 export const FINISHES = {
   copper: { color: '#B8663A', label: 'Copper', src: 'rev4 CAD render finish (concept)' },
   slate: { color: '#45484E', label: 'Slate', src: 'rev4 CAD render finish (concept)' },
