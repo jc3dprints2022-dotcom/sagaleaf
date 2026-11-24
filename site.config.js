@@ -7,6 +7,10 @@
  *
  * The reader app itself (saga-reader.html) is a separate build and is not affected.
  */
+// GoatCounter account (cookieless page-view counts). Loaded by site/site.js on the public pages
+// and mirrored in leaf-site/src/lib/goatcounter.ts. Skipped on localhost at runtime.
+window.GOATCOUNTER_CODE = "saga-proxima";
+
 window.SITE_CONFIG = {
   // Naming
   productName: "SAGA Reader by Proxima", // public title; never shorten to just "SAGA"

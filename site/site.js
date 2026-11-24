@@ -1,4 +1,13 @@
-/* Applies site.config.js to the page. No tracking, no cookies, no third-party requests. */
+/* Applies site.config.js to the page. No cookies. The only third-party request is the cookieless GoatCounter page-view counter below. */
+(function () {
+  var h = location.hostname, code = window.GOATCOUNTER_CODE;
+  if (!code || h === "localhost" || h === "127.0.0.1") return;
+  var s = document.createElement("script");
+  s.async = true;
+  s.src = "https://gc.zgo.at/count.js";
+  s.setAttribute("data-goatcounter", "https://" + code + ".goatcounter.com/count");
+  document.head.appendChild(s);
+})();
 (function () {
   var c = window.SITE_CONFIG || {};
   var root = document.documentElement.style;

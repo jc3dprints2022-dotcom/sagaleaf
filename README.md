@@ -71,4 +71,4 @@ Remember that static hosts usually keep their own short request logs. The policy
 
 ## What the site deliberately doesn't do
 
-No analytics, cookies, ad or marketing pixels, third-party fonts or scripts, accounts, App Store badges, or in-app purchase language. If you add any of these, update `privacy.html` in the same change.
+Only cookieless aggregate page counts via GoatCounter on the public site and `/leaf/` (no cookies, no ad or marketing pixels, and no analytics in the reader app); no other third-party fonts or scripts, accounts, App Store badges, or in-app purchase language. If you add any of these, update `privacy.html` in the same change.
