@@ -60,7 +60,7 @@ const ShopCanvas = forwardRef<ShopCanvasHandle, Props>(function ShopCanvas(props
       shadows={lowPower ? false : 'soft'}
       dpr={lowPower ? [1, 1.5] : [1, 1.75]}
       gl={{ antialias: !lowPower, preserveDrawingBuffer: true }}
-      camera={{ fov: 30, near: 0.05, far: 30, position: [-2.15, 0.55, -1.62] }}
+      camera={{ fov: 30, near: 0.05, far: 30, position: [-2.45, 0.63, -1.85] }}
       onCreated={({ gl, scene }) => { gl.toneMapping = THREE.ACESFilmicToneMapping; gl.toneMappingExposure = 1.4; gl.setClearColor(0x000000, 0); scene.background = new THREE.Color('#141416') }}
       aria-label="3D preview of SAGA Leaf, rendered from the rev 4 CAD model with a concept finish. Drag to orbit, scroll or pinch to zoom."
       role="img"

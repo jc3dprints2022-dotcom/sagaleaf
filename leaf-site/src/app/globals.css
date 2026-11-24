@@ -182,6 +182,8 @@ body {
 
 /* ---------- shop preview: poster first, canvas fades in over it ---------- */
 .preview .concept-badge { top: 12px; bottom: auto; right: 12px; }
+/* one line on phones, so the label never grows down over the top of the device */
+@media (max-width: 480px) { .preview .concept-badge { font-size: 0.6rem; letter-spacing: .1em; white-space: nowrap; } }
 .preview-canvas { position: absolute; inset: 0; opacity: 0; transition: opacity .7s ease; }
 .preview[data-ready] .preview-canvas { opacity: 1; }
 

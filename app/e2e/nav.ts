@@ -59,7 +59,7 @@ await step('Library segments: Books | Collections | Highlights, search per segme
   await page.getByRole('button', { name: 'Highlights', exact: true }).click()
   await page.waitForSelector('text=highlights across')
   await page.getByRole('button', { name: 'Books', exact: true }).click()
-  await page.getByRole('button', { name: /^Add/ }).click()
+  await page.getByRole('button', { name: 'Add', exact: true }).click()   // not the empty library's own “Add books”
   await page.waitForSelector('[role=dialog] >> text=Paste a link')
   await page.keyboard.press('Escape')
 })

@@ -225,6 +225,14 @@ export async function sweepOrphans(store: Store) {
   return n
 }
 
+/** Books that are probably copies of one another (same work, different files), as groups of two or more.
+ *  Uses the same key as the check made when a book is imported. */
+export function duplicateGroups<T extends { title: string; author: string }>(books: T[]): T[][] {
+  const m = new Map<string, T[]>()
+  for (const b of books) { const k = workKey(b.title, b.author); (m.get(k) ?? m.set(k, []).get(k)!).push(b) }
+  return [...m.values()].filter(g => g.length > 1)
+}
+
 /** Merge a probable duplicate into the book being kept: annotations move over
  *  and are re-anchored by their quoted text the next time the book opens. */
 export async function mergeDuplicate(store: Store, keepId: string, dropId: string) {
