@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { literata, fraunces, hanken } from './fonts'
 import { Nav, Footer } from '@/components/Nav'
 import { SITE_URL } from '@/lib/paths'
+import { GOATCOUNTER_LOADER } from '@/lib/goatcounter'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -24,6 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Nav />
         <main id="main">{children}</main>
         <Footer />
+        <script dangerouslySetInnerHTML={{ __html: GOATCOUNTER_LOADER }} />
       </body>
     </html>
   )
