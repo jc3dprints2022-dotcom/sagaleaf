@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { freshStore, sample } from './helpers'
-import { importBytes, bookTexts, removeBook, sweepOrphans, detectFormat, searchText } from '../src/core/library'
+import { importBytes, bookTexts, removeBook, sweepOrphans, detectFormat, searchText, duplicateGroups } from '../src/core/library'
+import { SAMPLE_BOOKS } from '../src/app/data'
 import { parseEpub, validateEpub } from '../src/core/epub'
 import { Store } from '../src/core/store'
 import { strToU8, zipSync } from 'fflate'
@@ -103,6 +104,29 @@ describe('duplicate detection', () => {
     const b = await importBytes(s, 'sherlock.txt', sample('sherlock-holmes-sample.txt'))
     expect(b.status).toBe('added')
     expect(b.possibleDuplicateOf).toEqual([a.bookId])
+  })
+  it('adding the starter classics flags no duplicate: the Frankenstein letters excerpt is not a copy of Frankenstein', async () => {
+    const s = await freshStore()
+    // every file either build adds (the standalone build swaps two EPUBs for the Sherlock Holmes text sample)
+    for (const starter of [SAMPLE_BOOKS, ['pride-and-prejudice.epub', 'frankenstein.epub', 'sherlock-holmes-sample.txt', 'frankenstein-letters.pdf']]) {
+      for (const name of starter) {
+        const r = await importBytes(s, name, sample(name))
+        expect(['added', 'duplicate'], name).toContain(r.status)        // 'duplicate' only for the very same file, second time round
+        if (r.status === 'added' && name !== 'sherlock-holmes-sample.txt') expect(r.possibleDuplicateOf, name).toBeUndefined()
+      }
+      const books = await s.db.books.toArray()
+      expect(duplicateGroups(books).flat().map(b => b.title)).not.toContain('Frankenstein')
+      expect(duplicateGroups(books.filter(b => SAMPLE_BOOKS.includes(b.filename!)))).toEqual([])
+    }
+    // a true duplicate is still found: the same work in two formats
+    const groups = duplicateGroups(await s.db.books.toArray())
+    expect(groups.map(g => g.map(b => b.format).sort())).toEqual([['epub', 'txt']])
+    expect(groups[0][0].title).toBe('The Adventures of Sherlock Holmes')
+  })
+  it('matches duplicates on the whole title and the author, however they are written', () => {
+    const b = (title: string, author: string) => ({ title, author })
+    expect(duplicateGroups([b('Frankenstein', 'Mary Shelley'), b('Frankenstein (Letters)', 'Mary Shelley'), b('Frankenstein: A Play', 'Mary Shelley'), b('Frankenstein', 'Someone Else')])).toEqual([])
+    expect(duplicateGroups([b('The Émigré’s Tale', 'Shelley, Mary'), b('emigres tale', 'mary shelley'), b('Dracula', 'Bram Stoker')])).toHaveLength(1)
   })
   it('restores a deleted book when it is imported again, keeping its id', async () => {
     const s = await freshStore()

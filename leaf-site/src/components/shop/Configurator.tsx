@@ -38,7 +38,7 @@ export default function Configurator() {
 
   return (
     <div className="grid gap-8 lg:grid-cols-[1.4fr_1fr]">
-      <div className="panel preview relative aspect-[4/3] overflow-hidden lg:sticky lg:top-24 lg:self-start" data-testid="preview" data-ready={ready ?? undefined} role="group" aria-label="Preview">
+      <div className="panel preview relative aspect-square overflow-hidden sm:aspect-[4/3] lg:sticky lg:top-24 lg:self-start" data-testid="preview" data-ready={ready ?? undefined} role="group" aria-label="Preview">
         {/* The poster stays up until the CAD model has drawn its first frame; the canvas then fades in over it. */}
         <img src={asset(poster)} alt={`SAGA Leaf rendered from the rev 4 CAD model, seen from the rear, with the ${skin.label} concept finish`} width={897} height={672} className="h-full w-full object-cover" aria-hidden={ready ? true : undefined} />
         {gl && live && (

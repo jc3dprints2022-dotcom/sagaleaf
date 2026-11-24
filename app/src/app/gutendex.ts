@@ -49,12 +49,19 @@ export function listUrl(q: { search?: string; topic?: string; sort?: 'popular' |
   return u.toString()
 }
 
-export async function fetchPage(url: string): Promise<GPage> {
-  const r = await proxiedFetch(url, { signal: AbortSignal.timeout(60_000) })
-  if (!r.ok) throw new Error(`Discover couldn’t load books (${r.status}).`)
-  const page = await r.json() as GPage
-  rememberBooks(page.results)
-  return page
+export interface FetchOpts { timeoutMs?: number; retries?: number }
+/** One list page. A request that times out, fails on the network or gets a 5xx is tried again up to `retries` times. */
+export async function fetchPage(url: string, { timeoutMs = 60_000, retries = 0 }: FetchOpts = {}): Promise<GPage> {
+  for (let attempt = 0; ; attempt++) {
+    let r: Response
+    try { r = await proxiedFetch(url, { signal: AbortSignal.timeout(timeoutMs) }) }
+    catch (e) { if (attempt < retries) continue; throw e }
+    if (r.status >= 500 && attempt < retries) continue
+    if (!r.ok) throw new Error(`Discover couldn’t load books (${r.status}).`)
+    const page = await r.json() as GPage
+    rememberBooks(page.results)
+    return page
+  }
 }
 
 // ---------- local cache (localStorage: small, synchronous, survives offline)

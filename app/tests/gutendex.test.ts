@@ -21,4 +21,26 @@ describe('Discover proxy', () => {
     expect(timeout).toHaveBeenCalledWith(60_000)
     expect(timeout).not.toHaveBeenCalledWith(20_000)
   })
+
+  it('a list request that times out or gets a 5xx is retried as often as asked, and no more', async () => {
+    const timeout = vi.spyOn(AbortSignal, 'timeout')
+    const page = { count: 0, next: null, previous: null, results: [] }
+    let n = 0
+    vi.stubGlobal('fetch', async () => { if (++n === 1) throw new DOMException('timed out', 'TimeoutError'); return new Response(JSON.stringify(page)) })
+    expect(await fetchPage(listUrl({}), { timeoutMs: 8000, retries: 1 })).toEqual(page)
+    expect(n).toBe(2)
+    expect(timeout).toHaveBeenCalledWith(8000)
+    n = 0
+    vi.stubGlobal('fetch', async () => { n++; return new Response('busy', { status: 503 }) })
+    await expect(fetchPage(listUrl({}), { retries: 1 })).rejects.toThrow('503')
+    expect(n).toBe(2)
+    n = 0
+    vi.stubGlobal('fetch', async () => { n++; throw new DOMException('timed out', 'TimeoutError') })
+    await expect(fetchPage(listUrl({}))).rejects.toThrow('timed out')      // no retry unless asked for
+    expect(n).toBe(1)
+    n = 0
+    vi.stubGlobal('fetch', async () => { n++; return new Response('no', { status: 404 }) })
+    await expect(fetchPage(listUrl({}), { retries: 1 })).rejects.toThrow('404')   // a 4xx is an answer, not a blip
+    expect(n).toBe(1)
+  })
 })

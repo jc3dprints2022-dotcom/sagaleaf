@@ -46,7 +46,7 @@ export function Home() {
       <h1 className="page-title">Your library starts here</h1>
       <div className="empty">
         <h2>Add your first book</h2>
-        <div className="row" style={{ justifyContent: 'center' }}>
+        <div className="row wrap" style={{ justifyContent: 'center' }}>
           <button className="btn primary" onClick={() => importUi.open()}><Icon.plus />Add books</button>
           <button className="btn" disabled={busy} onClick={async () => { setBusy(true); await addSamples(); setBusy(false) }}>{busy ? 'Adding…' : 'Add classic books'}</button>
           <a className="btn" href={href('catalog')}>Browse Discover</a>
