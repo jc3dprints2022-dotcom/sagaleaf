@@ -7,7 +7,7 @@ import { join } from 'node:path'
 import { dedupe, interleave, cardKey, sameWork, type DiscoverCard } from '../src/app/card'
 import { parseWikisource, wikisourceUrl, wsEpubUrl, fetchWikisource, normalizeWikisource } from '../src/app/wikisource'
 import { normalizeOpenLibrary, openLibraryUrl, resolveIaEpub, pickEpub, isRestricted, iaDownloadUrl } from '../src/app/openlibrary'
-import { createFeed, matchStandard, tastes, recommended, parseLink, getWikisource, getInternetArchive, OpenOnSource, type Sources } from '../src/app/discover'
+import { createFeed, matchStandard, tastes, recommended, ROW_FETCH, parseLink, getWikisource, getInternetArchive, OpenOnSource, type Sources } from '../src/app/discover'
 import { swr, throttle, clearMemory } from '../src/app/swr'
 import { completeNativeSignIn, NATIVE_REDIRECT } from '../src/app/account'
 import { PROXY } from '../src/app/gutendex'
@@ -207,6 +207,24 @@ describe('recommendations', () => {
     const empty = await recommended([], s)
     expect(empty.fallback).toBe(true)
     expect(empty.cards.map(c => c.title)).toEqual(['Popular Thing'])
+  })
+
+  it('Recommended falls back to Popular, quickly, when its own requests fail or hang', async () => {
+    const pgCard = (t: string, a: string) => card({ title: t, author: a, source: 'gutenberg' })
+    const opts: unknown[] = []
+    const s: Sources = {
+      standard: async () => [], wikisource: async () => ({ cards: [], next: null, category: 0 }), openlibrary: async () => ({ cards: [], more: false }),
+      gutenberg: async (q, _c, o) => { opts.push(o); if (q.q === 'Austen') throw new Error('timed out'); if (q.q) return new Promise(() => {}); return { cards: [pgCard('Popular Thing', 'Pop'), pgCard('Emma', 'Jane Austen')], next: null } },
+    }
+    vi.useFakeTimers()
+    try {
+      const p = recommended([{ title: 'Emma', author: 'Jane Austen' }, { title: 'Dracula', author: 'Bram Stoker' }], s)
+      await vi.advanceTimersByTimeAsync(ROW_FETCH.timeoutMs * 2 + 1000)     // the hung request is given up on
+      const r = await p
+      expect(r.fallback).toBe(true)
+      expect(r.cards.map(c => c.title)).toEqual(['Popular Thing'])          // still minus what the library has
+      expect(opts.every(o => o === ROW_FETCH)).toBe(true)                    // short timeout + one retry on every request
+    } finally { vi.useRealTimers() }
   })
 })
 

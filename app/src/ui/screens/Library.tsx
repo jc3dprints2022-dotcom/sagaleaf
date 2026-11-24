@@ -4,8 +4,8 @@ import { store, useLive, href, go, toast, useRoute } from '../../app/state'
 import { loadBooks, loadCollections, setMembership, deleteBookWithUndo, type BookView } from '../../app/data'
 import { Cover, ProgressBar, Seg, Modal, pct } from '../components'
 import { Icon } from '../icons'
-import { workKey, fmtBytes } from '../../core/util'
-import { mergeDuplicate, searchText, type Hit } from '../../core/library'
+import { fmtBytes } from '../../core/util'
+import { duplicateGroups, mergeDuplicate, searchText, type Hit } from '../../core/library'
 import { importUi } from './ImportModal'
 import { CollectionsBody } from './Collections'
 import { NotesBody } from './Notes'
@@ -37,11 +37,7 @@ export function Library() {
     ms.addAll((books ?? []).map(b => ({ ...b, subjectsText: (b.subjects ?? []).join(' ') })))
     return ms
   }, [books])
-  const dupes = useMemo(() => {
-    const m = new Map<string, BookView[]>()
-    for (const b of books ?? []) { const k = workKey(b.title, b.author); m.set(k, [...(m.get(k) ?? []), b]) }
-    return [...m.values()].filter(g => g.length > 1)
-  }, [books])
+  const dupes = useMemo(() => duplicateGroups(books ?? []), [books])
   const [dismissed, setDismissed] = useState<string[]>(() => JSON.parse(localStorage.getItem('saga.dupesDismissed') ?? '[]'))
 
   const shown = useMemo(() => {

@@ -40,9 +40,10 @@ export const squash = (s: string) => s.replace(/\s+/g, ' ').trim()
 const ARTICLES = /^(the|a|an|le|la|les|der|die|das|el|los|las)\s+/i
 export const sortKey = (title: string) => norm(title).replace(ARTICLES, '').replace(/[^\p{L}\p{N} ]/gu, '').trim()
 
-/** Key used for "probably the same book" detection (different files, same work). */
+/** Key used for "probably the same book" detection (different files, same work): the whole title and the author.
+ *  The title is not cut at "(" or ":", so an excerpt such as "Frankenstein (Letters)" is not a copy of "Frankenstein". */
 export const workKey = (title: string, author: string) =>
-  sortKey(title.split(/[:(\[]/)[0]) + '|' + norm(author).replace(/[^\p{L} ]/gu, '').split(/\s+/).filter(Boolean).sort().join(' ')
+  sortKey(title) + '|' + norm(author).replace(/[^\p{L} ]/gu, '').split(/\s+/).filter(Boolean).sort().join(' ')
 
 export const tintOf = (s: string) => { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h % 360 }
 

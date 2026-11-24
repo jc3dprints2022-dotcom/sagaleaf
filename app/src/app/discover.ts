@@ -8,7 +8,7 @@ import { store } from './state'
 import { dedupe, interleave, sameWork, SOURCE_LABEL, type DiscoverCard } from './card'
 import { swr, peek, store as cacheStore } from './swr'
 import {
-  fetchPage, listUrl, cachedBook, fetchBook, getBook, withProxy, coverOf, authorsOf, shortTitle, catalogIdOf, gutenbergPage, DownloadBlocked, TOPICS, type GBook,
+  fetchPage, listUrl, cachedBook, fetchBook, getBook, withProxy, coverOf, authorsOf, shortTitle, catalogIdOf, gutenbergPage, DownloadBlocked, TOPICS, type GBook, type FetchOpts,
 } from './gutendex'
 import { fetchSENewReleases, cachedSE, getStandardEbook, seCatalogId, seSegmentsOf, unslug, SE_ORIGIN, parseBookUrl, importFromUrl, type SEBook } from './standardebooks'
 import { fetchWikisource, wsCatalogId, wsEpubUrl, wsPage, wsTitleOf, WS_LICENSE, type WsQuery } from './wikisource'
@@ -32,7 +32,7 @@ export function fromStandardEbook(b: SEBook): DiscoverCard {
 // ---------------------------------------------------------------- sources
 export interface Sources {
   standard(): Promise<SEBook[]>
-  gutenberg(q: Query, cursor: string | null): Promise<{ cards: DiscoverCard[]; next: string | null }>
+  gutenberg(q: Query, cursor: string | null, opts?: FetchOpts): Promise<{ cards: DiscoverCard[]; next: string | null }>
   wikisource(q: WsQuery): ReturnType<typeof fetchWikisource>
   openlibrary(q: Query, page: number): Promise<{ cards: DiscoverCard[]; more: boolean }>
 }
@@ -40,9 +40,9 @@ let seFlight: Promise<SEBook[]> | null = null
 const standardFeed = async (): Promise<SEBook[]> => cachedSE()?.books && (Date.now() - cachedSE()!.at < 24 * 3600_000 || navigator.onLine === false) ? cachedSE()!.books : navigator.onLine === false ? Promise.reject(new Error('offline')) : fetchSENewReleases().catch(e => { const c = cachedSE(); if (c) return c.books; throw e })
 export const liveSources: Sources = {
   standard: () => (seFlight ??= standardFeed().finally(() => { seFlight = null })),
-  async gutenberg(q, cursor) {
+  async gutenberg(q, cursor, opts) {
     const url = cursor ?? listUrl({ search: q.q, topic: q.topic, sort: q.sort })
-    const p = await swr(`pg:${url}`, () => fetchPage(url))
+    const p = await swr(`pg:${url}`, () => fetchPage(url, opts))
     return { cards: p.results.filter(b => !b.copyright).map(fromGutenberg), next: p.next }
   },
   wikisource: fetchWikisource,
@@ -143,18 +143,33 @@ const surname = (a: string) => (a.includes(',') ? a.split(',')[0] : a.split(/\s+
 export async function recommended(books: LibraryBook[], src: Sources = liveSources): Promise<{ cards: DiscoverCard[]; fallback: boolean }> {
   const { authors, topics } = tastes(books)
   const owned = (c: DiscoverCard) => books.some(b => b.catalogId === c.id || sameWork(b, c))
-  const lists: DiscoverCard[][] = []
-  for (const a of authors) lists.push((await src.gutenberg({ q: surname(a), topic: '', sort: 'popular' }, null).catch(() => ({ cards: [] as DiscoverCard[] }))).cards)
-  for (const t of topics) lists.push((await src.gutenberg({ q: '', topic: t, sort: 'popular' }, null).catch(() => ({ cards: [] as DiscoverCard[] }))).cards)
-  const cards = dedupe(interleave(lists).filter(c => !owned(c)))
+  // Each request gives up after ROW_FETCH.timeoutMs and is tried once more; one that still fails counts as an empty
+  // list. They run together, with Popular alongside as the fallback, so the row never waits on a slow request for long.
+  // (the cap also covers a request that is shared with a slower caller of the same list)
+  const cap = ROW_FETCH.timeoutMs! * (ROW_FETCH.retries! + 1) + 1000
+  const ask = (q: Query) => Promise.race([src.gutenberg(q, null, ROW_FETCH), new Promise<never>((_, no) => setTimeout(no, cap))]).then(r => r.cards, () => [] as DiscoverCard[])
+  const wanted = [...authors.map(a => ask({ q: surname(a), topic: '', sort: 'popular' })), ...topics.map(t => ask({ q: '', topic: t, sort: 'popular' }))]
+  const popular = ask(emptyQuery)
+  const cards = dedupe(interleave(await Promise.all(wanted)).filter(c => !owned(c)))
   if (cards.length >= 4) return { cards: cards.slice(0, ROW_SIZE), fallback: false }
-  const pop = createFeed(emptyQuery, { ...src, standard: async () => [], wikisource: async () => ({ cards: [], next: null, category: 0 }) })
-  return { cards: (await pop.loadMore()).filter(c => !owned(c)).slice(0, ROW_SIZE), fallback: true }
+  return { cards: dedupe(await popular).filter(c => !owned(c)).slice(0, ROW_SIZE), fallback: true }
+}
+/** Recommended is an extra on Home and Discover: 8 s and one retry per request, not the 60 s a search is allowed. */
+export const ROW_FETCH = { timeoutMs: 8000, retries: 1 } satisfies FetchOpts
+const LAST_RECOMMENDED = 'row:v1:recommended:last'
+/** Recommended cards, or the last set that loaded when nothing can be fetched now. Throws only when there is neither,
+ *  so an empty answer is never cached as the row's content. */
+async function recommendedOrLast(library: LibraryBook[], src: Sources): Promise<DiscoverCard[]> {
+  const cards = (await recommended(library, src).catch(() => ({ cards: [] as DiscoverCard[] }))).cards
+  if (cards.length) { void cacheStore(LAST_RECOMMENDED, cards); return cards }
+  const last = (await peek<DiscoverCard[]>(LAST_RECOMMENDED))?.value.filter(c => !library.some(b => b.catalogId === c.id || sameWork(b, c))) ?? []
+  if (!last.length) throw new Error('Recommended couldn’t be loaded.')
+  return last
 }
 
 /** First screenful of a row. */
 export async function rowCards(id: RowId, library: LibraryBook[], src: Sources = liveSources): Promise<DiscoverCard[]> {
-  if (id === 'recommended') return (await recommended(library, src)).cards
+  if (id === 'recommended') return recommendedOrLast(library, src)
   if (id === 'standard-new') return (await src.standard()).map(fromStandardEbook).slice(0, ROW_SIZE)
   const q: Query = { q: '', topic: id.startsWith('topic:') ? id.slice(6) : '', sort: 'popular' }
   // carousels use the fast sources only; Wikisource is limited to 1 request a second and is kept for the grids and search
@@ -166,7 +181,7 @@ export function rowFeed(id: RowId, library: LibraryBook[], src: Sources = liveSo
   if (id === 'recommended') {
     let cache: Promise<DiscoverCard[]> | null = null, used = false
     const cards: DiscoverCard[] = []
-    return { cards, get done() { return used }, failed: false, loadMore: async () => { if (used) return []; used = true; const r = await (cache ??= recommended(library, src).then(x => x.cards)); cards.push(...r); return r }, prefetch() { cache ??= recommended(library, src).then(x => x.cards) } }
+    return { cards, get done() { return used }, failed: false, loadMore: async () => { if (used) return []; used = true; const r = await (cache ??= recommendedOrLast(library, src).catch(() => [])); cards.push(...r); return r }, prefetch() { cache ??= recommendedOrLast(library, src).catch(() => []) } }
   }
   return createFeed({ q: '', topic: id.startsWith('topic:') ? id.slice(6) : '', sort: 'popular' }, src)
 }
